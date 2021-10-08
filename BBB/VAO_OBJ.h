@@ -50,7 +50,7 @@ private:
 
 	glm::vec3 _translate;
 	glm::quat _quaternion;
-	glm::vec3 _scale{ V_DEFAULT };
+	glm::vec3 _scale{ V3_DEFAULT };
 
 	CameraPtr _camera;
 };

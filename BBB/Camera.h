@@ -24,7 +24,7 @@ private:
 	glm::vec3 _diff{};
 	
 
-	glm::vec3 _position{ 0.f,3.f,5.f };
+	glm::vec3 _position{ V_ZERO };
 	glm::vec3 _target{ V_ZERO };
 	glm::vec3 _up{ Y_DEFAULT };
 };

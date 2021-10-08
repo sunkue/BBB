@@ -74,13 +74,13 @@ GLuint Renderer::create_vao(const VERTEX* vertices, GLsizei vertices_num, const 
 	glEnableVertexAttribArray(positionAttribute);
 	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, pos));
 
-	GLint positionAttribute = glGetAttribLocation(_shader, "a_normal");
-	if (positionAttribute == -1) {
+	GLint normalAttribute = glGetAttribLocation(_shader, "a_normal");
+	if (normalAttribute == -1) {
 		std::cerr << "normal 속성 설정 실패" << '\n';
 		exit(-1);
 	}
-	glEnableVertexAttribArray(positionAttribute);
-	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, nor));
+	glEnableVertexAttribArray(normalAttribute);
+	glVertexAttribPointer(normalAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, nor));
 
 
 	glBindVertexArray(0);

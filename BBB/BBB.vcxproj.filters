@@ -1,16 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="LoadFile">
-      <UniqueIdentifier>{5aa01f6b-cdae-469d-ba3b-2ca6f2810806}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Renderer">
-      <UniqueIdentifier>{74325291-5878-4fd1-98a4-824d5d9aa219}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Main">
       <UniqueIdentifier>{e6c2092e-6012-46ce-b767-826ca36a3208}</UniqueIdentifier>
     </Filter>
@@ -20,19 +10,35 @@
     <Filter Include="Utility">
       <UniqueIdentifier>{1186872b-e549-49ea-8af0-f6625d543221}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shader">
+    <Filter Include="resource">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Logic">
+      <UniqueIdentifier>{b362cae4-8183-4ac7-96b7-8ef7e0c0386e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render">
+      <UniqueIdentifier>{1c999f3e-0340-42cf-b5e1-f311bedde80d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Renderer">
+      <UniqueIdentifier>{74325291-5878-4fd1-98a4-824d5d9aa219}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Shader">
       <UniqueIdentifier>{47ca0c7b-b35f-498b-a247-ed871049cf7a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OBJ">
+    <Filter Include="Render\OBJ">
       <UniqueIdentifier>{dfe2e22a-9f7f-474b-8d04-07df47213b9a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Camera">
+    <Filter Include="Render\LoadFile">
+      <UniqueIdentifier>{5aa01f6b-cdae-469d-ba3b-2ca6f2810806}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Camera">
       <UniqueIdentifier>{aea07750-d6b3-49ee-bac1-8cbfa6892249}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LoadPng.cpp">
-      <Filter>LoadFile</Filter>
+      <Filter>Render\LoadFile</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>stdafx</Filter>
@@ -41,20 +47,25 @@
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="VAO_OBJ.cpp">
-      <Filter>OBJ</Filter>
+      <Filter>Render\OBJ</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Camera</Filter>
+      <Filter>Render\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="game_system.cpp" />
-    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="texture.cpp">
-      <Filter>LoadFile</Filter>
+      <Filter>Render\LoadFile</Filter>
     </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Render\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="game_system.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="Vehicle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LoadPng.h">
-      <Filter>LoadFile</Filter>
+      <Filter>Render\LoadFile</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>stdafx</Filter>
@@ -63,27 +74,34 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="VAO_OBJ.h">
-      <Filter>OBJ</Filter>
+      <Filter>Render\OBJ</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Camera</Filter>
+      <Filter>Render\Camera</Filter>
     </ClInclude>
-    <ClInclude Include="game_system.h" />
-    <ClInclude Include="Renderer.h" />
     <ClInclude Include="stb_image.h">
-      <Filter>LoadFile</Filter>
+      <Filter>Render\LoadFile</Filter>
     </ClInclude>
     <ClInclude Include="texture.h">
-      <Filter>LoadFile</Filter>
+      <Filter>Render\LoadFile</Filter>
     </ClInclude>
-    <ClInclude Include="defines.h" />
+    <ClInclude Include="Renderer.h">
+      <Filter>Render\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="defines.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="game_system.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="Vehicle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\fragment.glsl">
-      <Filter>Shader</Filter>
+      <Filter>Render\Shader</Filter>
     </None>
     <None Include="Shader\vertex.glsl">
-      <Filter>Shader</Filter>
+      <Filter>Render\Shader</Filter>
     </None>
   </ItemGroup>
 </Project>

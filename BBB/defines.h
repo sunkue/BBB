@@ -48,5 +48,6 @@ const glm::vec3 V_ZERO{ glm::vec3(0.f) };
 const glm::vec3 X_DEFAULT{ 1.f,0.f,0.f };
 const glm::vec3 Y_DEFAULT{ 0.f,1.f,0.f };
 const glm::vec3 Z_DEFAULT{ 0.f,0.f,1.f };
-const glm::vec3 V_DEFAULT{ glm::vec3(1.f) };
+const glm::vec3 V3_DEFAULT{ glm::vec3(1.f) };
+const glm::vec4 V4_DEFAULT{ glm::vec3(0.f),1.f };
 const glm::mat4 M_DEFAULT{ 1.f };
