@@ -2,19 +2,6 @@
 
 #include "stdafx.h"
 
-const glm::vec3 box[8]
-{
-	/* position */
-	{-1.f,  1.f, -1.f},
-	{ 1.f,  1.f, -1.f},
-	{-1.f,  1.f,  1.f},
-	{ 1.f,  1.f,  1.f},
-	{-1.f, -1.f, -1.f},
-	{ 1.f, -1.f, -1.f},
-	{-1.f, -1.f,  1.f},
-	{ 1.f, -1.f,  1.f}
-};
-
 /* max = 256 */
 using INDEX = uint8_t;
 
@@ -22,8 +9,22 @@ struct VERTEX
 {
 	glm::vec3 pos;
 	glm::vec3 nor;
-	glm::vec2 tex;
+	//glm::vec2 tex;
 };
+
+const VERTEX box[8]
+{
+	/* position */
+	{{-1.f,  1.f, -1.f}, glm::normalize(glm::vec3{-1.f,  1.f, -1.f})},
+	{{ 1.f,  1.f, -1.f}, glm::normalize(glm::vec3{ 1.f,  1.f, -1.f})},
+	{{-1.f,  1.f,  1.f}, glm::normalize(glm::vec3{-1.f,  1.f,  1.f})},
+	{{ 1.f,  1.f,  1.f}, glm::normalize(glm::vec3{ 1.f,  1.f,  1.f})},
+	{{-1.f, -1.f, -1.f}, glm::normalize(glm::vec3{-1.f, -1.f, -1.f})},
+	{{ 1.f, -1.f, -1.f}, glm::normalize(glm::vec3{ 1.f, -1.f, -1.f})},
+	{{-1.f, -1.f,  1.f}, glm::normalize(glm::vec3{-1.f, -1.f,  1.f})},
+	{{ 1.f, -1.f,  1.f}, glm::normalize(glm::vec3{ 1.f, -1.f,  1.f})}
+};
+
 
 
 

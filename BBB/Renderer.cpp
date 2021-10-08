@@ -48,7 +48,7 @@ void Renderer::init_resources()
 }
 
 /* VERTEX */
-GLuint Renderer::create_vao(const glm::vec3* vertices, GLsizei vertices_num, const INDEX* indices, GLsizei indices_num)
+GLuint Renderer::create_vao(const VERTEX* vertices, GLsizei vertices_num, const INDEX* indices, GLsizei indices_num)
 {
 	GLuint retvao;
 	GLuint abo;
@@ -59,7 +59,7 @@ GLuint Renderer::create_vao(const glm::vec3* vertices, GLsizei vertices_num, con
 
 	glGenBuffers(1, &abo);
 	glBindBuffer(GL_ARRAY_BUFFER, abo);
-	glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(glm::vec3), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(VERTEX), vertices, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -72,7 +72,15 @@ GLuint Renderer::create_vao(const glm::vec3* vertices, GLsizei vertices_num, con
 		exit(-1);
 	}
 	glEnableVertexAttribArray(positionAttribute);
-	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
+	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, pos));
+
+	GLint positionAttribute = glGetAttribLocation(_shader, "a_normal");
+	if (positionAttribute == -1) {
+		std::cerr << "normal 속성 설정 실패" << '\n';
+		exit(-1);
+	}
+	glEnableVertexAttribArray(positionAttribute);
+	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, nor));
 
 
 	glBindVertexArray(0);

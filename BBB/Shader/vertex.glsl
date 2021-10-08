@@ -4,6 +4,7 @@
 uniform mat4 u_mvp_mat;
 
 in vec3 a_position;
+in vec3 a_normal;
 //in vec2 a_texpos;
 
 
@@ -15,6 +16,6 @@ void main()
 	gl_Position = u_mvp_mat*vec4(a_position, 1.0f);
 
 	//v_TexPos = a_texpos;
-	frag_c = a_position;
+	frag_c = a_normal;
 
 }
