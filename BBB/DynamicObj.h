@@ -12,7 +12,7 @@ public:
 	ObjPtr get_obj() { return _obj; };
 public:
 	glm::vec3 get_speed() { return _linear_speed; }
-
+	glm::vec3 get_moving_dir() { return glm::normalize(_linear_speed); }
 protected:
 	void update(float time_elapsed)
 	{
@@ -97,15 +97,11 @@ public:
 private:
 	void update_state()
 	{
-		const glm::vec3 _angular_power = Y_DEFAULT * 0.5f;
+		const glm::vec3 _angular_power = Y_DEFAULT * 3.0f;
 		constexpr float _acceleration_power = 4.f;
 		constexpr float _friction_power = 1.0f;
 
 		_angular_speed = _angular_power * static_cast<int>(_angular_control);
-	
-		cout << _angular_speed.x;
-		cout << _angular_speed.y;
-		cout << _angular_speed.z << endl;
 		_acceleration = _acceleration_power * static_cast<int>(_accel_control);
 
 		// [B] if(_brake_on)_acceleration = 0;

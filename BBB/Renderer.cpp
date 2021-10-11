@@ -9,6 +9,7 @@ Renderer::Renderer()
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT, GLU_FILL);
 	glEnable(GL_BLEND);
+
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	init();
 }
@@ -44,7 +45,7 @@ void Renderer::init_resources()
 	_player = make_shared<ControllObj>(box_data, _shader);
 
 	_main_camera->set_ownner(_player->get_obj());
-	_main_camera->set_diff({ 0.f, 3.f, 5.f });
+	_main_camera->set_diff({ -5.f, 3.f, 0.f });
 }
 
 /* VERTEX */
@@ -218,7 +219,7 @@ void Renderer::draw()
 	//update_texture("u_TexSampler", 0);	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 	
 	Sleep(1);
-	float tick = GAME_SYSTEM::instance().tick_time().count();
+	float tick = static_cast<float>(GAME_SYSTEM::instance().tick_time().count());
 	_player->update(tick / 1000.f);
 	_main_camera->update();
 	GAME_SYSTEM::instance().tick();

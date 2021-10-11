@@ -27,6 +27,20 @@ void MouseInput(int button, int state, int x, int y)
 	RenderScene();
 }
 
+void MouseWheel(int button, int dir, int x, int y) {
+	constexpr GLfloat dd{ 0.04f };
+	if (dir > 0)
+	{
+		
+	}
+	else
+	{
+		
+	}
+
+	RenderScene();
+}
+
 void KeyInput(unsigned char key, int x, int y)
 {
 	switch (key)
@@ -108,6 +122,7 @@ int main(int argc, char **argv)
 	glutKeyboardFunc(KeyInput);
 	glutKeyboardUpFunc(KeyInputUp);
 	glutMouseFunc(MouseInput);
+	glutMouseWheelFunc(MouseWheel);
 	glutSpecialFunc(SpecialKeyInput);
 
 	glutMainLoop();

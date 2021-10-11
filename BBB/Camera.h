@@ -3,9 +3,11 @@
 
 #include "VAO_OBJ.h"
 
+
 /// /////////////////////////////////////////////////////////////////////////
 
 class OBJ;
+
 using ObjPtr = shared_ptr<OBJ>;
 /* 소유된 (붙은) 카메라 */
 class Camera 
