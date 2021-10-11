@@ -1,12 +1,13 @@
 #include "stdafx.h"
-#include "Camera.h"
-#include "VAO_OBJ.h"
 
-void Camera::update(const OBJ& ownner)
+#include "Camera.h"
+
+
+void Camera::update()
 {
-	auto trans = glm::translate(ownner.get_position()+_diff);
-	auto target_rotate = ownner.get_rotation();
-	auto scale = glm::scale(ownner.get_scale());
+	auto trans = glm::translate(_ownner->get_position()+_diff);
+	auto target_rotate = _ownner->get_rotation();
+	auto scale = glm::scale(_ownner->get_scale());
 
 	auto tick_t = GAME_SYSTEM::instance().tick_time();
 	//auto m = trans * glm::toMat4(target_rotate) * scale;
@@ -20,6 +21,9 @@ void Camera::update(const OBJ& ownner)
 		auto m = trans * glm::toMat4(rotate) * scale;
 		_position = m * V4_DEFAULT;
 	}
+
+
+	_target = _ownner->get_position();
 	return;
 
 

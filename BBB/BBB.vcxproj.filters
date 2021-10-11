@@ -35,6 +35,12 @@
     <Filter Include="Render\Camera">
       <UniqueIdentifier>{aea07750-d6b3-49ee-bac1-8cbfa6892249}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Logic\Vehicle">
+      <UniqueIdentifier>{071f6fc7-2355-4d90-81e8-5779add2db80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logic\DynamicObj">
+      <UniqueIdentifier>{b69ea731-217b-4a43-8c8c-8027a0f8ef15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LoadPng.cpp">
@@ -61,7 +67,13 @@
     <ClCompile Include="game_system.cpp">
       <Filter>Logic</Filter>
     </ClCompile>
-    <ClCompile Include="Vehicle.cpp" />
+    <ClCompile Include="Vehicle.cpp">
+      <Filter>Logic\Vehicle</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicObj.cpp">
+      <Filter>Logic\DynamicObj</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LoadPng.h">
@@ -94,7 +106,13 @@
     <ClInclude Include="game_system.h">
       <Filter>Logic</Filter>
     </ClInclude>
-    <ClInclude Include="Vehicle.h" />
+    <ClInclude Include="Vehicle.h">
+      <Filter>Logic\Vehicle</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicObj.h">
+      <Filter>Logic\DynamicObj</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\fragment.glsl">

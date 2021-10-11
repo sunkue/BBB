@@ -13,9 +13,9 @@ out vec3 frag_c;
 
 void main()
 {	
-	gl_Position = u_mvp_mat*vec4(a_position, 1.0f);
+	gl_Position = u_mvp_mat * vec4(a_position, 1.0f);
 
 	//v_TexPos = a_texpos;
-	frag_c = a_normal+vec3(0.5f);
+	frag_c = a_normal + vec3(0.5f);
 
 }

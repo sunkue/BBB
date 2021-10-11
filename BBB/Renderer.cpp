@@ -40,10 +40,10 @@ void Renderer::init_resources()
 	auto box_vao = create_vao(box, 8, box_index, 36);
 	ObjDataPtr box_data = make_shared<OBJ_DATA>(box_vao);
 	_cars.emplace_back(make_shared<OBJ>(box_data, _shader));
-	//_cars.emplace_back(make_shared<OBJ>(box_data, _shader));
+	_cars.emplace_back(make_shared<OBJ>(box_data, _shader));
+	_player = make_shared<ControllObj>(box_data, _shader);
 
-
-	_cars[0]->set_camera(_main_camera);
+	_main_camera->set_ownner(_player->get_obj());
 	_main_camera->set_diff({ 0.f, 3.f, 5.f });
 }
 
@@ -207,8 +207,6 @@ void Renderer::draw()
 
 	ready_draw();
 
-	_cars[0]->bind_vao();
-
 	/*
 	auto update_texture = [&](const GLchar* uniform_tex, GLuint texture_id) {
 		glUniform1i(glGetUniformLocation(_shader, uniform_tex), texture_id);
@@ -219,12 +217,23 @@ void Renderer::draw()
 
 	//update_texture("u_TexSampler", 0);	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 	
+	Sleep(1);
+	float tick = GAME_SYSTEM::instance().tick_time().count();
+	_player->update(tick / 1000.f);
+	_main_camera->update();
+	GAME_SYSTEM::instance().tick();
+	// 로직분리, 카메라 회전 , 스크롤로 거리조절 >>  1tick == 최소 1ms.
+
+	/* draw */
+	_cars[0]->bind_vao();
 	for (auto& car : _cars)
 	{
-		car->update();
 		car->update_uniform_vars();
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
 	}
+
+	_player->get_obj()->update_uniform_vars();
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
 
 
 }

@@ -2,6 +2,7 @@
 
 
 #include "VAO_OBJ.h"
+#include "DynamicObj.h"
 
 //////////////////////////////////////////////////////
 
@@ -47,6 +48,7 @@ public:
 
 	GLuint get_uloc_mvp_mat()const { return _uloc_mvp_mat; }
 	CameraPtr get_main_camera()const { return _main_camera; }
+	Player0Ptr get_player()const { return _player; }
 
 private:
 	void init();
@@ -77,6 +79,8 @@ private:
 	SCREEN _screen;
 
 	vector<ObjPtr> _cars;
+	Player0Ptr _player;
+
 
 	unique_ptr<struct RESOURCE> _resource;
 
