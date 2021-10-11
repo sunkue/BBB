@@ -184,6 +184,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\fragment.glsl" />
+    <None Include="Shader\grass_vertex.glsl" />
+    <None Include="Shader\png_fragment.glsl" />
     <None Include="Shader\terrain_fragment.glsl" />
     <None Include="Shader\vertex.glsl" />
   </ItemGroup>

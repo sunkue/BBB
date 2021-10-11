@@ -12,10 +12,10 @@ void main()
 {
 	vec3 c = v_normal;
 	c-= 0.5f;
-
-	vec2 texcoord = v_texcoord * 50.f;
-	texcoord = fract(texcoord);
-	gl_FragColor = texture(u_tex_sampler, texcoord) + vec4(0.0f);
-
+		vec2 texcoord = v_texcoord * 50.f;
+	gl_FragColor = texture(u_tex_sampler, v_texcoord) + vec4(0.0f);
+	if(gl_FragColor.a < 0.1)
+        discard;
 	gl_FragColor += vec4(c, 1.0f)*0.1f;
+
 }

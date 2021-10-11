@@ -32,10 +32,12 @@ void Renderer::init_shader()
 
 	_terrain_shader = compile_shader("./Shader/vertex.glsl"sv, "./Shader/terrain_fragment.glsl"sv);
 	_uloc_mvp_mat_ts = glGetUniformLocation(_terrain_shader, "u_mvp_mat");
+	_uloc_texture_ts = glGetUniformLocation(_terrain_shader, "u_tex_sampler");
 
-
-	_billboard_shader = _terrain_shader;
-	_uloc_mvp_mat_bs = _uloc_mvp_mat_ts;
+	_billboard_shader = compile_shader("./Shader/grass_vertex.glsl"sv, "./Shader/png_fragment.glsl"sv);
+	_uloc_mvp_mat_bs = glGetUniformLocation(_billboard_shader, "u_mvp_mat");
+	_uloc_texture_bs = glGetUniformLocation(_billboard_shader, "u_tex_sampler");
+	_uloc_time_bs = glGetUniformLocation(_billboard_shader, "u_time");
 }
 
 void Renderer::init_resources()
@@ -89,7 +91,7 @@ void Renderer::load_model()
 void Renderer::load_texture()
 {
 	std::string Dir{ "./Resource/Texture" };
-	_terrain_tex = CreatePngTexture((Dir + "./greenpaint.png").c_str());
+	_terrain_tex = CreatePngTexture((Dir + "./greenwool.png").c_str());
 
 	_billboard_tex0 = CreatePngTexture((Dir + "./grass0.png").c_str());
 	_billboard_tex1 = CreatePngTexture((Dir + "./grass1.png").c_str());
@@ -247,8 +249,6 @@ GLuint Renderer::compile_shader(string_view filenameVS, string_view filenameFS)
 
 void Renderer::reshape(int w, int h)
 {
-	cout << w<<" h:";
-	cout << h<<endl;
 	if (w < h)
 	{
 		glViewport(0, (h - w) / 2, w, w);
@@ -276,13 +276,13 @@ void Renderer::ready_draw()
 
 void Renderer::draw()
 {
-	timer::TIMER::instance().start();
+	//timer::TIMER::instance().start();
 	ready_draw();
 
 	auto update_texture =
-		[&](GLuint shader, const GLchar* uniform_tex, GLuint texture_id)
+		[&](GLuint shader, GLuint uloc, GLuint texture_id)
 	{
-		glUniform1i(glGetUniformLocation(shader, uniform_tex), texture_id);
+		glUniform1i(uloc, texture_id);
 		glActiveTexture(GL_TEXTURE0 + texture_id);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 	};
@@ -295,7 +295,7 @@ void Renderer::draw()
 	// 로직분리, 카메라 회전 , 스크롤로 거리조절 >>  1tick == 최소 1ms.
 
 	/* draw */
-
+	
 	glUseProgram(_default_shader);
 	_cars[0]->bind_vao();
 	for (auto& car : _cars)
@@ -307,11 +307,10 @@ void Renderer::draw()
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
-
 	glUseProgram(_terrain_shader);
 	_terrain->bind_vao();
 	_terrain->update_uniform_vars();
-	update_texture(_terrain_shader, "u_tex_sampler", _terrain_tex);
+	update_texture(_terrain_shader, _uloc_texture_ts, _terrain_tex);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
@@ -319,11 +318,15 @@ void Renderer::draw()
 	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 	glDisable(GL_CULL_FACE);
 
+	auto time = GAME_SYSTEM::instance().game_time();
 	_grasses[0]->bind_vao();
 	for (int i = 0; auto& grass : _grasses)
 	{
 		grass->update_uniform_vars();
-		update_texture(_billboard_shader, "u_tex_sampler", _billboard_tex0 + (i++ % 4));
+		update_texture(_billboard_shader, _uloc_texture_bs, _billboard_tex0 + (i++ % 4));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glUniform1ui(_uloc_time_bs, time);
 		glDrawArrays(GL_TRIANGLES, 0, 18);
 	}
 
@@ -331,7 +334,11 @@ void Renderer::draw()
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	timer::TIMER::instance().end("T::");
+	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps
 	// 33	-> 30fps
+	auto fps = 1000 / (GAME_SYSTEM::instance().tick_time().count() + 1);
+	string title = "("s + to_string(fps) + " fps)"s;
+	glutSetWindowTitle(title.c_str());
+	
 }

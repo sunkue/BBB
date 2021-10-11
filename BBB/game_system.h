@@ -18,12 +18,18 @@ public:
 	{
 		auto now = clk::now();
 		_elapsed_time = duration_cast<milliseconds>(now - _prev_time_point);
+		_game_time += _elapsed_time; // should be overflow
 		_prev_time_point = now;
 	};
 
 	milliseconds tick_time()
 	{
 		return _elapsed_time;
+	}
+
+	size_t game_time()
+	{
+		return _game_time.count();
 	}
 
 private:
@@ -35,6 +41,7 @@ private:
 
 private:
 	milliseconds _elapsed_time{};
+	milliseconds _game_time{};
 	clk::time_point _prev_time_point;
 
 	

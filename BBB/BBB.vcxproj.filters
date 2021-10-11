@@ -124,5 +124,11 @@
     <None Include="Shader\terrain_fragment.glsl">
       <Filter>Render\Shader</Filter>
     </None>
+    <None Include="Shader\grass_vertex.glsl">
+      <Filter>Render\Shader</Filter>
+    </None>
+    <None Include="Shader\png_fragment.glsl">
+      <Filter>Render\Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -86,12 +86,15 @@ private:
 	//
 	GLuint _terrain_shader;
 	GLuint _uloc_mvp_mat_ts;
+	GLuint _uloc_texture_ts;
 	GLuint _terrain_tex;
 	ObjPtr _terrain;
 
 	//
 	GLuint _billboard_shader;
 	GLuint _uloc_mvp_mat_bs;
+	GLuint _uloc_texture_bs;
+	GLuint _uloc_time_bs;
 	GLuint _billboard_tex0;
 	GLuint _billboard_tex1;
 	GLuint _billboard_tex2;
