@@ -96,6 +96,10 @@ void SpecialKeyInput(int key, int x, int y)
 	RenderScene();
 }
 
+void Reshape(int w, int h)
+{
+	Renderer::instance().reshape(w, h);
+}
 
 
 int main(int argc, char **argv)
@@ -118,7 +122,7 @@ int main(int argc, char **argv)
 	{
 		std::cout << "GLEW 4.5 not supported\n ";
 	}
-
+	
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
 	glutKeyboardFunc(KeyInput);
@@ -126,6 +130,7 @@ int main(int argc, char **argv)
 	glutMouseFunc(MouseInput);
 	glutMouseWheelFunc(MouseWheel);
 	glutSpecialFunc(SpecialKeyInput);
+	glutReshapeFunc(Reshape);
 
 	glutMainLoop();
 }

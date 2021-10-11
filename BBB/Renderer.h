@@ -8,7 +8,7 @@
 
 struct SCREEN 
 {
-	GLfloat fovy{ 60.0f }; //glm::Radians(fovy)
+	GLfloat fovy{ 45.0f }; //glm::Radians(fovy)
 	GLsizei width{ 500 };	//W/H
 	GLsizei height{ 500 };	//W/H
 	GLfloat n{ 0.1f };
@@ -44,6 +44,8 @@ public:
 	void draw();
 	void ready_draw();
 
+	void reshape(int w, int h);
+
 	glm::mat4 proj_mat()const { return _screen.proj_mat(); }
 
 	GLuint get_uloc_mvp_mat()const { return _uloc_mvp_mat_ds; }
@@ -62,7 +64,6 @@ private:
 	void load_texture();
 	void load_model();
 
-
 private:
 	Renderer();
 	~Renderer();
@@ -76,15 +77,26 @@ private:
 	CameraPtr _main_camera;
 	SCREEN _screen;
 
+	//
 	GLuint _default_shader;
 	GLuint _uloc_mvp_mat_ds;
 	vector<ObjPtr> _cars;
 	Player0Ptr _player;
 
+	//
 	GLuint _terrain_shader;
 	GLuint _uloc_mvp_mat_ts;
 	GLuint _terrain_tex;
 	ObjPtr _terrain;
+
+	//
+	GLuint _billboard_shader;
+	GLuint _uloc_mvp_mat_bs;
+	GLuint _billboard_tex0;
+	GLuint _billboard_tex1;
+	GLuint _billboard_tex2;
+	GLuint _billboard_tex3;
+	vector<ObjPtr> _grasses;
 
 };
 

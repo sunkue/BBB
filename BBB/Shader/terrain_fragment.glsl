@@ -11,7 +11,8 @@ varying vec2 v_texcoord;
 void main()
 {
 	vec3 c = v_normal;
-	c+=0.5f;
-	gl_FragColor = texture(u_tex_sampler, v_texcoord) + vec4(0.1f);
-	
+	c-= 0.5f;
+	gl_FragColor = texture(u_tex_sampler, v_texcoord) + vec4(0.0f);
+	if(gl_FragColor.a < 0.1)
+        discard;
 	gl_FragColor += vec4(c, 1.0f)*0.1f;}

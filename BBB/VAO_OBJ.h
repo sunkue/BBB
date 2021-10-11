@@ -18,7 +18,7 @@ const glm::vec3 HEADING_DEFAULT = X_DEFAULT;
 class OBJ
 {
 public:
-	explicit OBJ(ObjDataPtr obj_data, GLuint shader) : _obj_data{ obj_data }, _default_shader{ shader }{}
+	explicit OBJ(ObjDataPtr obj_data, GLuint shader) : _obj_data{ obj_data }, _shader{ shader }{}
 
 	glm::mat4 model_mat()const { return glm::translate(_translate) * glm::toMat4(_quaternion)* glm::scale(_scale); }
 
@@ -42,7 +42,7 @@ public:
 
 private:
 	ObjDataPtr _obj_data;
-	GLuint _default_shader;
+	GLuint _shader;
 
 	glm::vec3 _translate;
 	glm::quat _quaternion;

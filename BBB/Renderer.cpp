@@ -9,7 +9,7 @@ Renderer::Renderer()
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT, GLU_FILL);
 	glEnable(GL_BLEND);
-
+	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	init();
 }
@@ -34,6 +34,8 @@ void Renderer::init_shader()
 	_uloc_mvp_mat_ts = glGetUniformLocation(_terrain_shader, "u_mvp_mat");
 
 
+	_billboard_shader = _terrain_shader;
+	_uloc_mvp_mat_bs = _uloc_mvp_mat_ts;
 }
 
 void Renderer::init_resources()
@@ -61,16 +63,38 @@ void Renderer::load_model()
 
 	box_vao = create_vao(_terrain_shader, box, 36);
 	_terrain = make_shared<OBJ>(box_data, _terrain_shader);
-	glm::vec3 scale_ = { 100.f,100.25f,100.f };
+	glm::vec3 scale_ = { 100.f, 0.25f, 100.f };
 	_terrain->scaling(scale_);
 	glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
 	_terrain->move(move_);
+
+	auto grass_vao = create_vao(_billboard_shader, cross_billboard_3, 18);
+	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
+	const auto grass_count = 8000;
+	const auto grass_range = 50;
+	_grasses.reserve(grass_count);
+	for (int i = 0; i < grass_count; i++)
+	{
+		_grasses.emplace_back(make_shared<OBJ>(grass_data, _billboard_shader));
+	}
+	for (auto& g : _grasses)
+	{
+		glm::vec3 pos = { rand() % (2 * grass_range) - grass_range, 0.f, rand() % (2 * grass_range) - grass_range };
+		g->scaling(glm::vec3(1.0f));
+		g->move(pos);
+		g->rotate(glm::vec3{ 0.f,rand() % 360,0.f });
+	}
 }
 
 void Renderer::load_texture()
 {
 	std::string Dir{ "./Resource/Texture" };
-	_terrain_tex = CreatePngTexture((Dir + "./RGB.png").c_str());
+	_terrain_tex = CreatePngTexture((Dir + "./greenpaint.png").c_str());
+
+	_billboard_tex0 = CreatePngTexture((Dir + "./grass0.png").c_str());
+	_billboard_tex1 = CreatePngTexture((Dir + "./grass1.png").c_str());
+	_billboard_tex2 = CreatePngTexture((Dir + "./redflower.png").c_str());
+	_billboard_tex3 = CreatePngTexture((Dir + "./blueflower.png").c_str());
 }
 
 
@@ -220,6 +244,25 @@ GLuint Renderer::compile_shader(string_view filenameVS, string_view filenameFS)
 
 /////////////////////////////////////////////////////////////////////
 
+
+void Renderer::reshape(int w, int h)
+{
+	cout << w<<" h:";
+	cout << h<<endl;
+	if (w < h)
+	{
+		glViewport(0, (h - w) / 2, w, w);
+	}
+	else 
+	{
+		glViewport((w - h) / 2, 0, h, h);
+	}
+	draw();
+}
+
+
+/////////////////////////////////////////////////////////////////////
+
 void Renderer::ready_draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -260,7 +303,6 @@ void Renderer::draw()
 		car->update_uniform_vars();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
-
 	_player->get_obj()->update_uniform_vars();
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -273,9 +315,21 @@ void Renderer::draw()
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
+	glUseProgram(_billboard_shader);
+	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
+	glDisable(GL_CULL_FACE);
 
+	_grasses[0]->bind_vao();
+	for (int i = 0; auto& grass : _grasses)
+	{
+		grass->update_uniform_vars();
+		update_texture(_billboard_shader, "u_tex_sampler", _billboard_tex0 + (i++ % 4));
+		glDrawArrays(GL_TRIANGLES, 0, 18);
+	}
 
-
+	glPolygonMode(GL_FRONT, GLU_FILL);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
 
 	timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps
