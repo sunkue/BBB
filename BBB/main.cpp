@@ -64,7 +64,7 @@ void KeyInput(unsigned char key, int x, int y)
 	default: break;
 	}
 	
-	RenderScene();
+	//RenderScene();
 }
 
 void KeyInputUp(unsigned char key, int x, int y)
@@ -88,7 +88,7 @@ void KeyInputUp(unsigned char key, int x, int y)
 	default: break;
 	}
 
-	RenderScene();
+	//RenderScene();
 }
 
 void SpecialKeyInput(int key, int x, int y)
