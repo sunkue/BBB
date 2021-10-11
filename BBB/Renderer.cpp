@@ -37,7 +37,7 @@ void Renderer::init_shader()
 	_billboard_shader = compile_shader("./Shader/grass_vertex.glsl"sv, "./Shader/png_fragment.glsl"sv);
 	_uloc_mvp_mat_bs = glGetUniformLocation(_billboard_shader, "u_mvp_mat");
 	_uloc_texture_bs = glGetUniformLocation(_billboard_shader, "u_tex_sampler");
-	_uloc_time_bs = glGetUniformLocation(_billboard_shader, "u_time");
+	_uloc_time_bs = glGetUniformLocation(_billboard_shader, "u_shear_mat");
 }
 
 void Renderer::init_resources()
@@ -84,7 +84,8 @@ void Renderer::load_model()
 		glm::vec3 pos = { rand() % (2 * grass_range) - grass_range, 0.f, rand() % (2 * grass_range) - grass_range };
 		g->scaling(glm::vec3(1.0f));
 		g->move(pos);
-		g->rotate(glm::vec3{ 0.f,rand() % 360,0.f });
+		g->move({ -HALF_ROOT3,-1.f,-1.f });
+	//	g->rotate(glm::vec3{ 0.f,rand() % 360,0.f });
 	}
 }
 
@@ -322,11 +323,22 @@ void Renderer::draw()
 	_grasses[0]->bind_vao();
 	for (int i = 0; auto& grass : _grasses)
 	{
+		glm::mat4 shear =
+		{
+			1.f, 0.f, 0.f, 0.f,
+			0.f, 1.f, 0.f, 0.f,
+			0.f, 0.f, 1.f, 0.f,
+			0.f, 0.f, 0.f, 1.f
+		};
+		auto t = float(time) / 500 + grass->get_position().x/10;
+		auto ww = glm::cos(t) / 4;
+		shear[1][0] = ww;
+		shear[1][2] = ww;
 		grass->update_uniform_vars();
 		update_texture(_billboard_shader, _uloc_texture_bs, _billboard_tex0 + (i++ % 4));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glUniform1ui(_uloc_time_bs, time);
+		glUniformMatrix4fv(_uloc_time_bs, 1, GL_FALSE, glm::value_ptr(shear));
 		glDrawArrays(GL_TRIANGLES, 0, 18);
 	}
 

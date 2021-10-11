@@ -80,29 +80,29 @@ const VERTEX box[36]
 const VERTEX cross_billboard_3[18]
 {
 	/* - */
-	{ {0,  1, -1}, Y_DEFAULT, {0, 1}},
-	{ {0, -1,  1}, Y_DEFAULT, {1, 0}},
-	{ {0,  1,  1}, Y_DEFAULT, {1, 1}},
+	{ {HALF_ROOT3,  2, 0}, Y_DEFAULT, {0, 1}},
+	{ {HALF_ROOT3, 0,  2}, Y_DEFAULT, {1, 0}},
+	{ {HALF_ROOT3,  2,  2}, Y_DEFAULT, {1, 1}},
 
-	{ {0,  1, -1}, Y_DEFAULT, {0, 1}},
-	{ {0, -1, -1}, Y_DEFAULT, {0, 0}},
-	{ {0, -1,  1}, Y_DEFAULT, {1, 0}},
+	{ {HALF_ROOT3,  2, 0}, Y_DEFAULT, {0, 1}},
+	{ {HALF_ROOT3, 0, 0}, Y_DEFAULT, {0, 0}},
+	{ {HALF_ROOT3, 0,  2}, Y_DEFAULT, {1, 0}},
 
 	/* / */
-	{ {-HALF_ROOT3,  1, -0.5}, Y_DEFAULT, {0, 1}},
-	{ { HALF_ROOT3, -1,  0.5}, Y_DEFAULT, {1, 0}},
-	{ { HALF_ROOT3,  1,  0.5}, Y_DEFAULT, {1, 1}},
+	{ {0,  2, 0.5}, Y_DEFAULT, {0, 1}},
+	{ { ROOT3, 0,  1.5}, Y_DEFAULT, {1, 0}},
+	{ { ROOT3,  2,  1.5}, Y_DEFAULT, {1, 1}},
 
-	{ {-HALF_ROOT3,  1, -0.5}, Y_DEFAULT, {0, 1}},
-	{ {-HALF_ROOT3, -1, -0.5}, Y_DEFAULT, {0, 0}},
-	{ { HALF_ROOT3, -1,  0.5}, Y_DEFAULT, {1, 0}},
+	{ {0,  2, 0.5}, Y_DEFAULT, {0, 1}},
+	{ {0, 0, 0.5}, Y_DEFAULT, {0, 0}},
+	{ { ROOT3, 0,  1.5}, Y_DEFAULT, {1, 0}},
 
 	/* \ */
-	{ { HALF_ROOT3,  1, -0.5}, Y_DEFAULT, {0, 1}},
-	{ {-HALF_ROOT3, -1,  0.5}, Y_DEFAULT, {1, 0}},
-	{ {-HALF_ROOT3,  1,  0.5}, Y_DEFAULT, {1, 1}},
+	{ { ROOT3,  2, 0.5}, Y_DEFAULT, {0, 1}},
+	{ {0, 0,  1.5}, Y_DEFAULT, {1, 0}},
+	{ {0,  2,  1.5}, Y_DEFAULT, {1, 1}},
 
-	{ { HALF_ROOT3,  1, -0.5}, Y_DEFAULT, {0, 1}},
-	{ { HALF_ROOT3, -1, -0.5}, Y_DEFAULT, {0, 0}},
-	{ {-HALF_ROOT3, -1,  0.5}, Y_DEFAULT, {1, 0}}
+	{ { ROOT3,  2, 0.5}, Y_DEFAULT, {0, 1}},
+	{ { ROOT3, 0, 0.5}, Y_DEFAULT, {0, 0}},
+	{ {0, 0,  1.5}, Y_DEFAULT, {1, 0}}
 };
