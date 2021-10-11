@@ -28,14 +28,16 @@ void MouseInput(int button, int state, int x, int y)
 }
 
 void MouseWheel(int button, int dir, int x, int y) {
-	constexpr GLfloat dd{ 0.04f };
+	auto camera = Renderer::instance().get_main_camera();
 	if (dir > 0)
 	{
-		
+		auto diff = camera->get_diff();
+		camera->set_diff(diff * 0.875f);
 	}
 	else
 	{
-		
+		auto diff = camera->get_diff();
+		camera->set_diff(diff * 1.125f);
 	}
 
 	RenderScene();

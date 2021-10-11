@@ -15,6 +15,8 @@ class Camera
 	friend class OBJ;
 public:
 	void update();
+	
+	glm::vec3 get_diff()const { return _diff; };
 	void set_diff(glm::vec3 d) { _diff = d; };
 
 	glm::mat4 view_mat()const { return glm::lookAt(_position, _target, _up); };

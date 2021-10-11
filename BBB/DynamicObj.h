@@ -49,7 +49,6 @@ private:
 		auto new_speed = glm::length(new_linear_speed);
 		bool over_speed = _max_speed < new_speed;
 		// [B] if (over_speed) { new_linear_speed = new_dir * _max_speed; }
-	
 		new_linear_speed -= new_linear_speed * over_speed;
 		new_linear_speed += new_dir * _max_speed * over_speed;
 
@@ -62,7 +61,7 @@ private:
 	}
 
 public:
-	static constexpr float _max_speed = 7.0f;
+	static constexpr float _max_speed = 15.0f;
 
 protected:
 	glm::vec3 _linear_speed{1.0f,0.0f,0.0f};
@@ -98,17 +97,18 @@ private:
 	void update_state()
 	{
 		const glm::vec3 _angular_power = Y_DEFAULT * 3.0f;
-		constexpr float _acceleration_power = 4.f;
-		constexpr float _friction_power = 1.0f;
+		constexpr float _acceleration_power = 7.f;
+		constexpr float _friction_power = 2.0f;
 
 		_angular_speed = _angular_power * static_cast<int>(_angular_control);
 		_acceleration = _acceleration_power * static_cast<int>(_accel_control);
 
 		// [B] if(_brake_on)_acceleration = 0;
-		_acceleration -= _acceleration * _brake_on;
+		//_acceleration -= _acceleration * _brake_on;
 
 		_friction = _friction_power;
 		// [B] if(_brake_on)_friction += _friction_power;
+		_friction += _friction_power * _brake_on;
 		_friction += _friction_power * _brake_on;
 	}
 
