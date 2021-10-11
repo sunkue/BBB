@@ -45,7 +45,7 @@ void Renderer::init_resources()
 void Renderer::load_model()
 {
 	// create objs, give vaos for models
-	auto box_vao = create_vao(_default_shader, box, 8, box_index, 36);
+	auto box_vao = create_vao(_default_shader, box, 36);
 	ObjDataPtr box_data = make_shared<OBJ_DATA>(box_vao);
 
 	_cars.emplace_back(make_shared<OBJ>(box_data, _default_shader));
@@ -59,7 +59,7 @@ void Renderer::load_model()
 	_main_camera->set_ownner(_player->get_obj());
 	_main_camera->set_diff({ -5.f, 3.f, 0.f });
 
-	box_vao = create_vao(_terrain_shader, box, 8, box_index, 36);
+	box_vao = create_vao(_terrain_shader, box, 36);
 	_terrain = make_shared<OBJ>(box_data, _terrain_shader);
 	glm::vec3 scale_ = { 100.f,100.25f,100.f };
 	_terrain->scaling(scale_);
@@ -74,7 +74,7 @@ void Renderer::load_texture()
 }
 
 
-GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei vertices_num, const INDEX* indices, GLsizei indices_num)
+GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei vertices_num)
 {
 	GLuint retvao;
 	GLuint abo;
@@ -86,10 +86,6 @@ GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei verti
 	glGenBuffers(1, &abo);
 	glBindBuffer(GL_ARRAY_BUFFER, abo);
 	glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(VERTEX), vertices, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_num * sizeof(INDEX), indices, GL_STATIC_DRAW);
 
 
 	GLint positionAttribute = glGetAttribLocation(shader, "a_position");
@@ -237,6 +233,7 @@ void Renderer::ready_draw()
 
 void Renderer::draw()
 {
+	timer::TIMER::instance().start();
 	ready_draw();
 
 	auto update_texture =
@@ -255,16 +252,17 @@ void Renderer::draw()
 	// 로직분리, 카메라 회전 , 스크롤로 거리조절 >>  1tick == 최소 1ms.
 
 	/* draw */
+
 	glUseProgram(_default_shader);
 	_cars[0]->bind_vao();
 	for (auto& car : _cars)
 	{
 		car->update_uniform_vars();
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
 	_player->get_obj()->update_uniform_vars();
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 
@@ -272,10 +270,14 @@ void Renderer::draw()
 	_terrain->bind_vao();
 	_terrain->update_uniform_vars();
 	update_texture(_terrain_shader, "u_tex_sampler", _terrain_tex);
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 
 
 
+
+	timer::TIMER::instance().end("T::");
+	// 16.6	-> 60fps
+	// 33	-> 30fps
 }

@@ -58,7 +58,7 @@ private:
 	bool read_file(string_view filename, std::string& target);
 	void add_shader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
 	GLuint compile_shader(string_view filenameVS, string_view filenameFS);
-	GLuint create_vao(GLuint shader, const VERTEX* vertices, GLsizei vertices_num, const INDEX* indices, GLsizei indices_num);
+	GLuint create_vao(GLuint shader, const VERTEX* vertices, GLsizei vertices_num);
 	void load_texture();
 	void load_model();
 
