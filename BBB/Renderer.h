@@ -46,7 +46,7 @@ public:
 
 	glm::mat4 proj_mat()const { return _screen.proj_mat(); }
 
-	GLuint get_uloc_mvp_mat()const { return _uloc_mvp_mat; }
+	GLuint get_uloc_mvp_mat()const { return _uloc_mvp_mat_ds; }
 	CameraPtr get_main_camera()const { return _main_camera; }
 	Player0Ptr get_player()const { return _player; }
 
@@ -71,19 +71,18 @@ private:
 
 
 private:
-	GLuint _shader;
-
-	GLuint _uloc_mvp_mat;
-
+	unique_ptr<struct RESOURCE> _resource;
 	CameraPtr _main_camera;
 	SCREEN _screen;
 
+	GLuint _default_shader;
+	GLuint _uloc_mvp_mat_ds;
 	vector<ObjPtr> _cars;
 	Player0Ptr _player;
 
-
-	unique_ptr<struct RESOURCE> _resource;
-
+	GLuint _terrain_shader;
+	GLuint _uloc_mvp_mat_ts;
+	ObjPtr _terrain;
 
 };
 

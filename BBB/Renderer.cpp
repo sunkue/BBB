@@ -27,25 +27,38 @@ void Renderer::init()
 
 void Renderer::init_shader()
 {
-	_shader = compile_shader("./Shader/vertex.glsl"sv, "./Shader/fragment.glsl"sv);
+	_default_shader = compile_shader("./Shader/vertex.glsl"sv, "./Shader/fragment.glsl"sv);
+	_uloc_mvp_mat_ds = glGetUniformLocation(_default_shader, "u_mvp_mat");
 
-	_uloc_mvp_mat = glGetUniformLocation(_shader, "u_mvp_mat");
+	_terrain_shader = compile_shader("./Shader/vertex.glsl"sv, "./Shader/terrain_fragment.glsl"sv);
+	_uloc_mvp_mat_ts = glGetUniformLocation(_terrain_shader, "u_mvp_mat");
+
 
 }
 
 void Renderer::init_resources()
 {
-	_main_camera = make_shared<Camera>();
 	
 	// create objs, give vaos for models
 	auto box_vao = create_vao(box, 8, box_index, 36);
 	ObjDataPtr box_data = make_shared<OBJ_DATA>(box_vao);
-	_cars.emplace_back(make_shared<OBJ>(box_data, _shader));
-	_cars.emplace_back(make_shared<OBJ>(box_data, _shader));
-	_player = make_shared<ControllObj>(box_data, _shader);
+	
+	_cars.emplace_back(make_shared<OBJ>(box_data, _default_shader));
+	_cars[0]->move({ 10.f,0.f,2.f });
+	_cars.emplace_back(make_shared<OBJ>(box_data, _default_shader));
+	_cars[1]->move({ 2.f,0.f,14.f });
 
+	_player = make_shared<ControllObj>(box_data, _default_shader);
+
+	_main_camera = make_shared<Camera>();
 	_main_camera->set_ownner(_player->get_obj());
 	_main_camera->set_diff({ -5.f, 3.f, 0.f });
+
+	_terrain = make_shared<OBJ>(box_data, _terrain_shader);
+ 	glm::vec3 scale_ = { 100.f,0.25f,100.f };
+	_terrain->scaling(scale_);
+	glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
+	_terrain->move(move_);
 }
 
 /* VERTEX */
@@ -67,7 +80,7 @@ GLuint Renderer::create_vao(const VERTEX* vertices, GLsizei vertices_num, const 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_num * sizeof(INDEX), indices, GL_STATIC_DRAW);
 
 
-	GLint positionAttribute = glGetAttribLocation(_shader, "a_position");
+	GLint positionAttribute = glGetAttribLocation(_default_shader, "a_position");
 	if (positionAttribute == -1) {
 		std::cerr << "position 속성 설정 실패" << '\n';
 		exit(-1);
@@ -75,7 +88,7 @@ GLuint Renderer::create_vao(const VERTEX* vertices, GLsizei vertices_num, const 
 	glEnableVertexAttribArray(positionAttribute);
 	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, pos));
 
-	GLint normalAttribute = glGetAttribLocation(_shader, "a_normal");
+	GLint normalAttribute = glGetAttribLocation(_default_shader, "a_normal");
 	if (normalAttribute == -1) {
 		std::cerr << "normal 속성 설정 실패" << '\n';
 		exit(-1);
@@ -195,7 +208,7 @@ void Renderer::ready_draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-	glUseProgram(_shader);
+	glUseProgram(_default_shader);
 
 	/*
 		uniforms
@@ -236,5 +249,7 @@ void Renderer::draw()
 	_player->get_obj()->update_uniform_vars();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
 
+	_terrain->update_uniform_vars();
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
 
 }

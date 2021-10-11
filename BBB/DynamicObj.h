@@ -97,7 +97,7 @@ private:
 	void update_state()
 	{
 		const glm::vec3 _angular_power = Y_DEFAULT * 3.0f;
-		constexpr float _acceleration_power = 7.f;
+		constexpr float _acceleration_power = 16.f;
 		constexpr float _friction_power = 2.0f;
 
 		_angular_speed = _angular_power * static_cast<int>(_angular_control);
