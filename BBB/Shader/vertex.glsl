@@ -4,21 +4,17 @@
 uniform mat4 u_mvp_mat;
 
 attribute vec3 a_position;
-// flat
 attribute vec3 a_normal;
-//in vec2 a_texpos;
+attribute vec2 a_texcoord;
 
 
-//out vec2 v_TexPos;
-varying vec3 frag_c;
+varying vec3 v_normal;
+varying vec2 v_texcoord;
 
 void main()
 {	
 	gl_Position = u_mvp_mat * vec4(a_position, 1.0f);
 
-	
-	//v_TexPos = a_texpos;
-	
-	frag_c = a_normal;
-	
+	v_normal = a_normal;
+	v_texcoord = a_texcoord;
 }

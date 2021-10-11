@@ -38,11 +38,16 @@ void Renderer::init_shader()
 
 void Renderer::init_resources()
 {
-	
+	load_model();
+	load_texture();
+}
+
+void Renderer::load_model()
+{
 	// create objs, give vaos for models
-	auto box_vao = create_vao(box, 8, box_index, 36);
+	auto box_vao = create_vao(_default_shader, box, 8, box_index, 36);
 	ObjDataPtr box_data = make_shared<OBJ_DATA>(box_vao);
-	
+
 	_cars.emplace_back(make_shared<OBJ>(box_data, _default_shader));
 	_cars[0]->move({ 10.f,0.f,2.f });
 	_cars.emplace_back(make_shared<OBJ>(box_data, _default_shader));
@@ -54,15 +59,22 @@ void Renderer::init_resources()
 	_main_camera->set_ownner(_player->get_obj());
 	_main_camera->set_diff({ -5.f, 3.f, 0.f });
 
+	box_vao = create_vao(_terrain_shader, box, 8, box_index, 36);
 	_terrain = make_shared<OBJ>(box_data, _terrain_shader);
- 	glm::vec3 scale_ = { 100.f,0.25f,100.f };
+	glm::vec3 scale_ = { 100.f,100.25f,100.f };
 	_terrain->scaling(scale_);
 	glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
 	_terrain->move(move_);
 }
 
-/* VERTEX */
-GLuint Renderer::create_vao(const VERTEX* vertices, GLsizei vertices_num, const INDEX* indices, GLsizei indices_num)
+void Renderer::load_texture()
+{
+	std::string Dir{ "./Resource/Texture" };
+	_terrain_tex = CreatePngTexture((Dir + "./RGB.png").c_str());
+}
+
+
+GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei vertices_num, const INDEX* indices, GLsizei indices_num)
 {
 	GLuint retvao;
 	GLuint abo;
@@ -80,7 +92,7 @@ GLuint Renderer::create_vao(const VERTEX* vertices, GLsizei vertices_num, const 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_num * sizeof(INDEX), indices, GL_STATIC_DRAW);
 
 
-	GLint positionAttribute = glGetAttribLocation(_default_shader, "a_position");
+	GLint positionAttribute = glGetAttribLocation(shader, "a_position");
 	if (positionAttribute == -1) {
 		std::cerr << "position 속성 설정 실패" << '\n';
 		exit(-1);
@@ -88,13 +100,21 @@ GLuint Renderer::create_vao(const VERTEX* vertices, GLsizei vertices_num, const 
 	glEnableVertexAttribArray(positionAttribute);
 	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, pos));
 
-	GLint normalAttribute = glGetAttribLocation(_default_shader, "a_normal");
+	GLint normalAttribute = glGetAttribLocation(shader, "a_normal");
 	if (normalAttribute == -1) {
 		std::cerr << "normal 속성 설정 실패" << '\n';
 		exit(-1);
 	}
 	glEnableVertexAttribArray(normalAttribute);
 	glVertexAttribPointer(normalAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, nor));
+
+	GLint texcoordAttribute = glGetAttribLocation(shader, "a_texcoord");
+	if (texcoordAttribute == -1) {
+		std::cerr << "texcoord 속성 설정 실패" << '\n';
+		exit(-1);
+	}
+	glEnableVertexAttribArray(texcoordAttribute);
+	glVertexAttribPointer(texcoordAttribute, 2, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, tex));
 
 
 	glBindVertexArray(0);
@@ -208,7 +228,6 @@ void Renderer::ready_draw()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-	glUseProgram(_default_shader);
 
 	/*
 		uniforms
@@ -218,19 +237,16 @@ void Renderer::ready_draw()
 
 void Renderer::draw()
 {
-
 	ready_draw();
 
-	/*
-	auto update_texture = [&](const GLchar* uniform_tex, GLuint texture_id) {
-		glUniform1i(glGetUniformLocation(_shader, uniform_tex), texture_id);
+	auto update_texture =
+		[&](GLuint shader, const GLchar* uniform_tex, GLuint texture_id)
+	{
+		glUniform1i(glGetUniformLocation(shader, uniform_tex), texture_id);
 		glActiveTexture(GL_TEXTURE0 + texture_id);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 	};
-	*/
 
-	//update_texture("u_TexSampler", 0);	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
-	
 	Sleep(1);
 	float tick = static_cast<float>(GAME_SYSTEM::instance().tick_time().count());
 	_player->update(tick / 1000.f);
@@ -239,6 +255,7 @@ void Renderer::draw()
 	// 로직분리, 카메라 회전 , 스크롤로 거리조절 >>  1tick == 최소 1ms.
 
 	/* draw */
+	glUseProgram(_default_shader);
 	_cars[0]->bind_vao();
 	for (auto& car : _cars)
 	{
@@ -249,7 +266,16 @@ void Renderer::draw()
 	_player->get_obj()->update_uniform_vars();
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
 
+
+
+	glUseProgram(_terrain_shader);
+	_terrain->bind_vao();
 	_terrain->update_uniform_vars();
+	update_texture(_terrain_shader, "u_tex_sampler", _terrain_tex);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
+
+
+
+
 
 }
