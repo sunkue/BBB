@@ -20,7 +20,7 @@ class OBJ
 public:
 	explicit OBJ(ObjDataPtr obj_data, GLuint shader) : _obj_data{ obj_data }, _shader{ shader }{}
 
-	glm::mat4 model_mat()const { return glm::translate(_translate) * glm::toMat4(_quaternion)* glm::scale(_scale); }
+	glm::mat4 model_mat()const { return glm::translate(_translate) * glm::toMat4(_quaternion) * glm::scale(_scale); }
 
 	glm::vec3 get_position()const { return glm::vec3{ _translate }; }
 	glm::quat get_rotation()const { return _quaternion; }
@@ -34,8 +34,8 @@ public:
 public:
 
 public:
-	void bind_vao()const{ glBindVertexArray(_obj_data->vao); }
-	void update_uniform_vars()const;
+	void bind_vao()const { glBindVertexArray(_obj_data->vao); }
+	virtual void update_uniform_vars()const;
 
 public:
 
@@ -50,3 +50,15 @@ private:
 
 };
 using ObjPtr = shared_ptr<OBJ>;
+
+///////////////////////////////////////////
+
+class Billboard : public OBJ
+{
+public:
+	explicit Billboard(ObjDataPtr obj_data, GLuint shader) : OBJ{ obj_data ,shader } {}
+public:
+	virtual void update_uniform_vars()const final;
+};
+
+///////////////////////////////////////////

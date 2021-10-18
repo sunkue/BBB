@@ -32,6 +32,7 @@ struct RESOURCE
 /* clients drawer */
 class Renderer
 {
+	friend Billboard;
 public:
 	static Renderer& instance()
 	{
@@ -39,16 +40,17 @@ public:
 		return _instance;
 	}
 
-
 public:
 	void draw();
 	void ready_draw();
 
 	void reshape(int w, int h);
 
+	glm::mat4 vp_mat()const { return _vp_mat; }
 	glm::mat4 proj_mat()const { return _screen.proj_mat(); }
 
-	GLuint get_uloc_mvp_mat()const { return _uloc_mvp_mat_ds; }
+	GLuint get_uloc_vp_mat()const { return _uloc_vp_mat_s; }
+	GLuint get_uloc_m_mat()const { return _uloc_m_mat_s; }
 	CameraPtr get_main_camera()const { return _main_camera; }
 	Player0Ptr get_player()const { return _player; }
 
@@ -76,30 +78,34 @@ private:
 	unique_ptr<struct RESOURCE> _resource;
 	CameraPtr _main_camera;
 	SCREEN _screen;
+	glm::mat4 _vp_mat;
+	//
+	GLuint _uloc_vp_mat_s;
+	GLuint _uloc_m_mat_s;
 
 	//
 	GLuint _default_shader;
-	GLuint _uloc_mvp_mat_ds;
 	vector<ObjPtr> _cars;
 	Player0Ptr _player;
 
 	//
 	GLuint _terrain_shader;
-	GLuint _uloc_mvp_mat_ts;
 	GLuint _uloc_texture_ts;
 	GLuint _terrain_tex;
 	ObjPtr _terrain;
 
 	//
+protected:
 	GLuint _billboard_shader;
-	GLuint _uloc_mvp_mat_bs;
+	GLuint _uloc_p_mat_bs;
+	GLuint _uloc_rs_mat_bs;
+	GLuint _uloc_shear_bs;
 	GLuint _uloc_texture_bs;
-	GLuint _uloc_time_bs;
 	GLuint _billboard_tex0;
 	GLuint _billboard_tex1;
 	GLuint _billboard_tex2;
 	GLuint _billboard_tex3;
-	vector<ObjPtr> _grasses;
+	vector<Billboard> _grasses;
 
 };
 

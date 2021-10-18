@@ -28,16 +28,17 @@ void Renderer::init()
 void Renderer::init_shader()
 {
 	_default_shader = compile_shader("./Shader/vertex.glsl"sv, "./Shader/fragment.glsl"sv);
-	_uloc_mvp_mat_ds = glGetUniformLocation(_default_shader, "u_mvp_mat");
+	_uloc_vp_mat_s = glGetUniformLocation(_default_shader, "u_vp_mat");
+	_uloc_m_mat_s = glGetUniformLocation(_default_shader, "u_m_mat");
 
 	_terrain_shader = compile_shader("./Shader/vertex.glsl"sv, "./Shader/terrain_fragment.glsl"sv);
-	_uloc_mvp_mat_ts = glGetUniformLocation(_terrain_shader, "u_mvp_mat");
 	_uloc_texture_ts = glGetUniformLocation(_terrain_shader, "u_tex_sampler");
 
 	_billboard_shader = compile_shader("./Shader/grass_vertex.glsl"sv, "./Shader/png_fragment.glsl"sv);
-	_uloc_mvp_mat_bs = glGetUniformLocation(_billboard_shader, "u_mvp_mat");
+	_uloc_p_mat_bs = glGetUniformLocation(_billboard_shader, "u_p_mat");
+	_uloc_rs_mat_bs = glGetUniformLocation(_billboard_shader, "u_rs_mat");
+	_uloc_shear_bs = glGetUniformLocation(_billboard_shader, "u_shear_mat");
 	_uloc_texture_bs = glGetUniformLocation(_billboard_shader, "u_tex_sampler");
-	_uloc_time_bs = glGetUniformLocation(_billboard_shader, "u_shear_mat");
 }
 
 void Renderer::init_resources()
@@ -77,15 +78,15 @@ void Renderer::load_model()
 	_grasses.reserve(grass_count);
 	for (int i = 0; i < grass_count; i++)
 	{
-		_grasses.emplace_back(make_shared<OBJ>(grass_data, _billboard_shader));
+		_grasses.emplace_back(grass_data, _billboard_shader);
 	}
 	for (auto& g : _grasses)
 	{
 		glm::vec3 pos = { rand() % (2 * grass_range) - grass_range, 0.f, rand() % (2 * grass_range) - grass_range };
-		g->scaling(glm::vec3(1.0f));
-		g->move(pos);
-		g->move({ -HALF_ROOT3,-1.f,-1.f });
-		//g->rotate(glm::vec3{ 0.f,rand() % 360,0.f });
+		g.scaling(glm::vec3(1.0f));
+		g.move(pos);
+		g.move({ -HALF_ROOT3,-1.f,-1.f });
+		g.rotate(glm::vec3{ 0.f, rand() % 360, 0.f });
 	}
 }
 
@@ -275,18 +276,15 @@ void Renderer::reshape(const int w, const int h)
 
 void Renderer::ready_draw()
 {
+	_vp_mat = proj_mat() * _main_camera->view_mat();
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-
-	/*
-		uniforms
-			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(screen.proj_M()));
-	*/
 }
 
 void Renderer::draw()
 {
-	//timer::TIMER::instance().start();
+	timer::TIMER::instance().start();
 	ready_draw();
 
 	auto update_texture =
@@ -331,7 +329,7 @@ void Renderer::draw()
 	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 	glDisable(GL_CULL_FACE);
 	auto time = GAME_SYSTEM::instance().game_time();
-	_grasses[0]->bind_vao();
+	_grasses[0].bind_vao();
 	for (int i = 0; auto& grass : _grasses)
 	{
 		glm::mat4 shear =
@@ -341,22 +339,22 @@ void Renderer::draw()
 			0.f, 0.f, 1.f, 0.f,
 			0.f, 0.f, 0.f, 1.f
 		};
-		auto t = float(time) / 500 + grass->get_position().x/10;
+		auto t = float(time) / 500 + grass.get_position().x/10;
 		auto ww = glm::cos(t) / 8;
 		shear[1][0] = ww;
 		shear[1][2] = ww;
-		grass->update_uniform_vars();
+		grass.update_uniform_vars();
 		update_texture(_billboard_shader, _uloc_texture_bs, _billboard_tex0 + (i++ % 4));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glUniformMatrix4fv(_uloc_time_bs, 1, GL_FALSE, glm::value_ptr(shear));
+		glUniformMatrix4fv(_uloc_shear_bs, 1, GL_FALSE, glm::value_ptr(shear));
 		glDrawArrays(GL_TRIANGLES, 0, 18);
 	}
 	glPolygonMode(GL_FRONT, GLU_FILL);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	//timer::TIMER::instance().end("T::");
+	timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps
 	// 33	-> 30fps
 	auto fps = 1000 / (GAME_SYSTEM::instance().tick_time().count() + 1);
