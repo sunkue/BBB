@@ -34,6 +34,11 @@ private:
 
 		/* fric */
 		auto prev_dir = glm::normalize(_linear_speed);
+		auto prev_speed = glm::length(_linear_speed);
+		if (prev_speed < ellipsis)
+		{
+			prev_dir = V_ZERO;
+		}
 		auto fric = -1 * prev_dir * _friction * time_elapsed;
 
 		/* accel */
@@ -41,12 +46,16 @@ private:
 
 		///* accumulate */
 		auto new_linear_speed = _linear_speed + accel + fric;
+
 		/* no backward movement */
 		auto new_dir = glm::normalize(new_linear_speed);
-
+		auto new_speed = glm::length(new_linear_speed);
+		if (new_speed < ellipsis)
+		{
+			new_dir = V_ZERO;
+		}
 
 		/* overspeed */
-		auto new_speed = glm::length(new_linear_speed);
 		bool over_speed = _max_speed < new_speed;
 		// [B] if (over_speed) { new_linear_speed = new_dir * _max_speed; }
 		new_linear_speed -= new_linear_speed * over_speed;
@@ -66,6 +75,7 @@ public:
 protected:
 	glm::vec3 _linear_speed{ 1.0f,0.0f,0.0f };
 	glm::vec3 _angular_speed{};
+
 	float _acceleration = 0.f;
 	float _friction = 0.f;
 
@@ -107,6 +117,15 @@ private:
 		// [B] if(_brake_on)_friction += _friction_power;
 		_friction += _friction_power * _brake_on;
 		_friction += _friction_power * _brake_on;
+
+		int accel_control{ static_cast<int>(CONTROLL::none) };
+		int angular_control{ static_cast<int>(CONTROLL::none) };
+		accel_control += _up_on;
+		accel_control -= _down_on;
+		angular_control -= _right_on;
+		angular_control += _left_on;
+		_accel_control = static_cast<CONTROLL>(accel_control);
+		_angular_control = static_cast<CONTROLL>(angular_control);
 	}
 
 public:
@@ -116,6 +135,12 @@ public:
 private:
 	CONTROLL _accel_control{ CONTROLL::none };
 	CONTROLL _angular_control{ CONTROLL::none };
+
+	bool _up_on = false;
+	bool _down_on = false;
+	bool _right_on = false;
+	bool _left_on = false;
+
 	bool _brake_on = false;
 	bool _use_item = false;
 

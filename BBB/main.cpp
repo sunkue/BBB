@@ -72,10 +72,10 @@ void KeyInputUp(unsigned char key, int x, int y)
 	case 'W':
 	case 's':
 	case 'S':
-	case 'a':
-	case 'A':
 	case 'd':
 	case 'D':
+	case 'a':
+	case 'A':
 	case ' ':
 		Game::instance().player->apply_input_unpress(key);
 		break;
@@ -93,7 +93,7 @@ void SpecialKeyInput(int key, int x, int y)
 	switch (key)
 	{
 	case GLUT_KEY_SHIFT_L:
-		Game::instance().renderer.get_main_camera()->camera_shake(0.2);
+		Game::instance().renderer.get_main_camera()->camera_shake(0.2f);
 		break;
 	default: break;
 	}

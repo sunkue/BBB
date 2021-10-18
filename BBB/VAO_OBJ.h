@@ -41,12 +41,12 @@ public:
 
 
 private:
-	ObjDataPtr _obj_data;
-	GLuint _shader;
-
 	glm::vec3 _translate;
 	glm::quat _quaternion;
 	glm::vec3 _scale{ V3_DEFAULT };
+
+	ObjDataPtr _obj_data;
+	GLuint _shader;
 
 };
 using ObjPtr = shared_ptr<OBJ>;

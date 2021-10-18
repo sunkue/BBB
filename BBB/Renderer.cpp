@@ -72,7 +72,7 @@ void Renderer::load_model()
 
 	auto grass_vao = create_vao(_billboard_shader, cross_billboard_3, 18);
 	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
-	const auto grass_count = 4000;
+	const auto grass_count = 8000;
 	const auto grass_range = 50;
 	_grasses.reserve(grass_count);
 	for (int i = 0; i < grass_count; i++)
@@ -330,7 +330,6 @@ void Renderer::draw()
 	glUseProgram(_billboard_shader);
 	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 	glDisable(GL_CULL_FACE);
-
 
 	auto time = GAME_SYSTEM::instance().game_time();
 	_grasses[0]->bind_vao();
