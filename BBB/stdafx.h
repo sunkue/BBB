@@ -1,8 +1,8 @@
 #pragma once
 
-#pragma comment(lib,"./Dependencies/OPGL/glew32.lib")
-#pragma comment(lib,"./Dependencies/OPGL/glew32s.lib")
-#pragma comment(lib,"./Dependencies/OPGL/freeglut.lib")
+#pragma comment(lib,"./Dependencies/OPGL/x64/glew32.lib")
+#pragma comment(lib,"./Dependencies/OPGL/x64/glew32s.lib")
+#pragma comment(lib,"./Dependencies/OPGL/x64/freeglut.lib")
 
 
 #define WIN32_LEAN_AND_MEAN

@@ -9,8 +9,8 @@
 struct SCREEN 
 {
 	GLfloat fovy{ 45.0f }; //glm::Radians(fovy)
-	GLsizei width{ 500 };	//W/H
-	GLsizei height{ 500 };	//W/H
+	GLsizei width{ g_WindowSizeX };	//W/H
+	GLsizei height{ g_WindowSizeY };	//W/H
 	GLfloat n{ 0.1f };
 	GLfloat f{ 20000.0f };
 	

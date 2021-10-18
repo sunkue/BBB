@@ -60,7 +60,7 @@ void Renderer::load_model()
 	_player = make_shared<ControllObj>(box_data, _default_shader);
 
 	_main_camera = make_shared<Camera>();
-	_main_camera->set_ownner(_player->get_obj());
+	_main_camera->set_ownner(_player.get());
 	_main_camera->set_diff({ -5.f, 3.f, 0.f });
 
 	box_vao = create_vao(_terrain_shader, box, 36);
@@ -72,7 +72,7 @@ void Renderer::load_model()
 
 	auto grass_vao = create_vao(_billboard_shader, cross_billboard_3, 18);
 	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
-	const auto grass_count = 8000;
+	const auto grass_count = 4000;
 	const auto grass_range = 50;
 	_grasses.reserve(grass_count);
 	for (int i = 0; i < grass_count; i++)
@@ -85,7 +85,7 @@ void Renderer::load_model()
 		g->scaling(glm::vec3(1.0f));
 		g->move(pos);
 		g->move({ -HALF_ROOT3,-1.f,-1.f });
-	//	g->rotate(glm::vec3{ 0.f,rand() % 360,0.f });
+		//g->rotate(glm::vec3{ 0.f,rand() % 360,0.f });
 	}
 }
 
@@ -248,15 +248,24 @@ GLuint Renderer::compile_shader(string_view filenameVS, string_view filenameFS)
 /////////////////////////////////////////////////////////////////////
 
 
-void Renderer::reshape(int w, int h)
+void Renderer::reshape(const int w, const int h)
 {
-	if (w < h)
+	const auto s_w = _screen.width;
+	const auto s_h = _screen.height;
+	const float s_aspect = _screen.aspect();
+	const float aspect = (float)w / h;
+
+	if (aspect < s_aspect)
 	{
-		glViewport(0, (h - w) / 2, w, w);
+		const float ratio_W = (float)w / s_w;
+		const int new_h = static_cast<int>(s_h * ratio_W);
+		glViewport(0, (h - new_h) / 2, w, new_h);
 	}
 	else 
 	{
-		glViewport((w - h) / 2, 0, h, h);
+		const float ratio_h = (float)h / s_h;
+		const int new_w = static_cast<int>(s_w * ratio_h);
+		glViewport((w - new_w) / 2, 0, new_w, h);
 	}
 	draw();
 }
@@ -288,10 +297,13 @@ void Renderer::draw()
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 	};
 
+
+	/* logic */
 	Sleep(1);
-	float tick = static_cast<float>(GAME_SYSTEM::instance().tick_time().count());
-	_player->update(tick / 1000.f);
-	_main_camera->update();
+	float milli_tick = static_cast<float>(GAME_SYSTEM::instance().tick_time().count());
+	float tick = milli_tick / 1000.f;
+	_player->update(tick);
+	_main_camera->update(tick);
 	GAME_SYSTEM::instance().tick();
 	// 로직분리, 카메라 회전 , 스크롤로 거리조절 >>  1tick == 최소 1ms.
 
@@ -304,7 +316,7 @@ void Renderer::draw()
 		car->update_uniform_vars();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
-	_player->get_obj()->update_uniform_vars();
+	_player->update_uniform_vars();
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
@@ -319,6 +331,7 @@ void Renderer::draw()
 	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 	glDisable(GL_CULL_FACE);
 
+
 	auto time = GAME_SYSTEM::instance().game_time();
 	_grasses[0]->bind_vao();
 	for (int i = 0; auto& grass : _grasses)
@@ -331,7 +344,7 @@ void Renderer::draw()
 			0.f, 0.f, 0.f, 1.f
 		};
 		auto t = float(time) / 500 + grass->get_position().x/10;
-		auto ww = glm::cos(t) / 4;
+		auto ww = glm::cos(t) / 8;
 		shear[1][0] = ww;
 		shear[1][2] = ww;
 		grass->update_uniform_vars();

@@ -2,6 +2,8 @@
 
 #include "stdafx.h"
 
+const int g_WindowSizeX = 1240;
+const int g_WindowSizeY = 720;
 
 const glm::vec3 V_ZERO{ glm::vec3(0) };
 const glm::vec3 X_DEFAULT{ 1, 0, 0 };

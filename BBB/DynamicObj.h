@@ -3,13 +3,13 @@
 #include "VAO_OBJ.h"
 
 /* moving obj */
-class DynamicObj
+class DynamicObj : public OBJ
 {
 public:
 	explicit DynamicObj(ObjDataPtr obj_data, GLuint shader)
-		:_obj{ make_shared<OBJ>(obj_data, shader) } {}
+		:OBJ{ obj_data, shader } {}
 
-	ObjPtr get_obj() { return _obj; };
+
 public:
 	glm::vec3 get_speed() { return _linear_speed; }
 	glm::vec3 get_moving_dir() { return glm::normalize(_linear_speed); }
@@ -25,12 +25,12 @@ private:
 	void update_rotate(float time_elapsed)
 	{
 		/* rotate */
-		_obj->rotate(_angular_speed * time_elapsed);
+		rotate(_angular_speed * time_elapsed);
 	}
 
 	void update_speed(float time_elapsed)
 	{
-		auto head_dir = _obj->get_head_dir();
+		auto head_dir = get_head_dir();
 
 		/* fric */
 		auto prev_dir = glm::normalize(_linear_speed);
@@ -43,7 +43,7 @@ private:
 		auto new_linear_speed = _linear_speed + accel + fric;
 		/* no backward movement */
 		auto new_dir = glm::normalize(new_linear_speed);
-	
+
 
 		/* overspeed */
 		auto new_speed = glm::length(new_linear_speed);
@@ -57,20 +57,17 @@ private:
 
 	void update_movement(float time_elapsed)
 	{
-		_obj->move(_linear_speed * time_elapsed);
+		move(_linear_speed * time_elapsed);
 	}
 
 public:
 	static constexpr float _max_speed = 15.0f;
 
 protected:
-	glm::vec3 _linear_speed{1.0f,0.0f,0.0f};
+	glm::vec3 _linear_speed{ 1.0f,0.0f,0.0f };
 	glm::vec3 _angular_speed{};
 	float _acceleration = 0.f;
 	float _friction = 0.f;
-
-protected:
-	ObjPtr _obj;
 
 };
 
@@ -80,7 +77,7 @@ class ControllObj : public DynamicObj
 {
 public:
 	enum class CONTROLL { negative = -1, none = 0, positive = 1 };
-	
+
 public:
 	explicit ControllObj(ObjDataPtr obj_data, GLuint shader)
 		: DynamicObj{ obj_data, shader }
