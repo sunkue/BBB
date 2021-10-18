@@ -330,7 +330,6 @@ void Renderer::draw()
 	glUseProgram(_billboard_shader);
 	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 	glDisable(GL_CULL_FACE);
-
 	auto time = GAME_SYSTEM::instance().game_time();
 	_grasses[0]->bind_vao();
 	for (int i = 0; auto& grass : _grasses)
@@ -353,7 +352,6 @@ void Renderer::draw()
 		glUniformMatrix4fv(_uloc_time_bs, 1, GL_FALSE, glm::value_ptr(shear));
 		glDrawArrays(GL_TRIANGLES, 0, 18);
 	}
-
 	glPolygonMode(GL_FRONT, GLU_FILL);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);

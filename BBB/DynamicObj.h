@@ -9,7 +9,6 @@ public:
 	explicit DynamicObj(ObjDataPtr obj_data, GLuint shader)
 		:OBJ{ obj_data, shader } {}
 
-
 public:
 	glm::vec3 get_speed() { return _linear_speed; }
 	glm::vec3 get_moving_dir() { return glm::normalize(_linear_speed); }
