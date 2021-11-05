@@ -8,7 +8,7 @@ class GAME_SYSTEM
 {
 public:
 
-	static GAME_SYSTEM& instance()
+	static GAME_SYSTEM& get()
 	{
 		static GAME_SYSTEM _instance;
 		return _instance;

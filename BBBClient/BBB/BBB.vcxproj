@@ -158,9 +158,12 @@
     <ClCompile Include="DynamicObj.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="game_system.cpp" />
+    <ClCompile Include="LightObj.cpp" />
     <ClCompile Include="LoadPng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Renderer_static.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -187,8 +190,11 @@
     <ClInclude Include="DynamicObj.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="game_system.h" />
+    <ClInclude Include="LightObj.h" />
     <ClInclude Include="LoadPng.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Shader.hpp" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextRenderer.h" />
@@ -201,6 +207,8 @@
     <None Include="Shader\grass_vertex.glsl" />
     <None Include="Shader\png_fragment.glsl" />
     <None Include="Shader\terrain_fragment.glsl" />
+    <None Include="Shader\test_fragment.glsl" />
+    <None Include="Shader\test_vertex.glsl" />
     <None Include="Shader\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>

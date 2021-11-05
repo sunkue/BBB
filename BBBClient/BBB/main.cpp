@@ -9,7 +9,7 @@
 
 void RenderScene(void)
 {
-	Game::instance().renderer.draw();
+	Game::get().renderer.draw();
 
 	glutSwapBuffers();
 }
@@ -25,7 +25,7 @@ void MouseInput(int button, int state, int x, int y)
 }
 
 void MouseWheel(int button, int dir, int x, int y) {
-	auto camera = Renderer::instance().get_main_camera();
+	auto camera = Renderer::get().get_main_camera();
 	if (dir > 0)
 	{
 		auto diff = camera->get_diff();
@@ -42,7 +42,7 @@ void MouseWheel(int button, int dir, int x, int y) {
 
 void KeyInput(unsigned char key, int x, int y)
 {
-	Game::instance().player->apply_input_press(key);
+	Game::get().player->apply_input_press(key);
 	return;
 	switch (key)
 	{
@@ -67,7 +67,7 @@ void KeyInput(unsigned char key, int x, int y)
 
 void KeyInputUp(unsigned char key, int x, int y)
 {
-		Game::instance().player->apply_input_unpress(key);
+		Game::get().player->apply_input_unpress(key);
 		return;
 	switch (key)
 	{
@@ -95,7 +95,7 @@ void SpecialKeyInput(int key, int x, int y)
 	switch (key)
 	{
 	case GLUT_KEY_SHIFT_L:
-		Game::instance().renderer.get_main_camera()->camera_shake(0.2f);
+		Game::get().renderer.get_main_camera()->camera_shake(0.2f);
 		break;
 	default: break;
 	}
@@ -103,7 +103,7 @@ void SpecialKeyInput(int key, int x, int y)
 
 void Reshape(int w, int h)
 {
-	Renderer::instance().reshape(w, h);
+	Renderer::get().reshape(w, h);
 }
 
 void Position(int x, int y)

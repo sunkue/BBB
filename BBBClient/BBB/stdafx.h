@@ -52,6 +52,8 @@ using clk = std::chrono::high_resolution_clock;
 #pragma warning(pop)
 
 
+#include "../../Share/includes.h"
 #include "gl_defines.h"
 #include "game_system.h"
-#include "../../Share/includes.h"
+#include "VAO_OBJ.h"
+#include "Shader.h"

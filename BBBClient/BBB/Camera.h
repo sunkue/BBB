@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include "VAO_OBJ.h"
 
 
 /// /////////////////////////////////////////////////////////////////////////
@@ -18,9 +17,9 @@ public:
 	glm::vec3 get_diff()const { return _diff; };
 	void set_diff(glm::vec3 d) { _diff = d; };
 
-	glm::mat4 view_mat()const { return glm::lookAt(_position, _target, _up); };
+	glm::mat4 view_mat()const { return glm::lookAt(position_, _target, _up); };
 
-	glm::vec3 get_dir()const { return glm::normalize(_position - _target); };
+	glm::vec3 get_dir()const { return glm::normalize(position_ - _target); };
 	glm::vec3 get_right()const { return glm::normalize(glm::cross(_up, get_dir())); };
 	glm::vec3 get_up()const { return _up; };
 
@@ -28,13 +27,14 @@ public:
 
 	void camera_shake(float duration) { _shaking = true; _shaking_time = duration; };
 
+	GET(position);
 private:
 	milliseconds _rotate_lag{ 200ms };
 	glm::vec3 _diff{};
 	
 	OBJ* _ownner = nullptr;
 
-	glm::vec3 _position{ V_ZERO };
+	glm::vec3 position_{ V_ZERO };
 	glm::vec3 _target{ V_ZERO };
 	glm::vec3 _up{ Y_DEFAULT };
 

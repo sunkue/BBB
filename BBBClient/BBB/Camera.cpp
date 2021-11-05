@@ -12,7 +12,7 @@ void Camera::update(float time_elpased)
 		const auto trans = glm::translate(_ownner->get_position());
 		const auto scale = glm::scale(_ownner->get_scale());
 		auto m = trans * glm::toMat4(target_rotate) * trans_diff * scale;
-		_position = m * V4_DEFAULT;
+		position_ = m * V4_DEFAULT;
 	}
 
 	/* target */
@@ -40,8 +40,8 @@ void Camera::update(float time_elpased)
 		constexpr float magic_limit = 0.171875;
 		constexpr float friq = 10.f;
 		const float rand_val = static_cast<float>(rand() % 10);
-		_position.x += cos(_shaking_time * friq * rand_val) * magic_limit;
-		_position.y += sin(_shaking_time * friq * rand_val) * magic_limit;
-		_position.z += cos(_shaking_time * friq * rand_val) * magic_limit;
+		position_.x += cos(_shaking_time * friq * rand_val) * magic_limit;
+		position_.y += sin(_shaking_time * friq * rand_val) * magic_limit;
+		position_.z += cos(_shaking_time * friq * rand_val) * magic_limit;
 	}
 }

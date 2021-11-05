@@ -1,8 +1,9 @@
 #pragma once
 
 
-#include "VAO_OBJ.h"
 #include "DynamicObj.h"
+#include "Camera.h"
+#include "Shader.h"
 
 //////////////////////////////////////////////////////
 
@@ -34,12 +35,9 @@ struct RESOURCE
 class Renderer
 {
 	friend Billboard;
-public:
-	static Renderer& instance()
-	{
-		static Renderer _instance;
-		return _instance;
-	}
+private:
+	SINGLE_TON(Renderer);
+	~Renderer();
 
 public:
 	void draw();
@@ -47,12 +45,12 @@ public:
 
 	void reshape(int w, int h);
 
-	glm::mat4 vp_mat()const { return _vp_mat; }
-	glm::mat4 proj_mat()const { return _screen.proj_mat(); }
+	glm::mat4 vp_mat()const { return vp_mat_; }
+	glm::mat4 proj_mat()const { return screen_.proj_mat(); }
 
 
-	CameraPtr get_main_camera()const { return _main_camera; }
-	Player0Ptr get_player()const { return _player; }
+	CameraPtr get_main_camera()const { return main_camera_; }
+	Player0Ptr get_player()const { return player_; }
 
 private:
 	void init();
@@ -67,38 +65,36 @@ private:
 	void load_model();
 
 private:
-	Renderer();
-	~Renderer();
+	unique_ptr<struct RESOURCE> resource_;
+	CameraPtr main_camera_;
+	SCREEN& screen_ = screen;
+	glm::mat4 vp_mat_;
 
-	Renderer(const Renderer&) = delete;
-	Renderer& operator=(const Renderer&) = delete;
+	ShaderPtr testing_shader_;
+	//
+	ShaderPtr default_shader_;
+	ObjPtr sky_box_;
+	GLuint sky_box_tex_;
 
-
-private:
-	unique_ptr<struct RESOURCE> _resource;
-	CameraPtr _main_camera;
-	SCREEN& _screen = screen;
-	glm::mat4 _vp_mat;
 
 	//
-	GLuint _default_shader;
-	vector<ObjPtr> _cars;
-	Player0Ptr _player;
-	GLuint _player_tex;
+	vector<ObjPtr> cars_;
+	Player0Ptr player_;
+	GLuint player_tex_;
 
 	//
-	GLuint _terrain_shader;
-	GLuint _terrain_tex;
-	ObjPtr _terrain;
+	ShaderPtr terrain_shader_;
+	GLuint terrain_tex_;
+	ObjPtr terrain_;
 
 	//
 protected:
-	GLuint _billboard_shader;
-	GLuint _billboard_tex0;
-	GLuint _billboard_tex1;
-	GLuint _billboard_tex2;
-	GLuint _billboard_tex3;
-	vector<Billboard> _grasses;
+	ShaderPtr billboard_shader_;
+	GLuint billboard_tex0_;
+	GLuint billboard_tex1_;
+	GLuint billboard_tex2_;
+	GLuint billboard_tex3_;
+	vector<Billboard> grasses_;
 
 };
 

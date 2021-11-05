@@ -14,7 +14,7 @@ struct id_str
 class ChatManager
 {
 public:
-	static ChatManager& instance()
+	static ChatManager& get()
 	{
 		static ChatManager _instance;
 		return _instance;
@@ -67,7 +67,7 @@ public:
 	{
 		if (c == VK_RETURN) [[unlikely]]
 		{
-			size_t dead_line = GAME_SYSTEM::instance().game_time() + life_time;
+			size_t dead_line = GAME_SYSTEM::get().game_time() + life_time;
 			enter(_buf, dead_line);
 		}
 		else if (_buf.size() < 30)
@@ -85,7 +85,7 @@ public:
 	void enter(string_view str, size_t dead_line)
 	{
 		if (str.empty()) return;
-		const auto& str_ref = ChatManager::instance().add(_ownner, str);
+		const auto& str_ref = ChatManager::get().add(_ownner, str);
 		cout << "\n::" << str << "::\n";
 		_chat_balloon.emplace_back(str_ref.str, dead_line);
 		_buf.clear();

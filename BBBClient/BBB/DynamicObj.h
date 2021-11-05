@@ -7,8 +7,8 @@
 class DynamicObj : public OBJ
 {
 public:
-	explicit DynamicObj(ObjDataPtr obj_data, GLuint shader)
-		:OBJ{ obj_data, shader } {}
+	explicit DynamicObj(ObjDataPtr obj_data)
+		:OBJ{ obj_data } {}
 
 public:
 	glm::vec3 get_speed() { return _linear_speed; }
@@ -94,14 +94,14 @@ public:
 	enum class CONTROLL { negative = -1, none = 0, positive = 1 };
 
 public:
-	explicit ControllObj(size_t id, ObjDataPtr obj_data, GLuint shader)
-		: DynamicObj{ obj_data, shader }, _id{ id }, _chat{ id }
+	explicit ControllObj(size_t id, ObjDataPtr obj_data)
+		: DynamicObj{ obj_data }, _id{ id }, _chat{ id }
 	{}
 
 public:
 	void update(float time_elapsed)
 	{
-		_chat.update(GAME_SYSTEM::instance().game_time());
+		_chat.update(GAME_SYSTEM::get().game_time());
 		update_state();
 		DynamicObj::update(time_elapsed);
 	}

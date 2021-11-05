@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Camera.h"
-
 
 /////////////////////////////////////////////////////////////////
 
@@ -18,7 +16,7 @@ const glm::vec3 HEADING_DEFAULT = X_DEFAULT;
 class OBJ
 {
 public:
-	explicit OBJ(ObjDataPtr obj_data, GLuint shader) : _obj_data{ obj_data }, _shader{ shader }{}
+	explicit OBJ(ObjDataPtr obj_data) : _obj_data{ obj_data }{}
 
 	glm::mat4 model_mat()const { return glm::translate(_translate) * glm::toMat4(_quaternion) * glm::scale(_scale); }
 
@@ -34,7 +32,7 @@ public:
 
 public:
 	void bind_vao()const { glBindVertexArray(_obj_data->vao); }
-	void update_uniform_vars(GLuint shader)const;
+	void update_uniform_vars(const class Shader* shader)const;
 
 public:
 	glm::vec3 get_project_pos(glm::vec3 origin = {});
@@ -46,8 +44,6 @@ private:
 	glm::vec3 _scale{ V3_DEFAULT };
 
 	ObjDataPtr _obj_data;
-	GLuint _shader;
-
 };
 using ObjPtr = shared_ptr<OBJ>;
 
@@ -56,9 +52,9 @@ using ObjPtr = shared_ptr<OBJ>;
 class Billboard : public OBJ
 {
 public:
-	explicit Billboard(ObjDataPtr obj_data, GLuint shader) : OBJ{ obj_data ,shader } {}
+	explicit Billboard(ObjDataPtr obj_data) : OBJ{ obj_data } {}
 public:
-	void update_uniform_vars(GLuint shader)const;
+	void update_uniform_vars(const class Shader* shader)const;
 };
 
 ///////////////////////////////////////////

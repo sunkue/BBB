@@ -3,8 +3,6 @@
 
 uniform mat4 u_vp_mat;
 uniform mat4 u_p_mat;
-
-
 uniform mat4 u_rs_mat;
 uniform mat4 u_shear_mat;
 
