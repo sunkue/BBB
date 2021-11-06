@@ -28,7 +28,7 @@ namespace MY_NAME_SPACE {} using namespace MY_NAME_SPACE; using namespace std;
 
 
 /// CODE GENERATE
-namespace MY_NAME_SPACE 
+namespace MY_NAME_SPACE
 {
 
 #define DISABLE_COPY(CLASS)								\
@@ -54,6 +54,23 @@ namespace MY_NAME_SPACE
 #define SET(var) void set##var(auto value) { var##_ = value; }
 #define SET_REF(var) void set##var(const auto& value) { var##_ = value; }
 
+#define CREATE_SHARED(RETURN, CLASS)										\
+		template<typename ...Arg>											\
+		static RETURN create(Arg&&...arg)									\
+		{																	\
+			struct enabler : public CLASS									\
+			{ enabler(Arg&&...arg) :CLASS(std::forward<Arg>(arg)...) {} };	\
+			return std::make_shared<enabler>(std::forward<Arg>(arg)...);	\
+		}
+
+#define CREATE_UNIQUE(RETURN, CLASS)										\
+		template<typename ...Arg>											\
+		static RETURN create(Arg&&...arg)									\
+		{																	\
+			struct enabler : public CLASS									\
+			{ enabler(Arg&&...arg) :CLASS(std::forward<Arg>(arg)...) {} };	\
+			return std::make_unique<enabler>(std::forward<Arg>(arg)...);	\
+		}
 }
 
 
@@ -115,7 +132,7 @@ namespace MY_NAME_SPACE {
 
 		static consteval size_t bits() { return sizeof(_Ty) * 8; };
 	};
-	
+
 	template <class _T>
 	concept primitive_t = is_arithmetic_v<_T> || is_enum_v<_T>;
 }
@@ -241,7 +258,7 @@ namespace MY_NAME_SPACE {
 		{
 			return true;
 		}
-	} 
+	}
 }
 
 

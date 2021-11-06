@@ -71,6 +71,7 @@ private:
 	glm::mat4 vp_mat_;
 
 	ShaderPtr testing_shader_;
+	LightPtr testing_light_;
 	//
 	ShaderPtr default_shader_;
 	ObjPtr sky_box_;

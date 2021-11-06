@@ -10,16 +10,6 @@
 
 /////////////////////////////////////////
 
-inline void Shader::set_texture(string_view uniform_var_name, GLuint texture) const
-{
-	glProgramUniform1i(shader_id_, UNIFORM_LOCATION, texture);
-	glActiveTexture(GL_TEXTURE0 + texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-}
-
-/////////////////////////////////////////
-
-
 template<class T>
 inline void Shader::set(string_view uniform_var, const T& value)const
 {
@@ -64,6 +54,24 @@ TEMPLATE_SHADER_SET(glm::vec4)
 }
 
 
+/////////////////////////////////////////
+
+inline void Shader::set_texture(string_view uniform_var_name, GLuint texture) const
+{
+	glProgramUniform1i(shader_id_, UNIFORM_LOCATION, texture);
+	glActiveTexture(GL_TEXTURE0 + texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+}
+
+inline void Shader::set_light(const string& uniform_light_name, const LightPtr& light) const
+{
+	set(uniform_light_name + ".position", light->position);
+	set(uniform_light_name + ".ambient", light->ambient);
+	set(uniform_light_name + ".diffuse", light->diffuse);
+	set(uniform_light_name + ".specular", light->specular);
+}
+
+/////////////////////////////////////////
 
 #undef TEMPLATE_SHADER_SET
 #undef UNIFORM_LOCATION

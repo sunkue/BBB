@@ -49,31 +49,33 @@ void Renderer::init_resources()
 {
 	load_model();
 	load_texture();
+	testing_light_ = Light::create();
 }
 
 void Renderer::load_model()
 {
+	auto default_material = Material::create();
 	// create objs, give vaos for models
 	auto box_vao = default_shader_->create_vao(box, 36);
 	ObjDataPtr box_data = make_shared<OBJ_DATA>(box_vao);
 
-	sky_box_ = make_shared<OBJ>(box_data);
+	sky_box_ = make_shared<OBJ>(box_data, default_material);
 	sky_box_->scaling(glm::vec3{ 500.f });
 	sky_box_->move({ 0.f, -250.f,0.f });
 
-	cars_.emplace_back(make_shared<OBJ>(box_data));
-	cars_[0]->move({ 10.f,0.f,2.f });
-	cars_.emplace_back(make_shared<OBJ>(box_data));
+	cars_.emplace_back(make_shared<OBJ>(box_data, default_material));
+	cars_[0]->move({ 10.f,5.f,2.f });
+	cars_.emplace_back(make_shared<OBJ>(box_data, default_material));
 	cars_[1]->move({ 2.f,0.f,14.f });
 
-	player_ = make_shared<ControllObj>(size_t{ 0 }, box_data);
+	player_ = make_shared<ControllObj>(size_t{ 0 }, box_data, default_material);
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
 	main_camera_->set_diff({ -5.f, 3.f, 0.f });
 
 	box_vao = terrain_shader_->create_vao(box, 36);
-	terrain_ = make_shared<OBJ>(box_data);
+	terrain_ = make_shared<OBJ>(box_data, default_material);
 	glm::vec3 scale_ = { 100.f, 0.25f, 100.f };
 	terrain_->scaling(scale_);
 	glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
@@ -86,7 +88,7 @@ void Renderer::load_model()
 	grasses_.reserve(grass_count);
 	for (int i = 0; i < grass_count; i++)
 	{
-		grasses_.emplace_back(grass_data);
+		grasses_.emplace_back(grass_data, default_material);
 	}
 	for (auto& g : grasses_)
 	{
@@ -96,6 +98,7 @@ void Renderer::load_model()
 		g.move({ -HALF_ROOT3,-1.f,-1.f });
 		g.rotate(glm::vec3{ 0.f, rand() % 360, 0.f });
 	}
+
 }
 
 void Renderer::load_texture()
@@ -232,13 +235,12 @@ void Renderer::draw()
 	auto view_pos = main_camera_->get_position();
 	testing_shader_->set("u_view_pos", view_pos);
 
-	auto lp = cars_[0]->get_position();
-	testing_shader_->set("u_light_pos", lp);
+	testing_shader_->set_light("u_light", testing_light_);
 
 	default_shader_->set_texture("u_tex_sampler", player_tex_);
 	for (auto& car : cars_)
 	{
-		cars_[0]->update_uniform_vars(testing_shader_.get());
+		car->update_uniform_vars(testing_shader_.get());
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 	player_->update_uniform_vars(testing_shader_.get());

@@ -7,8 +7,8 @@
 class DynamicObj : public OBJ
 {
 public:
-	explicit DynamicObj(ObjDataPtr obj_data)
-		:OBJ{ obj_data } {}
+	explicit DynamicObj(const ObjDataPtr& obj_data, const MaterialPtr& material)
+		:OBJ{ obj_data, material } {}
 
 public:
 	glm::vec3 get_speed() { return _linear_speed; }
@@ -94,8 +94,8 @@ public:
 	enum class CONTROLL { negative = -1, none = 0, positive = 1 };
 
 public:
-	explicit ControllObj(size_t id, ObjDataPtr obj_data)
-		: DynamicObj{ obj_data }, _id{ id }, _chat{ id }
+	explicit ControllObj(size_t id, const ObjDataPtr& obj_data, const MaterialPtr& material)
+		: DynamicObj{ obj_data, material }, _id{ id }, _chat{ id }
 	{}
 
 public:

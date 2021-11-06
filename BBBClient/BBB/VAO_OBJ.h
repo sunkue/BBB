@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Light.h"
 
 /////////////////////////////////////////////////////////////////
 
@@ -16,22 +17,23 @@ const glm::vec3 HEADING_DEFAULT = X_DEFAULT;
 class OBJ
 {
 public:
-	explicit OBJ(ObjDataPtr obj_data) : _obj_data{ obj_data }{}
+	explicit OBJ(const ObjDataPtr& obj_data, const MaterialPtr& material) : obj_data_{ obj_data }, material_{ material } {}
 
-	glm::mat4 model_mat()const { return glm::translate(_translate) * glm::toMat4(_quaternion) * glm::scale(_scale); }
+	glm::mat4 model_mat()const { return glm::translate(translate_) * glm::toMat4(quaternion_) * glm::scale(scale_); }
 
-	glm::vec3 get_position()const { return glm::vec3{ _translate }; }
-	glm::quat get_rotation()const { return _quaternion; }
-	glm::vec3 get_scale()const { return _scale; }
+	glm::vec3 get_position()const { return glm::vec3{ translate_ }; }
+	glm::quat get_rotation()const { return quaternion_; }
+	glm::vec3 get_scale()const { return scale_; }
 
 	glm::vec3 get_head_dir()const { return get_rotation() * HEADING_DEFAULT; }
 
-	void rotate(glm::quat q) { _quaternion = q * _quaternion; }
-	void move(glm::vec3 dif) { _translate += dif; }
-	void scaling(glm::vec3 ratio) { _scale *= ratio; }
+	void rotate(glm::quat q) { quaternion_ = q * quaternion_; }
+	void move(glm::vec3 dif) { translate_ += dif; }
+	void scaling(glm::vec3 ratio) { scale_ *= ratio; }
+	void set_material(const MaterialPtr& material) { material_ = material; }
 
 public:
-	void bind_vao()const { glBindVertexArray(_obj_data->vao); }
+	void bind_vao()const { glBindVertexArray(obj_data_->vao); }
 	void update_uniform_vars(const class Shader* shader)const;
 
 public:
@@ -39,11 +41,11 @@ public:
 
 
 private:
-	glm::vec3 _translate;
-	glm::quat _quaternion;
-	glm::vec3 _scale{ V3_DEFAULT };
-
-	ObjDataPtr _obj_data;
+	glm::vec3 translate_;
+	glm::quat quaternion_;
+	glm::vec3 scale_{ V3_DEFAULT };
+	MaterialPtr material_;
+	ObjDataPtr obj_data_;
 };
 using ObjPtr = shared_ptr<OBJ>;
 
@@ -52,7 +54,7 @@ using ObjPtr = shared_ptr<OBJ>;
 class Billboard : public OBJ
 {
 public:
-	explicit Billboard(ObjDataPtr obj_data) : OBJ{ obj_data } {}
+	explicit Billboard(const ObjDataPtr& obj_data, const MaterialPtr& material) : OBJ{ obj_data, material } {}
 public:
 	void update_uniform_vars(const class Shader* shader)const;
 };

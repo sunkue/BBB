@@ -158,7 +158,7 @@
     <ClCompile Include="DynamicObj.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="game_system.cpp" />
-    <ClCompile Include="LightObj.cpp" />
+    <ClCompile Include="Light.cpp" />
     <ClCompile Include="LoadPng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -190,7 +190,7 @@
     <ClInclude Include="DynamicObj.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="game_system.h" />
-    <ClInclude Include="LightObj.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="LoadPng.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />

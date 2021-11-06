@@ -101,7 +101,7 @@
     <ClCompile Include="Renderer_static.cpp">
       <Filter>Render\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="LightObj.cpp">
+    <ClCompile Include="Light.cpp">
       <Filter>Render\Shader\Light</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
@@ -175,7 +175,7 @@
     <ClInclude Include="..\..\Share\Protocol.h">
       <Filter>Share\defineds</Filter>
     </ClInclude>
-    <ClInclude Include="LightObj.h">
+    <ClInclude Include="Light.h">
       <Filter>Render\Shader\Light</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
