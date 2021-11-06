@@ -47,21 +47,23 @@ void Renderer::init_shader()
 
 void Renderer::init_resources()
 {
-	load_model();
 	load_texture();
-	testing_light_ = Light::create();
+	load_model();
+	testing_directional_light_ = DirectionalLight::create();
+	testing_point_light_ = PointLight::create();
+	testing_spot_light_ = SpotLight::create();
 }
 
 void Renderer::load_model()
-{
-	auto default_material = Material::create();
+{	
+	auto default_material = Material::create(player_tex_, player_spec_tex_);
 	// create objs, give vaos for models
 	auto box_vao = default_shader_->create_vao(box, 36);
 	ObjDataPtr box_data = make_shared<OBJ_DATA>(box_vao);
 
 	sky_box_ = make_shared<OBJ>(box_data, default_material);
 	sky_box_->scaling(glm::vec3{ 500.f });
-	sky_box_->move({ 0.f, -250.f,0.f });
+	sky_box_->move({ 0.f, -250.f, 0.f });
 
 	cars_.emplace_back(make_shared<OBJ>(box_data, default_material));
 	cars_[0]->move({ 10.f,5.f,2.f });
@@ -83,7 +85,7 @@ void Renderer::load_model()
 
 	auto grass_vao = billboard_shader_->create_vao(cross_billboard_3, 36);
 	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
-	const auto grass_count = 8000;
+	const auto grass_count = 10;
 	const auto grass_range = 50;
 	grasses_.reserve(grass_count);
 	for (int i = 0; i < grass_count; i++)
@@ -105,8 +107,9 @@ void Renderer::load_texture()
 {
 	std::string Dir{ "./Resource/Texture" };
 	//sky_box_tex_ = CreatePngTexture((Dir + "/skydome.png").c_str());
-
 	player_tex_ = CreatePngTexture((Dir + "/RGB.png").c_str());
+	player_spec_tex_ = CreatePngTexture((Dir + "/RGB_spec.png").c_str());
+	black_tex_ = CreatePngTexture((Dir + "/black.png").c_str());
 
 	terrain_tex_ = CreatePngTexture((Dir + "/greenwool.png").c_str());
 
@@ -234,10 +237,13 @@ void Renderer::draw()
 	testing_shader_->use();
 	auto view_pos = main_camera_->get_position();
 	testing_shader_->set("u_view_pos", view_pos);
+	testing_spot_light_->direction = main_camera_->get_look_dir();
+	testing_spot_light_->position = main_camera_->get_position();
+	//testing_shader_->set("u_light", testing_point_light_);
+	//testing_shader_->set("u_light", testing_directional_light_);
+	testing_shader_->set("u_light", testing_spot_light_);
 
-	testing_shader_->set_light("u_light", testing_light_);
-
-	default_shader_->set_texture("u_tex_sampler", player_tex_);
+	testing_shader_->set_texture("u_tex_sampler", player_tex_);
 	for (auto& car : cars_)
 	{
 		car->update_uniform_vars(testing_shader_.get());
@@ -248,10 +254,10 @@ void Renderer::draw()
 
 	//////
 
-	terrain_shader_->use();
+	//terrain_shader_->use();
 	terrain_->bind_vao();
-	terrain_->update_uniform_vars(terrain_shader_.get());
-	terrain_shader_->set_texture("u_tex_sampler", terrain_tex_);
+	terrain_->update_uniform_vars(testing_shader_.get());
+	testing_shader_->set_texture("u_tex_sampler", terrain_tex_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
 	billboard_shader_->use();

@@ -71,30 +71,32 @@ private:
 	glm::mat4 vp_mat_;
 
 	ShaderPtr testing_shader_;
-	LightPtr testing_light_;
+	DirectionalLightPtr testing_directional_light_;
+	PointLightPtr testing_point_light_;
+	SpotLightPtr testing_spot_light_;
 	//
 	ShaderPtr default_shader_;
 	ObjPtr sky_box_;
-	GLuint sky_box_tex_;
-
+	Texture sky_box_tex_;
+	Texture black_tex_;
 
 	//
 	vector<ObjPtr> cars_;
 	Player0Ptr player_;
-	GLuint player_tex_;
-
+	Texture player_tex_;
+	Texture player_spec_tex_;
 	//
 	ShaderPtr terrain_shader_;
-	GLuint terrain_tex_;
+	Texture terrain_tex_;
 	ObjPtr terrain_;
 
 	//
 protected:
 	ShaderPtr billboard_shader_;
-	GLuint billboard_tex0_;
-	GLuint billboard_tex1_;
-	GLuint billboard_tex2_;
-	GLuint billboard_tex3_;
+	Texture billboard_tex0_;
+	Texture billboard_tex1_;
+	Texture billboard_tex2_;
+	Texture billboard_tex3_;
 	vector<Billboard> grasses_;
 
 };

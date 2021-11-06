@@ -19,8 +19,8 @@ public:
 
 	glm::mat4 view_mat()const { return glm::lookAt(position_, _target, _up); };
 
-	glm::vec3 get_dir()const { return glm::normalize(position_ - _target); };
-	glm::vec3 get_right()const { return glm::normalize(glm::cross(_up, get_dir())); };
+	glm::vec3 get_look_dir()const { return glm::normalize(_target - position_); };
+	glm::vec3 get_right()const { return glm::normalize(glm::cross(_up, - get_look_dir())); };
 	glm::vec3 get_up()const { return _up; };
 
 	void set_ownner(OBJ* ownner) { _ownner = ownner; }

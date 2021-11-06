@@ -18,9 +18,9 @@ varying vec2 v_texcoord;
 
 void main()
 {	
-	gl_Position = u_vp_mat * u_m_mat * vec4(a_position, 1.0f);
-
 	v_world_pos = vec3(u_m_mat * vec4(a_position, 1.0f));
 	v_normal = mat3(transpose(inverse(u_m_mat))) * a_normal;
 	v_texcoord = a_texcoord;
+
+	gl_Position = u_vp_mat * vec4(v_world_pos, 1);
 }

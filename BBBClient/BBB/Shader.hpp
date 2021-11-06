@@ -5,13 +5,14 @@
 
 /////////////////////////////////////////
 
-#define TEMPLATE_SHADER_SET(type) template<> inline void Shader::set<type>(string_view uniform_var_name, const type& value)const
+#define TEMPLATE_SHADER_SET(type) template<> inline void Shader::set<type>(const string& uniform_var_name, const type& value)const
 #define UNIFORM_LOCATION glGetUniformLocation(shader_id_, uniform_var_name.data())
+#define UNIFORM_LOCATION_STRUCT(mem) glGetUniformLocation(shader_id_, uniform_var_name.data() + #mem)
 
 /////////////////////////////////////////
 
 template<class T>
-inline void Shader::set(string_view uniform_var, const T& value)const
+inline void Shader::set(const string& uniform_var, const T& value)const
 {
 	static_assert(false, "Shader::set T&, come to Shader.hpp and add template for type.");
 }
@@ -53,6 +54,40 @@ TEMPLATE_SHADER_SET(glm::vec4)
 	glUniform4fv(UNIFORM_LOCATION, 1, glm::value_ptr(value));
 }
 
+TEMPLATE_SHADER_SET(Texture)
+{
+	glProgramUniform1i(shader_id_, UNIFORM_LOCATION, value);
+	glActiveTexture(GL_TEXTURE0 + value);
+	glBindTexture(GL_TEXTURE_2D, value);
+}
+
+#define SET_LIGHT_POWER()								\
+set(uniform_var_name + ".power.ambient", value->ambient);		\
+set(uniform_var_name + ".power.diffuse", value->diffuse);		\
+set(uniform_var_name + ".power.specular", value->specular);
+
+TEMPLATE_SHADER_SET(DirectionalLightPtr)
+{
+	SET_LIGHT_POWER();
+	set(uniform_var_name + ".direction", value->direction);
+}
+
+TEMPLATE_SHADER_SET(PointLightPtr)
+{
+	SET_LIGHT_POWER();
+	set(uniform_var_name + ".position", value->position);
+	set(uniform_var_name + ".attenuation", value->attenuation);
+}
+
+TEMPLATE_SHADER_SET(SpotLightPtr)
+{
+	SET_LIGHT_POWER();
+	set(uniform_var_name + ".position", value->position);
+	set(uniform_var_name + ".direction", value->direction);
+	set(uniform_var_name + ".attenuation", value->attenuation);
+	set(uniform_var_name + ".in_cutoff", value->in_cutoff);
+	set(uniform_var_name + ".out_cutoff", value->out_cutoff);
+}
 
 /////////////////////////////////////////
 
@@ -63,15 +98,8 @@ inline void Shader::set_texture(string_view uniform_var_name, GLuint texture) co
 	glBindTexture(GL_TEXTURE_2D, texture);
 }
 
-inline void Shader::set_light(const string& uniform_light_name, const LightPtr& light) const
-{
-	set(uniform_light_name + ".position", light->position);
-	set(uniform_light_name + ".ambient", light->ambient);
-	set(uniform_light_name + ".diffuse", light->diffuse);
-	set(uniform_light_name + ".specular", light->specular);
-}
-
 /////////////////////////////////////////
 
 #undef TEMPLATE_SHADER_SET
 #undef UNIFORM_LOCATION
+#undef SET_LIGHT_POWER

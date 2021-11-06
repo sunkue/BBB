@@ -9,9 +9,8 @@ public:
 
 	void use()const;
 
-	template<class T> void set(string_view uniform_var_name, const T& value)const;
+	template<class T> void set(const string& uniform_var_name, const T& value)const;
 	void set_texture(string_view uniform_var_name, GLuint texture)const;
-	void set_light(const string& uniform_light_name, const LightPtr& light)const;
 
 	GLuint create_vao(const VERTEX* vertices, GLsizei vertices_num)const;
 
