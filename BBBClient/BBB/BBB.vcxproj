@@ -205,6 +205,7 @@
   <ItemGroup>
     <None Include="Shader\fragment.glsl" />
     <None Include="Shader\grass_vertex.glsl" />
+    <None Include="Shader\IN_light.glsl" />
     <None Include="Shader\png_fragment.glsl" />
     <None Include="Shader\terrain_fragment.glsl" />
     <None Include="Shader\test_fragment.glsl" />

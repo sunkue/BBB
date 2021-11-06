@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Shader.h"
 
-Shader::Shader(string_view filenameVS, string_view filenameFS) 
-	: shader_id_{ compile_shader(filenameVS,filenameFS) } {}
+Shader::Shader(string_view filenameVS, string_view filenameFS, vector<string_view>& includesFS)
+	: shader_id_{ compile_shader(filenameVS, filenameFS, includesFS) } {}
 
 /// //////////////////////////////////////////////
 
@@ -57,7 +57,7 @@ void Shader::add_shader(GLuint shader_program, const char* raw_shader, GLenum sh
 	glDeleteShader(ShaderObj);
 }
 
-GLuint Shader::compile_shader(string_view filenameVS, string_view filenameFS)
+GLuint Shader::compile_shader(string_view filenameVS, string_view filenameFS, vector<string_view>& includesFS)
 {
 	GLuint ShaderProgram = glCreateProgram();
 
@@ -71,6 +71,16 @@ GLuint Shader::compile_shader(string_view filenameVS, string_view filenameFS)
 		printf("Error compiling vertex shader\n");
 		return -1;
 	};
+
+	for (auto& include : includesFS)
+	{
+		std::string temp;
+		if (!read_file(include, temp)) {
+			printf("Error compiling includes\n");
+			return -1;
+		};
+		fs += temp;
+	}
 
 	if (!read_file(filenameFS, fs)) {
 		printf("Error compiling fragment shader\n");

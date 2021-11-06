@@ -39,10 +39,14 @@ void render_chatrecord(glm::vec3 color = {}, void* font = GLUT_BITMAP_HELVETICA_
 
 void Renderer::init_shader()
 {
-	default_shader_ = make_unique<Shader>("./Shader/vertex.glsl"sv, "./Shader/fragment.glsl"sv);
-	testing_shader_ = make_unique<Shader>("./Shader/test_vertex.glsl"sv, "./Shader/test_fragment.glsl"sv);
-	terrain_shader_ = make_unique<Shader>("./Shader/vertex.glsl"sv, "./Shader/terrain_fragment.glsl"sv);
-	billboard_shader_ = make_unique<Shader>("./Shader/grass_vertex.glsl"sv, "./Shader/png_fragment.glsl"sv);
+	vector<string_view> includesFS;
+	includesFS.emplace_back("./Shader/IN_light.glsl"sv);
+	vector<string_view> etmpty;
+
+	default_shader_ = make_unique<Shader>("./Shader/vertex.glsl"sv, "./Shader/fragment.glsl"sv, etmpty);
+	testing_shader_ = make_unique<Shader>("./Shader/test_vertex.glsl"sv, "./Shader/test_fragment.glsl"sv, includesFS);
+	terrain_shader_ = make_unique<Shader>("./Shader/vertex.glsl"sv, "./Shader/terrain_fragment.glsl"sv, etmpty);
+	billboard_shader_ = make_unique<Shader>("./Shader/grass_vertex.glsl"sv, "./Shader/png_fragment.glsl"sv, etmpty);
 }
 
 void Renderer::init_resources()
@@ -239,9 +243,10 @@ void Renderer::draw()
 	testing_shader_->set("u_view_pos", view_pos);
 	testing_spot_light_->direction = main_camera_->get_look_dir();
 	testing_spot_light_->position = main_camera_->get_position();
-	//testing_shader_->set("u_light", testing_point_light_);
-	//testing_shader_->set("u_light", testing_directional_light_);
-	testing_shader_->set("u_light", testing_spot_light_);
+
+	testing_shader_->set("u_directinal_light", testing_directional_light_);
+	testing_shader_->set("u_point_light", testing_point_light_);
+	testing_shader_->set("u_spot_light", testing_spot_light_);
 
 	testing_shader_->set_texture("u_tex_sampler", player_tex_);
 	for (auto& car : cars_)
