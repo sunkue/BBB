@@ -1,4 +1,4 @@
-
+#version 450
 
 // 역행렬은 비싼연산, cpu에서 계산해서 유니폼으로 한번에 넘길 필요가 잇다.
 
@@ -7,13 +7,13 @@ uniform mat4 u_m_mat;
 uniform vec3 u_light_pos;
 uniform vec3 u_view_pos;
 
-attribute vec3 a_position;
-attribute vec3 a_normal;
-attribute vec2 a_texcoord;
+layout (location = 0) in vec3 a_position;
+layout (location = 1) in vec3 a_normal;
+layout (location = 2) in vec2 a_texcoord;
 
-varying vec3 v_world_pos;
-varying vec3 v_normal;
-varying vec2 v_texcoord;
+out vec3 v_world_pos;
+out vec3 v_normal;
+out vec2 v_texcoord;
 
 void main()
 {	

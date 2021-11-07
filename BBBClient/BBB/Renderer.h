@@ -66,13 +66,15 @@ private:
 	CameraPtr main_camera_;
 	SCREEN& screen_ = screen;
 	glm::mat4 vp_mat_;
-
 	ShaderPtr testing_shader_;
+	ShaderPtr screen_shader_;
 	DirectionalLightPtr testing_directional_light_;
 	PointLightPtr testing_point_light_;
 	SpotLightPtr testing_spot_light_;
 	ObjPtr default_map;
+	GLuint quad_vao;
 	GLuint fbo;
+	TexturePtr tbo;
 	//
 	ShaderPtr default_shader_;
 

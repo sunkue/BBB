@@ -41,9 +41,10 @@ void Renderer::init_shader()
 {
 	vector<string_view> includesFS;
 	includesFS.emplace_back("./Shader/IN_light.glsl"sv);
-	vector<string_view> etmpty;
+	vector<string_view> empty;
 
-	testing_shader_ = make_unique<Shader>("./Shader/test_vertex.glsl"sv, "./Shader/test_fragment.glsl"sv, includesFS);
+	testing_shader_ = Shader::create("./Shader/test_vertex.glsl"sv, "./Shader/test_fragment.glsl"sv, includesFS);
+	screen_shader_ = Shader::create("./Shader/screen_vertex.glsl"sv, "./Shader/screen_fragment.glsl"sv, empty);
 }
 
 void Renderer::init_resources()
@@ -56,7 +57,37 @@ void Renderer::init_resources()
 }
 
 void Renderer::load_model()
-{	
+{
+	glGenVertexArrays(1, &quad_vao);
+	GLuint vbo, ebo;
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
+	struct QUAD
+	{
+		glm::vec2 pos;
+		glm::vec2 tex;
+	};
+	QUAD quadv[] =
+	{
+		{{-1,-1},{0,0}},
+		{{ 1, 1},{1,1}},
+		{{-1, 1},{0,1}},
+		{{-1,-1},{0,0}},
+		{{ 1,-1},{1,0}},
+		{{ 1, 1},{1,1}}
+	};
+
+	glBindVertexArray(quad_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadv), quadv, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, pos));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
+
+	glBindVertexArray(0);
+
 	auto model = Model::create("./Resource/Model/backpack/backpack.obj");
 	auto greencar = Model::create("./Resource/Model/rocket/green/green_car.obj");
 	auto bluecar = Model::create("./Resource/Model/rocket/blue/blue_car.obj");
@@ -64,7 +95,7 @@ void Renderer::load_model()
 	auto map = Model::create("./Resource/Model/default_map/default_map.obj");
 
 	// create objs, give vaos for models
-	
+
 	cout << "model_load_done" << endl;
 	default_map = make_shared<OBJ>(map);
 	default_map->scaling(glm::vec3{ 50.f });
@@ -91,15 +122,15 @@ void Renderer::load_model()
 	main_camera_->set_ownner(player_.get());
 	main_camera_->set_diff({ -5.f, 3.f, 0.f });
 
-//	box_vao = terrain_shader_->create_vao(box, 36);
-//	terrain_ = make_shared<OBJ>(box_data, default_material);
-	//glm::vec3 scale_ = { 100.f, 0.25f, 100.f };
-	//terrain_->scaling(scale_);
-	//glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
-	//terrain_->move(move_);
+	//	box_vao = terrain_shader_->create_vao(box, 36);
+	//	terrain_ = make_shared<OBJ>(box_data, default_material);
+		//glm::vec3 scale_ = { 100.f, 0.25f, 100.f };
+		//terrain_->scaling(scale_);
+		//glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
+		//terrain_->move(move_);
 
-	//auto grass_vao = billboard_shader_->create_vao(cross_billboard_3, 36);
-//	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
+		//auto grass_vao = billboard_shader_->create_vao(cross_billboard_3, 36);
+	//	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
 	const auto grass_count = 10;
 	const auto grass_range = 50;
 	grasses_.reserve(grass_count);
@@ -122,6 +153,21 @@ void Renderer::load_texture()
 {
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	tbo = Texture::create();
+	glGenTextures(1, &tbo->id);
+	glBindTexture(GL_TEXTURE_2D, tbo->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_.width, screen_.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tbo->id, 0);
+
+
+
+	//	GLuint rbo;
+		//glGenRenderbuffers(1, &rbo);
+		//glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
 }
 
@@ -131,8 +177,7 @@ void Renderer::ready_draw()
 {
 	vp_mat_ = proj_mat() * main_camera_->view_mat();
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
+
 
 }
 
@@ -219,23 +264,13 @@ void Renderer::draw()
 
 
 
-	/* draw */
-	//default_shader_->use();
-
-	
-	glDisable(GL_DEPTH_TEST);
 
 
-	//sky_box_->bind_vao();
-	//default_shader_->set_texture("u_tex_sampler", sky_box_tex_);
-	//sky_box_->update_uniform_vars(default_shader_.get());
-
-
-
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
-	/// <summary>
-	/// // light testing....
-	/// </summary>
+
 	testing_shader_->use();
 	auto view_pos = main_camera_->get_position();
 	testing_shader_->set("u_view_pos", view_pos);
@@ -244,7 +279,7 @@ void Renderer::draw()
 	testing_shader_->set("u_point_light", testing_point_light_);
 	testing_shader_->set("u_directinal_light", testing_directional_light_);
 	testing_shader_->set("u_spot_light", testing_spot_light_);
-	
+
 	glDisable(GL_CULL_FACE);
 	default_map->update_uniform_vars(testing_shader_);
 	default_map->draw(testing_shader_);
@@ -257,6 +292,26 @@ void Renderer::draw()
 	}
 	player_->update_uniform_vars(testing_shader_);
 	player_->draw(testing_shader_);
+
+
+
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
+	glDisable(GL_DEPTH_TEST);
+	screen_shader_->use();
+	glBindVertexArray(quad_vao);
+	screen_shader_->set("screen_texture", tbo);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	
+
+
+
+	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
+	string title = "("s + to_string(fps) + " fps)"s;
+	glutSetWindowTitle(title.c_str());
 	return;
 
 	//////
@@ -270,7 +325,7 @@ void Renderer::draw()
 	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 	glDisable(GL_CULL_FACE);
 	auto time = GAME_SYSTEM::get().game_time();
-//	grasses_[0].bind_vao();
+	//	grasses_[0].bind_vao();
 	for (int i = 0; auto & grass : grasses_)
 	{
 		glm::mat4 shear = glm::mat4(1);
@@ -279,8 +334,8 @@ void Renderer::draw()
 		shear[1][0] = ww;
 		shear[1][2] = ww;
 		grass.update_uniform_vars(billboard_shader_.get());
-	//	billboard_shader_->set("u_shear_mat", shear);
-//		billboard_shader_->set_texture("u_tex_sampler", billboard_tex0_ + (i++ % 4));
+		//	billboard_shader_->set("u_shear_mat", shear);
+	//		billboard_shader_->set_texture("u_tex_sampler", billboard_tex0_ + (i++ % 4));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 		glDrawArrays(GL_TRIANGLES, 0, 18);
@@ -296,8 +351,8 @@ void Renderer::draw()
 	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps
 	// 33	-> 30fps
-	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
-	string title = "("s + to_string(fps) + " fps)"s;
-	glutSetWindowTitle(title.c_str());
+	//auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
+	//string title = "("s + to_string(fps) + " fps)"s;
+	//glutSetWindowTitle(title.c_str());
 }
 

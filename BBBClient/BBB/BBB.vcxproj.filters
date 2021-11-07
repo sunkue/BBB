@@ -228,6 +228,12 @@
     <None Include="Shader\IN_light.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
+    <None Include="Shader\screen_fragment.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\screen_vertex.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\Texture\blueflower.png">

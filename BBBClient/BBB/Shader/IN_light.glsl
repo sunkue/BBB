@@ -1,4 +1,4 @@
-
+#version 450
 
 struct Material 
 { 
@@ -46,9 +46,9 @@ uniform Material u_material;
 uniform vec3 u_view_pos;
 
 
-varying vec3 v_world_pos;
-varying vec3 v_normal;
-varying vec2 v_texcoord;
+in vec3 v_world_pos;
+in vec3 v_normal;
+in vec2 v_texcoord;
 
 
 float caculate_attenuation(vec3 light_pos,vec3 attenuation_param, vec3 world_pos)

@@ -28,7 +28,6 @@ bool read_file(string_view filename, std::string& target)
 void Shader::add_shader(GLuint shader_program, const char* raw_shader, GLenum shader_type)
 {
 	GLuint ShaderObj = glCreateShader(shader_type);
-
 	if (ShaderObj == 0) {
 		fprintf(stderr, "Error creating shader type %d\n", shader_type);
 	}
