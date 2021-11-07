@@ -123,7 +123,3 @@ void Shader::use()const
 	glUseProgram(shader_id_);
 }
 
-GLuint Shader::create_vao(const VERTEX* vertices, GLsizei vertices_num)const
-{
-	
-}

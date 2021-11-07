@@ -43,10 +43,7 @@ void Renderer::init_shader()
 	includesFS.emplace_back("./Shader/IN_light.glsl"sv);
 	vector<string_view> etmpty;
 
-	default_shader_ = make_unique<Shader>("./Shader/vertex.glsl"sv, "./Shader/fragment.glsl"sv, etmpty);
 	testing_shader_ = make_unique<Shader>("./Shader/test_vertex.glsl"sv, "./Shader/test_fragment.glsl"sv, includesFS);
-	terrain_shader_ = make_unique<Shader>("./Shader/vertex.glsl"sv, "./Shader/terrain_fragment.glsl"sv, etmpty);
-	billboard_shader_ = make_unique<Shader>("./Shader/grass_vertex.glsl"sv, "./Shader/png_fragment.glsl"sv, etmpty);
 }
 
 void Renderer::init_resources()
@@ -60,41 +57,39 @@ void Renderer::init_resources()
 
 void Renderer::load_model()
 {	
-	auto default_material = Material::create(player_tex_, player_spec_tex_);
+	auto model = Model::create("./Resource/Model/backpack/backpack.obj");
 	// create objs, give vaos for models
-	auto box_vao = default_shader_->create_vao(box, 36);
-	ObjDataPtr box_data = make_shared<OBJ_DATA>(box_vao);
-
-	sky_box_ = make_shared<OBJ>(box_data, default_material);
+	cout << "model_load_done" << endl;
+	sky_box_ = make_shared<OBJ>(model);
 	sky_box_->scaling(glm::vec3{ 500.f });
 	sky_box_->move({ 0.f, -250.f, 0.f });
 
-	cars_.emplace_back(make_shared<OBJ>(box_data, default_material));
+	cars_.emplace_back(make_shared<OBJ>(model));
 	cars_[0]->move({ 10.f,5.f,2.f });
-	cars_.emplace_back(make_shared<OBJ>(box_data, default_material));
+	cars_.emplace_back(make_shared<OBJ>(model));
 	cars_[1]->move({ 2.f,0.f,14.f });
 
-	player_ = make_shared<ControllObj>(size_t{ 0 }, box_data, default_material);
+	player_ = make_shared<ControllObj>(size_t{ 0 }, model);
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
 	main_camera_->set_diff({ -5.f, 3.f, 0.f });
 
-	box_vao = terrain_shader_->create_vao(box, 36);
-	terrain_ = make_shared<OBJ>(box_data, default_material);
-	glm::vec3 scale_ = { 100.f, 0.25f, 100.f };
-	terrain_->scaling(scale_);
-	glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
-	terrain_->move(move_);
+//	box_vao = terrain_shader_->create_vao(box, 36);
+//	terrain_ = make_shared<OBJ>(box_data, default_material);
+	//glm::vec3 scale_ = { 100.f, 0.25f, 100.f };
+	//terrain_->scaling(scale_);
+	//glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
+	//terrain_->move(move_);
 
-	auto grass_vao = billboard_shader_->create_vao(cross_billboard_3, 36);
-	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
+	//auto grass_vao = billboard_shader_->create_vao(cross_billboard_3, 36);
+//	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
 	const auto grass_count = 10;
 	const auto grass_range = 50;
 	grasses_.reserve(grass_count);
 	for (int i = 0; i < grass_count; i++)
 	{
-		grasses_.emplace_back(grass_data, default_material);
+		//grasses_.emplace_back(grass_data, default_material);
 	}
 	for (auto& g : grasses_)
 	{
@@ -109,18 +104,7 @@ void Renderer::load_model()
 
 void Renderer::load_texture()
 {
-	std::string Dir{ "./Resource/Texture" };
-	//sky_box_tex_ = CreatePngTexture((Dir + "/skydome.png").c_str());
-	player_tex_ = CreatePngTexture((Dir + "/RGB.png").c_str());
-	player_spec_tex_ = CreatePngTexture((Dir + "/RGB_spec.png").c_str());
-	black_tex_ = CreatePngTexture((Dir + "/black.png").c_str());
-
-	terrain_tex_ = CreatePngTexture((Dir + "/greenwool.png").c_str());
-
-	billboard_tex0_ = CreatePngTexture((Dir + "/grass0.png").c_str());
-	billboard_tex1_ = CreatePngTexture((Dir + "/grass1.png").c_str());
-	billboard_tex2_ = CreatePngTexture((Dir + "/redflower.png").c_str());
-	billboard_tex3_ = CreatePngTexture((Dir + "/blueflower.png").c_str());
+	//sky_box_tex_ = CreatePngTexture((Dir + "/skydome.png").c_str())
 
 }
 
@@ -218,18 +202,16 @@ void Renderer::draw()
 
 
 
-
 	/* draw */
-	default_shader_->use();
+	//default_shader_->use();
 
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 
 
-	sky_box_->bind_vao();
-	default_shader_->set_texture("u_tex_sampler", sky_box_tex_);
-	sky_box_->update_uniform_vars(default_shader_.get());
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	//sky_box_->bind_vao();
+	//default_shader_->set_texture("u_tex_sampler", sky_box_tex_);
+	//sky_box_->update_uniform_vars(default_shader_.get());
 
 
 
@@ -251,24 +233,24 @@ void Renderer::draw()
 	for (auto& car : cars_)
 	{
 		car->update_uniform_vars(testing_shader_.get());
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		car->draw(testing_shader_);
 	}
 	player_->update_uniform_vars(testing_shader_.get());
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	player_->draw(testing_shader_);
+	return;
 
 	//////
 
 	//terrain_shader_->use();
-	terrain_->bind_vao();
+	//terrain_->bind_vao();
 	terrain_->update_uniform_vars(testing_shader_.get());
-	testing_shader_->set_texture("u_tex_sampler", terrain_tex_);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-
+	//testing_shader_->set_texture("u_tex_sampler", terrain_tex_);
+	//glDrawArrays(GL_TRIANGLES, 0, 36);
 	billboard_shader_->use();
 	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 	glDisable(GL_CULL_FACE);
 	auto time = GAME_SYSTEM::get().game_time();
-	grasses_[0].bind_vao();
+//	grasses_[0].bind_vao();
 	for (int i = 0; auto & grass : grasses_)
 	{
 		glm::mat4 shear = glm::mat4(1);
@@ -277,8 +259,8 @@ void Renderer::draw()
 		shear[1][0] = ww;
 		shear[1][2] = ww;
 		grass.update_uniform_vars(billboard_shader_.get());
-		billboard_shader_->set("u_shear_mat", shear);
-		billboard_shader_->set_texture("u_tex_sampler", billboard_tex0_ + (i++ % 4));
+	//	billboard_shader_->set("u_shear_mat", shear);
+//		billboard_shader_->set_texture("u_tex_sampler", billboard_tex0_ + (i++ % 4));
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 		glDrawArrays(GL_TRIANGLES, 0, 18);
@@ -289,7 +271,7 @@ void Renderer::draw()
 
 	// text
 	player_->render_chat({ 1,0,1 });
-	render_chatrecord();
+	//render_chatrecord();
 
 	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps

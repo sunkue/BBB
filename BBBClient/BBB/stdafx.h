@@ -47,13 +47,16 @@ using clk = std::chrono::high_resolution_clock;
 #include "Dependencies/OPGL/glm/gtx/matrix_decompose.hpp"
 #include "Dependencies/OPGL/glm/ext.hpp"
 
-#include "stb_image.h"
-#include "texture.h"
-#pragma warning(pop)
 
 
 #include "../../Share/includes.h"
 #include "gl_defines.h"
 #include "game_system.h"
-#include "VAO_OBJ.h"
+#include "Texture.h"
+#include "Light.h"
 #include "Shader.h"
+#include "Model.h"
+#include "VAO_OBJ.h"
+
+
+#pragma warning(pop)

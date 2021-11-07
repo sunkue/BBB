@@ -3,13 +3,6 @@
 
 
 
-struct Texture
-{
-	GLuint id;
-	string type;
-	string path;
-};
-
 /// //////////////////////////////////////
 
 
@@ -22,7 +15,6 @@ struct LightBasic
 
 
 using DirectionalLightPtr = shared_ptr<struct DirectionalLight>;
-
 struct DirectionalLight : LightBasic
 {
 	glm::vec3 direction{ 10.f,5.f,2.f };
@@ -34,7 +26,6 @@ private:
 
 
 using PointLightPtr = shared_ptr<struct PointLight>;
-
 struct PointLight : LightBasic
 {
 	glm::vec3 position{ 10.f,5.f,2.f };
@@ -47,7 +38,6 @@ private:
 
 
 using SpotLightPtr = shared_ptr<struct SpotLight>;
-
 struct SpotLight : LightBasic
 {
 	friend class Shader;

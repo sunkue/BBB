@@ -11,9 +11,6 @@ void OBJ::update_uniform_vars(const Shader* shader)const
 	glm::mat4 m = model_mat();
 	shader->set("u_vp_mat", vp);
 	shader->set("u_m_mat", m);
-	shader->set("u_material.albedo", material_->albedo);
-	shader->set("u_material.specular", material_->specular);
-	shader->set("u_material.shininess", material_->shininess);
 }
 
 // [-1, 1]

@@ -1,6 +1,6 @@
 #pragma once
 
-/* max = 256 */
+#include "Shader.h"
 
 struct Vertex
 {
@@ -11,19 +11,8 @@ struct Vertex
 
 /// //////////////////////////////////////
 
-using MaterialPtr = shared_ptr<struct Material>;
 
-struct Material
-{
-	Texture albedo;
-	Texture specular;
-	float shininess;
 
-	CREATE_SHARED(MaterialPtr, Material);
-private:
-	Material(Texture albedoTex, Texture specularTex, float shininess = 32.f) noexcept
-		: albedo{ albedoTex }, specular{ specularTex }, shininess{ shininess }{};
-};
 
 /// //////////////////////////////////////
 
@@ -32,12 +21,12 @@ class Mesh
 public:
 	vector<Vertex> vertices;
 	vector<GLuint> indices;
-	vector<Texture> textures;
+	vector<TexturePtr> textures;
 	
 public:
 	Mesh( vector<Vertex> vertices
 		, vector<GLuint> indices
-		, vector<Texture> textures);
+		, vector<TexturePtr> textures);
 	
 	void draw(const ShaderPtr& shader)const;
 

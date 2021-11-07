@@ -5,7 +5,7 @@ Mesh::Mesh
 (
 	vector<Vertex> vertices, 
 	vector<GLuint> indices,
-	vector<Texture> textures
+	vector<TexturePtr> textures
 )
 	: vertices{ move(vertices) }
 	, indices{ move(indices) }
@@ -20,13 +20,13 @@ void Mesh::draw(const ShaderPtr& shader)const
 	GLuint specular_n = 1;
 	for (const auto& t : textures)
 	{
-		if ("albedo" == t.type)
+		if ("albedo" == t->type)
 		{
-			shader->set("u_material." + t.type + to_string(albedo_n++), t);
+			shader->set("u_material." + t->type + to_string(albedo_n++), t);
 		}
-		else if ("specular" == t.type)
+		else if ("specular" == t->type)
 		{
-			shader->set("u_material." + t.type + to_string(specular_n++), t);
+			shader->set("u_material." + t->type + to_string(specular_n++), t);
 		}
 	}
 	glBindVertexArray(vao);

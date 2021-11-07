@@ -54,18 +54,11 @@ TEMPLATE_SHADER_SET(glm::vec4)
 	glUniform4fv(UNIFORM_LOCATION, 1, glm::value_ptr(value));
 }
 
-TEMPLATE_SHADER_SET(Texture)
+TEMPLATE_SHADER_SET(TexturePtr)
 {
-	glUniform1i(UNIFORM_LOCATION, value.id);
-	glActiveTexture(GL_TEXTURE0 + value.id);
-	glBindTexture(GL_TEXTURE_2D, value.id);
-}
-
-TEMPLATE_SHADER_SET(MaterialPtr)
-{
-	set(uniform_var_name + ".albedo", value->albedo);
-	set(uniform_var_name + ".specular", value->specular);
-	set(uniform_var_name + ".shininess", value->shininess);
+	glUniform1i(UNIFORM_LOCATION, value->id);
+	glActiveTexture(GL_TEXTURE0 + value->id);
+	glBindTexture(GL_TEXTURE_2D, value->id);
 }
 
 #define SET_LIGHT_POWER()								\
@@ -98,12 +91,6 @@ TEMPLATE_SHADER_SET(SpotLightPtr)
 
 /////////////////////////////////////////
 
-inline void Shader::set_texture(string_view uniform_var_name, GLuint texture) const
-{
-	glProgramUniform1i(shader_id_, UNIFORM_LOCATION, texture);
-	glActiveTexture(GL_TEXTURE0 + texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-}
 
 /////////////////////////////////////////
 

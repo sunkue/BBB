@@ -57,9 +57,6 @@ private:
 	void init_shader();
 	void init_resources();
 
-	bool read_file(string_view filename, std::string& target);
-	void add_shader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
-	GLuint compile_shader(string_view filenameVS, string_view filenameFS);
 	GLuint create_vao(GLuint shader, const Vertex* vertices, GLsizei vertices_num);
 	void load_texture();
 	void load_model();
@@ -77,26 +74,17 @@ private:
 	//
 	ShaderPtr default_shader_;
 	ObjPtr sky_box_;
-	Texture sky_box_tex_;
-	Texture black_tex_;
 
 	//
 	vector<ObjPtr> cars_;
 	Player0Ptr player_;
-	Texture player_tex_;
-	Texture player_spec_tex_;
 	//
 	ShaderPtr terrain_shader_;
-	Texture terrain_tex_;
 	ObjPtr terrain_;
 
 	//
 protected:
 	ShaderPtr billboard_shader_;
-	Texture billboard_tex0_;
-	Texture billboard_tex1_;
-	Texture billboard_tex2_;
-	Texture billboard_tex3_;
 	vector<Billboard> grasses_;
 
 };

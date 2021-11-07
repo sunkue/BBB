@@ -73,7 +73,7 @@
     <ClCompile Include="TextRenderer.cpp">
       <Filter>Render\Chatting</Filter>
     </ClCompile>
-    <ClCompile Include="texture.cpp">
+    <ClCompile Include="Texture.cpp">
       <Filter>Render\Texture</Filter>
     </ClCompile>
     <ClCompile Include="LoadPng.cpp">
@@ -130,7 +130,7 @@
     <ClInclude Include="TextRenderer.h">
       <Filter>Render\Chatting</Filter>
     </ClInclude>
-    <ClInclude Include="texture.h">
+    <ClInclude Include="Texture.h">
       <Filter>Render\Texture</Filter>
     </ClInclude>
     <ClInclude Include="LoadPng.h">

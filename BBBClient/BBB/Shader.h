@@ -10,9 +10,6 @@ public:
 	void use()const;
 
 	template<class T> void set(const string& uniform_var_name, const T& value)const;
-	void set_texture(string_view uniform_var_name, GLuint texture)const;
-
-	GLuint create_vao(const Vertex* vertices, GLsizei vertices_num)const;
 
 	GET(shader_id);
 private:

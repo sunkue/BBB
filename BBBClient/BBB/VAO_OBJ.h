@@ -1,14 +1,11 @@
 #pragma once
 
 #include "Light.h"
+#include "Model.h"
 
 /////////////////////////////////////////////////////////////////
 
-struct OBJ_DATA
-{
-	GLuint vao;
-};
-using ObjDataPtr = shared_ptr<OBJ_DATA>;
+
 /////////////////////////////////////////////////////////////////
 
 const glm::vec3 HEADING_DEFAULT = X_DEFAULT;
@@ -17,7 +14,7 @@ const glm::vec3 HEADING_DEFAULT = X_DEFAULT;
 class OBJ
 {
 public:
-	explicit OBJ(const ObjDataPtr& obj_data, const MaterialPtr& material) : obj_data_{ obj_data }, material_{ material } {}
+	explicit OBJ(const ModelPtr& model) : model_{ model } {}
 
 	glm::mat4 model_mat()const { return glm::translate(translate_) * glm::toMat4(quaternion_) * glm::scale(scale_); }
 
@@ -30,22 +27,22 @@ public:
 	void rotate(glm::quat q) { quaternion_ = q * quaternion_; }
 	void move(glm::vec3 dif) { translate_ += dif; }
 	void scaling(glm::vec3 ratio) { scale_ *= ratio; }
-	void set_material(const MaterialPtr& material) { material_ = material; }
 
 public:
-	void bind_vao()const { glBindVertexArray(obj_data_->vao); }
 	void update_uniform_vars(const class Shader* shader)const;
 
 public:
 	glm::vec3 get_project_pos(glm::vec3 origin = {});
-
+	void draw(const ShaderPtr& shader)const
+	{
+		model_->draw(shader);
+	}
 
 private:
 	glm::vec3 translate_;
 	glm::quat quaternion_;
 	glm::vec3 scale_{ V3_DEFAULT };
-	MaterialPtr material_;
-	ObjDataPtr obj_data_;
+	ModelPtr model_;
 };
 using ObjPtr = shared_ptr<OBJ>;
 
@@ -54,7 +51,7 @@ using ObjPtr = shared_ptr<OBJ>;
 class Billboard : public OBJ
 {
 public:
-	explicit Billboard(const ObjDataPtr& obj_data, const MaterialPtr& material) : OBJ{ obj_data, material } {}
+	explicit Billboard(const ModelPtr& model) : OBJ{ model } {}
 public:
 	void update_uniform_vars(const class Shader* shader)const;
 };

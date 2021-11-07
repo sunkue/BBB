@@ -2,7 +2,8 @@
 /*
 	assimp 라이브러리를 사용하고 있음,, 5.0 버전임.
 */
-#pragma comment(lib,"./Dependencies/assimp/assimp-vc142-mt.lib")
+#pragma comment(lib,"./Dependencies/assimp/assimp-vc140-mt.lib")
+
 #include "Dependencies/assimp/assimp/Importer.hpp";
 #include "Dependencies/assimp/assimp/scene.h";
 #include "Dependencies/assimp/assimp/postprocess.h";
@@ -24,6 +25,7 @@ void Model::load_model(string_view path)
 	const aiScene* scene = importer.ReadFile(path.data()
 		, aiProcess_Triangulate | aiProcess_FlipUVs);
 
+
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE
 		|| !scene->mRootNode)
 	{
@@ -42,7 +44,7 @@ void Model::process_node(aiNode* node, const aiScene* scene)
 	for (GLuint i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(process_mesh(mesh, scene));
+		meshes.emplace_back(process_mesh(mesh, scene));
 	}
 	for (GLuint i = 0; i < node->mNumChildren; i++)
 	{
@@ -52,9 +54,9 @@ void Model::process_node(aiNode* node, const aiScene* scene)
 
 Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 {
-	vector<Vertex> vertices;
-	vector<GLuint> indices;
-	vector<Texture> textures;
+	vector<Vertex> vertices; vertices.reserve(mesh->mNumVertices);
+	vector<GLuint> indices; indices.reserve(mesh->mNumVertices);
+	vector<TexturePtr> textures; textures.reserve(10);
 
 	for (int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -65,7 +67,7 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 		{
 			vertex.tex = { mesh->mTextureCoords[0][i].x , mesh->mTextureCoords[0][i].y };
 		}
-		else 
+		else
 		{
 			vertex.tex = { 0, 0 };
 		}
@@ -85,74 +87,46 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 	if (0 <= mesh->mMaterialIndex)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		vector<Texture> albedo_maps = load_material_textures(material
+		vector<TexturePtr> albedo_maps = load_material_textures(material
 			, aiTextureType_DIFFUSE, "albedo");
 		textures.insert(textures.end(), albedo_maps.begin(), albedo_maps.end());
-		vector<Texture> specular_maps = load_material_textures(material
+		vector<TexturePtr> specular_maps = load_material_textures(material
 			, aiTextureType_SPECULAR, "specular");
 		textures.insert(textures.end(), specular_maps.begin(), specular_maps.end());
 	}
-
 	return Mesh(move(vertices), move(indices), move(textures));
 }
 
-GLuint TextureFromFile(const char* path, const string& directory, bool gamma = false);
 
-vector<Texture> Model::load_material_textures(
+vector<TexturePtr> Model::load_material_textures(
 	aiMaterial* mat, aiTextureType type, string typeName)
 {
-	vector<Texture> textures;
-	std::string Dir{ "./Resource/Texture" };
+	vector<TexturePtr> textures;
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString str;
 		mat->GetTexture(type, i, &str);
-		Texture texture;
-		//texture.id = CreatePngTexture(Dir.append(str.C_Str()).c_str());
-		texture.id = TextureFromFile(str.C_Str(), Dir.c_str());
-		texture.type = typeName;
-		textures.push_back(texture);
+		bool skip = false;
+		for (const auto& t : textures_loaded)
+		{
+			if (t->path == str.C_Str())
+			{
+				textures.push_back(t);
+				skip = true;
+				break;
+			}
+		}
+		if (false == skip)
+		{
+			auto texture = Texture::create();
+			//texture.id = CreatePngTexture(Dir.append(str.C_Str()).c_str());
+			texture->id = load_texture_file(str.C_Str(), directory);
+			texture->type = typeName;
+			texture->path = str.C_Str();
+			textures.push_back(texture);
+			textures_loaded.push_back(texture);
+		}
 	}
 	return textures;
 }
 
-
-GLuint TextureFromFile(const char* path, const string& directory, bool gamma)
-{
-	string filename = string(path);
-	filename = directory + '/' + filename;
-
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height, nrComponents;
-	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-	if (data)
-	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		stbi_image_free(data);
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
-	}
-
-	return textureID;
-}
