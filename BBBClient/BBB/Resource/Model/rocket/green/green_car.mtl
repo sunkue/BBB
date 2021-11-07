@@ -1,0 +1,75 @@
+# Blender MTL File: 'None'
+# Material Count: 6
+
+newmtl Dieci_Rim
+Ns 714.201325
+Ka 0.777000 0.777000 0.777000
+Kd 0.467200 0.451465 0.340223
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd cacy.png
+map_Ks gray.png
+
+newmtl Dieci_Tread
+Ns 396.371964
+Ka 0.490909 0.490909 0.490909
+Kd 0.000000 0.000000 0.000000
+Ks 0.145455 0.145455 0.145455
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd wheel.png
+map_Ks wheel.png
+
+newmtl Octane_Body
+Ns 506.618623
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd green_body.png
+map_Ks shine.png
+
+newmtl Octane_Chassis
+Ns 390.960741
+Ka 0.800000 0.800000 0.800000
+Kd 0.800000 0.800000 0.800000
+Ks 0.663636 0.663636 0.663636
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd Octane_Chasis_Map.png
+map_Ks white.png
+
+
+newmtl Paint
+Ns 290.547515
+Ka 0.479091 0.479091 0.479091
+Kd 0.018442 0.036469 0.128225
+Ks 0.713636 0.713636 0.713636
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd light_green.png
+map_Ks black.png
+
+newmtl Window
+Ns 699.842965
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.236364 0.236364 0.236364
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd black.png
+map_Ks white.png

@@ -71,9 +71,10 @@ private:
 	DirectionalLightPtr testing_directional_light_;
 	PointLightPtr testing_point_light_;
 	SpotLightPtr testing_spot_light_;
+	ObjPtr default_map;
+	GLuint fbo;
 	//
 	ShaderPtr default_shader_;
-	ObjPtr sky_box_;
 
 	//
 	vector<ObjPtr> cars_;

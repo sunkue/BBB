@@ -56,7 +56,6 @@ TEMPLATE_SHADER_SET(glm::vec4)
 
 TEMPLATE_SHADER_SET(TexturePtr)
 {
-	//cout << uniform_var_name <<" " << value->type<<" " << value->id << endl;
 	glUniform1i(UNIFORM_LOCATION, value->id);
 	glActiveTexture(GL_TEXTURE0 + value->id);
 	glBindTexture(GL_TEXTURE_2D, value->id);

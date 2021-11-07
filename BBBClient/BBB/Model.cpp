@@ -23,8 +23,7 @@ void Model::load_model(string_view path)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path.data()
-		, aiProcess_Triangulate);
-
+		, aiProcess_Triangulate | aiProcess_FlipUVs);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE
 		|| !scene->mRootNode)
@@ -33,7 +32,7 @@ void Model::load_model(string_view path)
 			<< importer.GetErrorString() << endl;
 		return;
 	}
-
+	cout << path << endl;
 	directory = path.substr(0, path.find_last_of('/'));
 
 	process_node(scene->mRootNode, scene);
@@ -83,7 +82,6 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 			indices.push_back(face.mIndices[j]);
 		}
 	}
-
 	if (0 <= mesh->mMaterialIndex)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -93,6 +91,7 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 		vector<TexturePtr> specular_maps = load_material_textures(material
 			, aiTextureType_SPECULAR, "specular");
 		textures.insert(textures.end(), specular_maps.begin(), specular_maps.end());
+		cout << textures.size() << endl;
 	}
 	return Mesh(move(vertices), move(indices), move(textures));
 }
@@ -101,21 +100,24 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 vector<TexturePtr> Model::load_material_textures(
 	aiMaterial* mat, aiTextureType type, string typeName)
 {
+	cout << "numtex:" << mat->GetTextureCount(type);
 	vector<TexturePtr> textures;
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString str;
 		mat->GetTexture(type, i, &str);
+		cout << directory <<"::" << str.C_Str() << endl;
 		bool skip = false;
 		for (const auto& t : textures_loaded)
 		{
-			if (t->path == str.C_Str())
+			if ((t->path == str.C_Str()) && (t->type == typeName))
 			{
 				textures.push_back(t);
 				skip = true;
 				break;
 			}
 		}
+		
 		if (false == skip)
 		{
 			auto texture = Texture::create();
@@ -125,6 +127,7 @@ vector<TexturePtr> Model::load_material_textures(
 			texture->path = str.C_Str();
 			textures.push_back(texture);
 			textures_loaded.push_back(texture);
+			cout << directory<<" " << texture->type << " " << texture->path << " " << texture->id << endl;
 		}
 	}
 	return textures;

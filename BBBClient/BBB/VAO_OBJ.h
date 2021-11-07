@@ -29,7 +29,7 @@ public:
 	void scaling(glm::vec3 ratio) { scale_ *= ratio; }
 
 public:
-	void update_uniform_vars(const class Shader* shader)const;
+	void update_uniform_vars(const ShaderPtr& shader)const;
 
 public:
 	glm::vec3 get_project_pos(glm::vec3 origin = {});

@@ -72,7 +72,7 @@ private:
 	}
 
 public:
-	static constexpr float _max_speed = 15.0f;
+	static constexpr float _max_speed = 35.0f;
 
 protected:
 	glm::vec3 _linear_speed{ 1.0f,0.0f,0.0f };

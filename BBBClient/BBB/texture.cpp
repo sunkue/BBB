@@ -85,20 +85,6 @@ GLuint CreatePngTexture(const char* filePath)
 		return -1;
 	}
 
-	{
-		decltype(image) temp;
-		temp.resize(image.size());
-
-		auto origin_data = image.data();
-		auto temp_data = temp.data();
-
-		for (decltype(height) i = 0; i < height * 4; i += 4)
-		{
-			memcpy(&temp_data[width * i], &origin_data[width * ((height - 1) * 4 - i)], static_cast<size_t>(width) * 4);
-		}
-		image = std::move(temp);
-	}
-
 	GLuint temp;
 	glGenTextures(1, &temp);
 

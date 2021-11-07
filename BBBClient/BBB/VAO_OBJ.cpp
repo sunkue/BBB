@@ -3,7 +3,7 @@
 #include "Renderer.h"
 
 
-void OBJ::update_uniform_vars(const Shader* shader)const
+void OBJ::update_uniform_vars(const ShaderPtr& shader)const
 {
 	auto& renderer = Renderer::get();
 	auto camera = renderer.get_main_camera();

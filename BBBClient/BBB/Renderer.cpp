@@ -58,18 +58,34 @@ void Renderer::init_resources()
 void Renderer::load_model()
 {	
 	auto model = Model::create("./Resource/Model/backpack/backpack.obj");
+	auto greencar = Model::create("./Resource/Model/rocket/green/green_car.obj");
+	auto bluecar = Model::create("./Resource/Model/rocket/blue/blue_car.obj");
+	auto pinkcar = Model::create("./Resource/Model/rocket/pink/pink_car.obj");
+	auto map = Model::create("./Resource/Model/default_map/default_map.obj");
+
 	// create objs, give vaos for models
+	
 	cout << "model_load_done" << endl;
-	sky_box_ = make_shared<OBJ>(model);
-	sky_box_->scaling(glm::vec3{ 500.f });
-	sky_box_->move({ 0.f, -250.f, 0.f });
+	default_map = make_shared<OBJ>(map);
+	default_map->scaling(glm::vec3{ 50.f });
 
 	cars_.emplace_back(make_shared<OBJ>(model));
 	cars_[0]->move({ 10.f,5.f,2.f });
-	cars_.emplace_back(make_shared<OBJ>(model));
-	cars_[1]->move({ 2.f,0.f,14.f });
 
-	player_ = make_shared<ControllObj>(size_t{ 0 }, model);
+	cars_.emplace_back(make_shared<OBJ>(bluecar));
+	cars_[1]->move({ 2.f,0.f,6.f });
+	cars_[1]->scaling(glm::vec3{ 4.0f });
+
+	cars_.emplace_back(make_shared<OBJ>(pinkcar));
+	cars_[2]->move({ 5.f,0.f,10.f });
+	cars_[2]->scaling(glm::vec3{ 4.0f });
+
+	cars_.emplace_back(make_shared<OBJ>(greencar));
+	cars_[3]->move({ 8.f,0.f,14.f });
+	cars_[3]->scaling(glm::vec3{ 4.0f });
+
+	player_ = make_shared<ControllObj>(size_t{ 0 }, bluecar);
+	player_->scaling(glm::vec3{ 4.0f });
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
@@ -104,7 +120,8 @@ void Renderer::load_model()
 
 void Renderer::load_texture()
 {
-	//sky_box_tex_ = CreatePngTexture((Dir + "/skydome.png").c_str())
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
 }
 
@@ -205,7 +222,7 @@ void Renderer::draw()
 	/* draw */
 	//default_shader_->use();
 
-	glDisable(GL_CULL_FACE);
+	
 	glDisable(GL_DEPTH_TEST);
 
 
@@ -215,7 +232,6 @@ void Renderer::draw()
 
 
 
-	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	/// <summary>
 	/// // light testing....
@@ -228,14 +244,18 @@ void Renderer::draw()
 	testing_shader_->set("u_point_light", testing_point_light_);
 	testing_shader_->set("u_directinal_light", testing_directional_light_);
 	testing_shader_->set("u_spot_light", testing_spot_light_);
+	
+	glDisable(GL_CULL_FACE);
+	default_map->update_uniform_vars(testing_shader_);
+	default_map->draw(testing_shader_);
+	glEnable(GL_CULL_FACE);
 
-	//testing_shader_->set_texture("u_tex_sampler", player_tex_);
 	for (auto& car : cars_)
 	{
-		car->update_uniform_vars(testing_shader_.get());
+		car->update_uniform_vars(testing_shader_);
 		car->draw(testing_shader_);
 	}
-	player_->update_uniform_vars(testing_shader_.get());
+	player_->update_uniform_vars(testing_shader_);
 	player_->draw(testing_shader_);
 	return;
 
@@ -243,7 +263,7 @@ void Renderer::draw()
 
 	//terrain_shader_->use();
 	//terrain_->bind_vao();
-	terrain_->update_uniform_vars(testing_shader_.get());
+	//terrain_->update_uniform_vars(testing_shader_);
 	//testing_shader_->set_texture("u_tex_sampler", terrain_tex_);
 	//glDrawArrays(GL_TRIANGLES, 0, 36);
 	billboard_shader_->use();
