@@ -75,6 +75,7 @@ private:
 	GLuint quad_vao;
 	GLuint fbo;
 	TexturePtr tbo;
+	GLuint rbo;
 	//
 	ShaderPtr default_shader_;
 

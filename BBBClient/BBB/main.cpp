@@ -30,11 +30,15 @@ void MouseWheel(int button, int dir, int x, int y) {
 	{
 		auto diff = camera->get_diff();
 		camera->set_diff(diff * 0.875f);
-	}
+		cout << diff.x<<" " << diff.y<<" " << diff.z << endl;
+		//- 1.31538 0.789227 0
+		//- 1.4798 0.88788 0
+	} 
 	else
 	{
 		auto diff = camera->get_diff();
 		camera->set_diff(diff * 1.125f);
+		cout << diff.x <<" " << diff.y<<" " << diff.z << endl;
 	}
 
 	RenderScene();

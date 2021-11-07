@@ -8,14 +8,13 @@ void ControllObj::render_chat(glm::vec3 color)
 	opt._align = TEXT_ALIGNMENT::mid;
 	opt._space = { 0.0f, 0.0f };
 
-	auto p = get_project_pos({ 0,2,0 });
+	auto p = get_project_pos({ 0,0.5f,0 });
 	auto h = TextRenderer::get_height();
 	for (const auto& chat : views::reverse(_chat.get_chat_balloon()))
 	{
 		auto str = chat._str;
 
-		glColor4f(color.r, color.g, color.b, 1.f);
-		TextRenderer::rend_text(str, p, opt, true);
+		TextRenderer::rend_text(str, p, opt, true, color);
 		p.y += h;
 	}
 }

@@ -60,7 +60,7 @@ public:
 	}
 
 	static void rend_text(string_view txt, Pointf point, TextOpt opt,
-		bool back_ground, void* font = default_font)
+		bool back_ground, glm::vec3 color, void* font = default_font)
 	{
 		const float x_diff = opt._space._width;
 		const float y_diff = opt._space._height;
@@ -73,6 +73,23 @@ public:
 		glUseProgram(0);
 
 		bool activate_space_opt = x_diff != 0 || y_diff != 0;
+		
+		if (back_ground)
+		{
+			auto xl = point._x - get_width(" ", font);
+			auto xh = point._x + len + get_width(" ", font);
+			auto yl = point._y - get_height(font) * 0.2f;
+			auto yh = point._y + get_height(font) * 0.7f;
+			glColor4f(1, 1, 1, 0.8f);
+			glBegin(GL_QUADS);
+			glVertex3f(xl, yl, 0.9f);
+			glVertex3f(xh, yl, 0.9f);
+			glVertex3f(xh, yh, 0.9f);
+			glVertex3f(xl, yh, 0.9f);
+			glEnd();
+		}
+		glDisable(GL_BLEND);
+		glColor4f(color.r, color.g, color.b, 1.0f);
 		if (activate_space_opt)
 		{
 			for (const auto c : txt)
@@ -88,21 +105,8 @@ public:
 			glRasterPos2f(point._x, point._y);
 			glutBitmapString(font, str);
 		}
-
-		if (back_ground)
-		{
-			auto xl = point._x - get_width(" ", font);
-			auto xh = point._x + len + get_width(" ", font);
-			auto yl = point._y - get_height(font) * 0.2f;
-			auto yh = point._y + get_height(font) * 0.7f;
-			glColor4f(1, 1, 1, 0.8f);
-			glBegin(GL_QUADS);
-			glVertex3f(xl, yl, 0.9f);
-			glVertex3f(xh, yl, 0.9f);
-			glVertex3f(xh, yh, 0.9f);
-			glVertex3f(xl, yh, 0.9f);
-			glEnd();
-		}
+		glEnable(GL_BLEND);
+		
 	}
 private:
 	static float pixelsize_to_float(int pixelsize, int max_pixel)

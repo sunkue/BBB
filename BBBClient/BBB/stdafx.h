@@ -51,6 +51,7 @@ using clk = std::chrono::high_resolution_clock;
 
 #include "../../Share/includes.h"
 #include "gl_defines.h"
+#include "sunkue_glm.hpp"
 #include "game_system.h"
 #include "Texture.h"
 #include "Light.h"

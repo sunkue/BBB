@@ -21,12 +21,12 @@ void render_chatrecord(glm::vec3 color = {}, void* font = GLUT_BITMAP_HELVETICA_
 		const auto& record = rv_it_record;
 		glColor3f(color.r, color.g, color.b);
 		auto chat_header = "player" + to_string(record->id) + ":: ";
-		TextRenderer::rend_text(chat_header, p, opt, true, font);
+		TextRenderer::rend_text(chat_header, p, opt, true, glm::vec4(0), font);
 
 		glColor3f(color.r, color.g, color.b);
-		auto header_w = TextRenderer::get_width(chat_header.data(), font);;
+		auto header_w = TextRenderer::get_width(chat_header.data(), font) + 0.025f;
 		p._x += header_w;
-		TextRenderer::rend_text(record->str, p, opt, true, font);
+		TextRenderer::rend_text(record->str, p, opt, true, glm::vec4(0), font);
 		p._x -= header_w;
 
 		p._y += TextRenderer::get_height(font);
@@ -153,22 +153,23 @@ void Renderer::load_texture()
 {
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	
 	tbo = Texture::create();
 	glGenTextures(1, &tbo->id);
 	glBindTexture(GL_TEXTURE_2D, tbo->id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_.width, screen_.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0); 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tbo->id, 0);
 
-
-
-	//	GLuint rbo;
-		//glGenRenderbuffers(1, &rbo);
-		//glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
-		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_.width, screen_.height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -266,7 +267,7 @@ void Renderer::draw()
 
 
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -294,20 +295,19 @@ void Renderer::draw()
 	player_->draw(testing_shader_);
 
 
-
-
-
-	glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
 	glDisable(GL_DEPTH_TEST);
 	screen_shader_->use();
-	glBindVertexArray(quad_vao);
 	screen_shader_->set("screen_texture", tbo);
+	glBindVertexArray(quad_vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	
 
-
+	// text
+	player_->render_chat({ 1,0,1 });
+	render_chatrecord();
 
 	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
 	string title = "("s + to_string(fps) + " fps)"s;
@@ -344,9 +344,7 @@ void Renderer::draw()
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	// text
-	player_->render_chat({ 1,0,1 });
-	//render_chatrecord();
+	
 
 	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps

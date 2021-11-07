@@ -202,6 +202,9 @@
     <ClInclude Include="Model.h">
       <Filter>Render\Model</Filter>
     </ClInclude>
+    <ClInclude Include="sunkue_glm.hpp">
+      <Filter>helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\fragment.glsl">
