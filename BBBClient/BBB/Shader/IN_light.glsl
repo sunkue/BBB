@@ -2,8 +2,8 @@
 
 struct Material 
 { 
-	sampler2D albedo;
-	sampler2D specular; 
+	sampler2D albedo1;
+	sampler2D specular1; 
 	float shininess; 
 }; 
 

@@ -23,7 +23,7 @@ void Model::load_model(string_view path)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path.data()
-		, aiProcess_Triangulate | aiProcess_FlipUVs);
+		, aiProcess_Triangulate);
 
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE
