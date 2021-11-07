@@ -125,46 +125,5 @@ void Shader::use()const
 
 GLuint Shader::create_vao(const VERTEX* vertices, GLsizei vertices_num)const
 {
-	GLuint retvao;
-	GLuint abo;
-	GLuint ebo;
-
-	glGenVertexArrays(1, &retvao);
-	glBindVertexArray(retvao);
-
-	glGenBuffers(1, &abo);
-	glBindBuffer(GL_ARRAY_BUFFER, abo);
-	glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(VERTEX), vertices, GL_STATIC_DRAW);
-
-
-	GLint positionAttribute = glGetAttribLocation(shader_id_, "a_position");
-	if (positionAttribute == -1) {
-		std::cerr << "position 속성 설정 실패" << '\n';
-		exit(-1);
-	}
-	glEnableVertexAttribArray(positionAttribute);
-	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, pos));
-
-	GLint normalAttribute = glGetAttribLocation(shader_id_, "a_normal");
-	if (normalAttribute == -1) {
-		std::cerr << "normal 속성 설정 실패" << '\n';
-		exit(-1);
-	}
-	glEnableVertexAttribArray(normalAttribute);
-	glVertexAttribPointer(normalAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, nor));
-
-	GLint texcoordAttribute = glGetAttribLocation(shader_id_, "a_texcoord");
-	if (texcoordAttribute == -1) {
-		std::cerr << "texcoord 속성 설정 실패" << '\n';
-		exit(-1);
-	}
-	glEnableVertexAttribArray(texcoordAttribute);
-	glVertexAttribPointer(texcoordAttribute, 2, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, tex));
-
-
-	glBindVertexArray(0);
-	glDeleteBuffers(1, &abo);
-	glDeleteBuffers(1, &ebo);
-
-	return retvao;
+	
 }

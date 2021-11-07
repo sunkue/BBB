@@ -56,6 +56,12 @@
     <Filter Include="Render\Shader\Light">
       <UniqueIdentifier>{4a377ca6-ab10-41bf-8dbb-c5278e00b7ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\Mesh">
+      <UniqueIdentifier>{b52b8903-955c-4410-8351-497e4771ad69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\Model">
+      <UniqueIdentifier>{fa34afe7-6cc8-4c5c-a2cd-20dfc0fdf4df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -106,6 +112,12 @@
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Render\Shader\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Render\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Render\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -183,6 +195,12 @@
     </ClInclude>
     <ClInclude Include="Shader.hpp">
       <Filter>Render\Shader\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Render\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Render\Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -27,7 +27,7 @@ void Renderer::init()
 
 
 
-GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei vertices_num)
+GLuint Renderer::create_vao(GLuint shader, const Vertex* vertices, GLsizei vertices_num)
 {
 	GLuint retvao;
 	GLuint abo;
@@ -38,7 +38,7 @@ GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei verti
 
 	glGenBuffers(1, &abo);
 	glBindBuffer(GL_ARRAY_BUFFER, abo);
-	glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(VERTEX), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(Vertex), vertices, GL_STATIC_DRAW);
 
 
 	GLint positionAttribute = glGetAttribLocation(shader, "a_position");
@@ -47,7 +47,7 @@ GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei verti
 		exit(-1);
 	}
 	glEnableVertexAttribArray(positionAttribute);
-	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, pos));
+	glVertexAttribPointer(positionAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, pos));
 
 	GLint normalAttribute = glGetAttribLocation(shader, "a_normal");
 	if (normalAttribute == -1) {
@@ -55,7 +55,7 @@ GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei verti
 		exit(-1);
 	}
 	glEnableVertexAttribArray(normalAttribute);
-	glVertexAttribPointer(normalAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, nor));
+	glVertexAttribPointer(normalAttribute, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, nor));
 
 	GLint texcoordAttribute = glGetAttribLocation(shader, "a_texcoord");
 	if (texcoordAttribute == -1) {
@@ -63,7 +63,7 @@ GLuint Renderer::create_vao(GLuint shader, const VERTEX* vertices, GLsizei verti
 		exit(-1);
 	}
 	glEnableVertexAttribArray(texcoordAttribute);
-	glVertexAttribPointer(texcoordAttribute, 2, GL_FLOAT, GL_FALSE, sizeof(VERTEX), (const GLvoid*)offsetof(VERTEX, tex));
+	glVertexAttribPointer(texcoordAttribute, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, tex));
 
 
 	glBindVertexArray(0);

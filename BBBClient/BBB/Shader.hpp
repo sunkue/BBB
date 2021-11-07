@@ -56,9 +56,16 @@ TEMPLATE_SHADER_SET(glm::vec4)
 
 TEMPLATE_SHADER_SET(Texture)
 {
-	glProgramUniform1i(shader_id_, UNIFORM_LOCATION, value);
-	glActiveTexture(GL_TEXTURE0 + value);
-	glBindTexture(GL_TEXTURE_2D, value);
+	glUniform1i(UNIFORM_LOCATION, value.id);
+	glActiveTexture(GL_TEXTURE0 + value.id);
+	glBindTexture(GL_TEXTURE_2D, value.id);
+}
+
+TEMPLATE_SHADER_SET(MaterialPtr)
+{
+	set(uniform_var_name + ".albedo", value->albedo);
+	set(uniform_var_name + ".specular", value->specular);
+	set(uniform_var_name + ".shininess", value->shininess);
 }
 
 #define SET_LIGHT_POWER()								\

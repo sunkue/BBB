@@ -7,9 +7,9 @@ uniform mat4 u_m_mat;
 uniform vec3 u_light_pos;
 uniform vec3 u_view_pos;
 
-attribute vec3 a_position;
-attribute vec3 a_normal;
-attribute vec2 a_texcoord;
+layout(location = 0) attribute vec3 a_position;
+layout(location = 1) attribute vec3 a_normal;
+layout(location = 2) attribute vec2 a_texcoord;
 
 varying vec3 v_world_pos;
 varying vec3 v_normal;

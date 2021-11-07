@@ -243,12 +243,11 @@ void Renderer::draw()
 	testing_shader_->set("u_view_pos", view_pos);
 	testing_spot_light_->direction = main_camera_->get_look_dir();
 	testing_spot_light_->position = main_camera_->get_position();
-
-	testing_shader_->set("u_directinal_light", testing_directional_light_);
 	testing_shader_->set("u_point_light", testing_point_light_);
+	testing_shader_->set("u_directinal_light", testing_directional_light_);
 	testing_shader_->set("u_spot_light", testing_spot_light_);
 
-	testing_shader_->set_texture("u_tex_sampler", player_tex_);
+	//testing_shader_->set_texture("u_tex_sampler", player_tex_);
 	for (auto& car : cars_)
 	{
 		car->update_uniform_vars(testing_shader_.get());

@@ -3,20 +3,11 @@
 
 
 
-/// //////////////////////////////////////
-
-using MaterialPtr = shared_ptr<struct Material>;
-
-struct Material
+struct Texture
 {
-	Texture albedo;
-	Texture specular;
-	float shininess;
-
-	CREATE_SHARED(MaterialPtr, Material);
-private:
-	Material(Texture albedoTex, Texture specularTex, float shininess = 32.f) noexcept
-		: albedo{ albedoTex }, specular{ specularTex }, shininess{ shininess }{};
+	GLuint id;
+	string type;
+	string path;
 };
 
 /// //////////////////////////////////////
