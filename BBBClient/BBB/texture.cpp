@@ -181,7 +181,6 @@ GLuint load_cube_texture_file(const vector<string_view>& textures, string_view d
 	GLuint cube_texture;
 	glGenTextures(1, &cube_texture);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cube_texture);
-	cout << cube_texture << endl;
 
 	int width, height, nrComponents;
 	for (int i = 0; i < textures.size(); i++)

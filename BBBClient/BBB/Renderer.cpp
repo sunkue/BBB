@@ -82,7 +82,6 @@ void Renderer::init_shader()
 		skybox = CubeMap::create(cubeshader, textures, dir);
 	}
 
-
 }
 
 void Renderer::init_resources()
