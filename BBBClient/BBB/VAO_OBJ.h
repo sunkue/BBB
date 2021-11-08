@@ -78,8 +78,6 @@ public:
 
 	void setup_instance_attribute(const ShaderPtr& shader, string_view name, auto* data, GLenum type = GL_FLOAT, GLuint divisor = 1)
 	{
-		return;
-
 		GLuint inst_abo;
 		glGenBuffers(1, &inst_abo);
 		glBindBuffer(GL_ARRAY_BUFFER, inst_abo);
@@ -88,6 +86,7 @@ public:
 
 		glBindVertexArray(vao);
 		auto index = glGetAttribLocation(shader->get_shader_id(), name.data());
+		if (index == -1)cerr << shader->get_shader_id() << "!@@!" << name.data() << endl;
 		glEnableVertexAttribArray(index);
 		glBindBuffer(GL_ARRAY_BUFFER, inst_abo);
 		glVertexAttribPointer(index, sizeof(*data) / 4, type, GL_FALSE, sizeof(*data), 0);
@@ -99,10 +98,7 @@ public:
 	void draw()const
 	{
 		glBindVertexArray(vao);
-		cout << vao << "::" << verticlesize_ << "::" << num_inst_ << endl;
-		//glDrawArraysInstanced(GL_TRIANGLES, 0, verticlesize_, num_inst_);
-		glDrawArrays(GL_TRIANGLES, 0, verticlesize_);
-		cout << vao << "::" << verticlesize_ << "::" << num_inst_ << endl;
+		glDrawArraysInstanced(GL_TRIANGLES, 0, verticlesize_, num_inst_);
 		glBindVertexArray(0);
 	}
 
