@@ -86,7 +86,6 @@ public:
 
 		glBindVertexArray(vao);
 		auto index = glGetAttribLocation(shader->get_shader_id(), name.data());
-		if (index == -1)cerr << shader->get_shader_id() << "!@@!" << name.data() << endl;
 		glEnableVertexAttribArray(index);
 		glBindBuffer(GL_ARRAY_BUFFER, inst_abo);
 		glVertexAttribPointer(index, sizeof(*data) / 4, type, GL_FALSE, sizeof(*data), 0);

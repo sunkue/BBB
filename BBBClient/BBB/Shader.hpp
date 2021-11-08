@@ -59,9 +59,19 @@ TEMPLATE_SHADER_SET(TexturePtr)
 	glUniform1i(UNIFORM_LOCATION, value->id);
 	glActiveTexture(GL_TEXTURE0 + value->id);
 	glBindTexture(GL_TEXTURE_2D, value->id);
-	
 }
 
+TEMPLATE_SHADER_SET(vector<TexturePtr>)
+{
+	vector<GLsizei> ids;
+	for (auto& t : value)
+	{
+		ids.push_back(t->id);
+		glActiveTexture(GL_TEXTURE0 + t->id);
+		glBindTexture(GL_TEXTURE_2D, t->id);
+	}
+	glUniform1iv(UNIFORM_LOCATION, ids.size(), ids.data());
+}
 
 
 #define SET_LIGHT_POWER()								\

@@ -296,9 +296,9 @@ void Renderer::draw()
 	glDisable(GL_CULL_FACE);
 	
 	billboard_shader_->use();
-	billboard_shader_->set("u_time", gametime * 2);
+	billboard_shader_->set("u_time", gametime);
 	auto tt = grasses_.get_textures();
-	billboard_shader_->set("u_tex_sampler", tt.back());
+	billboard_shader_->set("u_tex_sampler", tt);
 	grasses_.draw();
 	
 

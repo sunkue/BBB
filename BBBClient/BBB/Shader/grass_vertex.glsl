@@ -60,7 +60,7 @@ void main()
 	pos = vec4(pos.xyz + a_translate, 1.f);
 
 	gl_Position = u_vp_mat * pos;
-	vs_out.texture_index = gl_InstanceID;
+	vs_out.texture_index = gl_InstanceID % 4;
 	vs_out.normal = a_normal;	
 	vs_out.texcoord = a_texcoord;
 }

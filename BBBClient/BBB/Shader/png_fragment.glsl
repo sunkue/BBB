@@ -3,8 +3,7 @@
 
 
 
-uniform sampler2D u_tex_sampler;
-//uniform sampler2D u_tex_sampler[3];
+uniform sampler2D u_tex_sampler[4];
 
 in VS_OUT
 {
@@ -22,9 +21,10 @@ void main()
 		vec2 texcoord = vs_in.texcoord * 50.f;
 
 	
-	//o_flagcolor = texture(u_tex_sampler[vs_in.texture_index], vs_in.texcoord) + vec4(0.0f);
-	o_flagcolor = texture(u_tex_sampler, vs_in.texcoord);
+	o_flagcolor = texture(u_tex_sampler[vs_in.texture_index], vs_in.texcoord) + vec4(0.0f);
+
 	if(o_flagcolor.a < 0.1)
         discard;
+
 	o_flagcolor += vec4(c, 1.0f)*0.01f;
 }
