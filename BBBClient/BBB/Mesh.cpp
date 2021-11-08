@@ -13,6 +13,7 @@ Mesh::Mesh
 	, textures_{ move(textures) }
 {
 	setup_mesh();
+	vertices_.clear(); // ..
 }
 
 void Mesh::draw(const ShaderPtr& shader)const

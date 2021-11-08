@@ -9,6 +9,7 @@ Renderer::Renderer()
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT, GLU_FILL);
 	glEnable(GL_BLEND);
+	glDepthFunc(GL_LEQUAL);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	init();
@@ -74,8 +75,6 @@ GLuint Renderer::create_vao(GLuint shader, const Vertex* vertices_, GLsizei vert
 }
 
 
-
-
 void Renderer::reshape(const int w, const int h)
 {
 	const auto s_w = screen_.width;
@@ -87,15 +86,14 @@ void Renderer::reshape(const int w, const int h)
 	{
 		const float ratio_W = (float)w / s_w;
 		const int new_h = static_cast<int>(s_h * ratio_W);
-		glViewport(0, (h - new_h) / 2, w, new_h);
+		screen_.viewport_ = { 0, (h - new_h) / 2, w, new_h };
 	}
 	else
 	{
 		const float ratio_h = (float)h / s_h;
 		const int new_w = static_cast<int>(s_w * ratio_h);
-		glViewport((w - new_w) / 2, 0, new_w, h);
+		screen_.viewport_ = { (w - new_w) / 2, 0, new_w, h };
 	}
-
 
 	draw();
 }

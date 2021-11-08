@@ -21,6 +21,7 @@ private:
 	Model(string_view path)
 	{
 		load_model(path);
+		
 	}
 
 

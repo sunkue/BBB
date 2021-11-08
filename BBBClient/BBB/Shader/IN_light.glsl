@@ -37,10 +37,9 @@ struct SpotLight
 	float out_cutoff;
 }; 
 
-
-uniform SpotLight u_spot_light;
-uniform PointLight u_point_light;
-uniform DirectionalLight u_directinal_light;
+	uniform SpotLight u_spot_light;
+	uniform PointLight u_point_light;
+	uniform DirectionalLight u_directinal_light;
 
 uniform Material u_material;
 uniform vec3 u_view_pos;

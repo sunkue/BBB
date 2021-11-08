@@ -14,7 +14,7 @@ struct SCREEN
 	GLsizei height{ g_WindowSizeY };	//W/H
 	GLfloat n{ 0.1f };
 	GLfloat f{ 20000.0f };
-
+	glm::vec4 viewport_{};
 	GLfloat aspect()const { return (GLfloat)width / height; }
 	glm::mat4 proj_mat()const {
 		return glm::perspective(glm::radians(fovy), aspect(), n, f);
@@ -27,6 +27,36 @@ extern SCREEN screen;
 struct RESOURCE
 {
 
+};
+
+//////////////////////////////////////////////////////
+
+template<class T>
+struct UBO
+{
+	UBO(GLuint binding) :binding{ binding }
+	{
+		glGenBuffers(1, &ubo_id);
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo_id);
+		glBufferData(GL_UNIFORM_BUFFER, 64, NULL, GL_STATIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, binding, ubo_id);
+	}
+
+	void update(void* data)
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, ubo_id);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(T), data);
+	}
+
+	void bind(const ShaderPtr& shader, string_view name)
+	{
+		GLuint index = glGetUniformBlockIndex(shader->get_shader_id(), name.data());
+		glUniformBlockBinding(shader->get_shader_id(), index, binding);
+	}
+
+private:
+	GLuint ubo_id;
+	GLuint binding;
 };
 
 //////////////////////////////////////////////////////
@@ -77,6 +107,8 @@ private:
 	GLuint fbo;
 	TexturePtr tbo;
 	GLuint rbo;
+
+	UBO<glm::mat4> ubo_vp_mat{ 0 };
 	//
 	ShaderPtr default_shader_;
 
@@ -93,7 +125,6 @@ protected:
 	vector<Billboard> grasses_;
 
 };
-
 
 
 

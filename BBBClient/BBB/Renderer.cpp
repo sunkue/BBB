@@ -44,11 +44,13 @@ void Renderer::init_shader()
 	vector<string_view> empty;
 	testing_shader_ = Shader::create("./Shader/test_vertex.glsl"sv, "./Shader/test_fragment.glsl"sv, includesFS);
 	screen_shader_ = Shader::create("./Shader/screen_vertex.glsl"sv, "./Shader/screen_fragment.glsl"sv, empty);
+	
+	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
+
 }
 
 void Renderer::init_resources()
 {
-	glDepthFunc(GL_LEQUAL);
 	load_texture();
 	load_model();
 	testing_directional_light_ = DirectionalLight::create();
@@ -104,6 +106,9 @@ void Renderer::load_model()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
 
 	glBindVertexArray(0);
+
+
+
 
 	auto model = Model::create("./Resource/Model/backpack/backpack.obj");
 	auto greencar = Model::create("./Resource/Model/rocket/green/green_car.obj");
@@ -194,9 +199,7 @@ void Renderer::load_texture()
 void Renderer::ready_draw()
 {
 	vp_mat_ = proj_mat() * main_camera_->view_mat();
-
-
-
+	ubo_vp_mat.update(glm::value_ptr(vp_mat_));
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -280,16 +283,13 @@ void Renderer::draw()
 	// check for completeness. [...]
 	*/
 
-
-
-
-
+	glViewport(0, 0, screen_.width, screen_.height);
 	glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	
+
 	testing_shader_->use();
 	auto view_pos = main_camera_->get_position();
 	testing_shader_->set("u_view_pos", view_pos);
@@ -304,8 +304,6 @@ void Renderer::draw()
 	default_map->draw(testing_shader_);
 	glEnable(GL_CULL_FACE);
 	
-
-
 	for (auto& car : cars_)
 	{
 		car->update_uniform_vars(testing_shader_);
@@ -319,6 +317,7 @@ void Renderer::draw()
 	// draw fbo
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(screen_.viewport_.x, screen_.viewport_.y, screen_.viewport_.z, screen_.viewport_.w);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
 	glDisable(GL_DEPTH_TEST);
