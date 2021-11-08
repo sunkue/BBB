@@ -20,12 +20,6 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::init()
-{
-	load_texture();
-	init_shader();
-	init_resources();
-}
 
 
 void Renderer::reshape(const int w, const int h)

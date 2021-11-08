@@ -88,8 +88,7 @@ private:
 	ShaderPtr terrain_shader_;
 	ObjPtr terrain_;
 
-	//
-protected:
+
 	ShaderPtr billboard_shader_;
 	InstancingObj grasses_;
 

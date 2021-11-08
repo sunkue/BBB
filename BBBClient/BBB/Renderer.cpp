@@ -35,6 +35,12 @@ void render_chatrecord(glm::vec3 color = {}, void* font = GLUT_BITMAP_HELVETICA_
 
 ////////////////////////////
 
+void Renderer::init()
+{
+	load_texture();
+	init_shader();
+	init_resources();
+}
 
 
 void Renderer::init_shader()
@@ -76,8 +82,7 @@ void Renderer::init_shader()
 		skybox = CubeMap::create(cubeshader, textures, dir);
 	}
 
-	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
-	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
+
 }
 
 void Renderer::init_resources()
@@ -86,6 +91,9 @@ void Renderer::init_resources()
 	testing_directional_light_ = DirectionalLight::create();
 	testing_point_light_ = PointLight::create();
 	testing_spot_light_ = SpotLight::create();
+
+	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
+	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
 }
 
 void Renderer::load_model()
@@ -164,7 +172,7 @@ void Renderer::load_model()
 		grassvertices.push_back(v);
 	}
 
-	const auto grass_count = 8000;
+	const auto grass_count = 1;
 	const auto grass_range = 50;
 
 	grasses_.set_num_inst(grass_count);
@@ -191,10 +199,10 @@ void Renderer::load_model()
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/blueflower.png");	grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/redflower.png");	grasses_.add_texture(texture);
 
-	grasses_.setup_instance_attribute(billboard_shader_, "a_scale", scales);
-	grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw);
-	grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate);
-	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed);
+	//grasses_.setup_instance_attribute(billboard_shader_, "a_scale", scales);
+	//grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw);
+	//grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate);
+	//grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed);
 }
 
 void Renderer::load_texture()
@@ -281,20 +289,17 @@ void Renderer::draw()
 	player_->update_uniform_vars(testing_shader_);
 	player_->draw(testing_shader_);
 
-
-	billboard_shader_->use();
-
-
 	skybox->draw();
 
 	// billoards
-	billboard_shader_->use();
 	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 	glDisable(GL_CULL_FACE);
 	
-	billboard_shader_->set("u_time", gametime / 2);
-	auto tt = grasses_.get_textures();
-	billboard_shader_->set("u_tex_sampler", tt.back());
+	billboard_shader_->use();
+	//billboard_shader_->set("u_time", gametime / 2);
+	//auto tt = grasses_.get_textures();
+	//billboard_shader_->set("u_tex_sampler", tt.back());
+	billboard_shader_->use();
 	grasses_.draw();
 	
 

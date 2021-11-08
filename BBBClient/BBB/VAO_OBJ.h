@@ -61,7 +61,7 @@ public:
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, abo);
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
-
+		
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, pos));
 
@@ -71,7 +71,6 @@ public:
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, tex));
 
-		glDeleteBuffers(1, &abo);
 		glBindVertexArray(0);
 
 		verticlesize_ = vertices.size();
@@ -79,7 +78,7 @@ public:
 
 	void setup_instance_attribute(const ShaderPtr& shader, string_view name, auto* data, GLenum type = GL_FLOAT, GLuint divisor = 1)
 	{
-		glBindVertexArray(0);
+		return;
 
 		GLuint inst_abo;
 		glGenBuffers(1, &inst_abo);
@@ -100,7 +99,11 @@ public:
 	void draw()const
 	{
 		glBindVertexArray(vao);
-		glDrawArraysInstanced(GL_TRIANGLES, 0, verticlesize_, num_inst_);
+		cout << vao << "::" << verticlesize_ << "::" << num_inst_ << endl;
+		//glDrawArraysInstanced(GL_TRIANGLES, 0, verticlesize_, num_inst_);
+		glDrawArrays(GL_TRIANGLES, 0, verticlesize_);
+		cout << vao << "::" << verticlesize_ << "::" << num_inst_ << endl;
+		glBindVertexArray(0);
 	}
 
 	SET(num_inst);

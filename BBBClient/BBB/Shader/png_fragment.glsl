@@ -21,6 +21,7 @@ void main()
 	c-= 0.5f;
 		vec2 texcoord = vs_in.texcoord * 50.f;
 
+	
 	//o_flagcolor = texture(u_tex_sampler[vs_in.texture_index], vs_in.texcoord) + vec4(0.0f);
 	o_flagcolor = texture(u_tex_sampler, vs_in.texcoord);
 	if(o_flagcolor.a < 0.1)

@@ -6,17 +6,17 @@ layout (std140, binding = 0) uniform VP_MAT
 	mat4 u_vp_mat;
 };
 
-uniform float u_time;
+//uniform float u_time;
 
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
 layout (location = 2) in vec2 a_texcoord;
 
 // instance values
-in float a_scale;
-in float a_yaw;
-in float a_shearseed;
-in vec3 a_translate;
+//in float a_scale;
+//in float a_yaw;
+//in float a_shearseed;
+//in vec3 a_translate;
 
 out VS_OUT
 {
@@ -45,19 +45,19 @@ vec4 shear(vec4 v, float x)
 void main()
 {	
 	//scale
-	vec4 pos = vec4(a_position * a_scale, 1.f);
+	vec4 pos = vec4(a_position * 1, 1.f);
 	
 	//rotate
-	vec2 rot = rotate(pos.xz, a_yaw);
-	pos = vec4(rot.x , pos.y, rot.y, 1.f);
+	//vec2 rot = rotate(pos.xz, a_yaw);
+	//pos = vec4(rot.x , pos.y, rot.y, 1.f);
 	
 	//shear
-	float seed = u_time / 500.f + a_shearseed;
-	float x = cos(seed) / 8;
-	pos = shear(pos, x);
+//	float seed = u_time / 500.f + a_shearseed;
+	//float x = cos(seed) / 8;
+//	pos = shear(pos, x);
 
 	//translate
-	pos = vec4(pos.xyz + a_translate, 1.f);
+//	pos = vec4(pos.xyz + a_translate, 1.f);
 
 	pos.x += gl_InstanceID;
 
