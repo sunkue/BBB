@@ -57,7 +57,7 @@ private:
 	void init_shader();
 	void init_resources();
 
-	GLuint create_vao(GLuint shader, const Vertex* vertices, GLsizei vertices_num);
+	GLuint create_vao(GLuint shader, const Vertex* vertices_, GLsizei vertices_num);
 	void load_texture();
 	void load_model();
 
@@ -73,6 +73,7 @@ private:
 	SpotLightPtr testing_spot_light_;
 	ObjPtr default_map;
 	GLuint quad_vao;
+	CubeMapPtr skybox;
 	GLuint fbo;
 	TexturePtr tbo;
 	GLuint rbo;

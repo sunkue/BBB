@@ -52,9 +52,9 @@ void Model::process_node(aiNode* node, const aiScene* scene)
 
 Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 {
-	vector<Vertex> vertices; vertices.reserve(mesh->mNumVertices);
-	vector<GLuint> indices; indices.reserve(mesh->mNumVertices);
-	vector<TexturePtr> textures; textures.reserve(10);
+	vector<Vertex> vertices_; vertices_.reserve(mesh->mNumVertices);
+	vector<GLuint> indices_; indices_.reserve(mesh->mNumVertices);
+	vector<TexturePtr> textures_; textures_.reserve(10);
 
 	for (int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -70,7 +70,7 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 			vertex.tex = { 0, 0 };
 		}
 
-		vertices.emplace_back(move(vertex));
+		vertices_.emplace_back(move(vertex));
 	}
 
 	for (GLuint i = 0; i < mesh->mNumFaces; i++)
@@ -78,7 +78,7 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 		aiFace face = mesh->mFaces[i];
 		for (GLuint j = 0; j < face.mNumIndices; j++)
 		{
-			indices.push_back(face.mIndices[j]);
+			indices_.push_back(face.mIndices[j]);
 		}
 	}
 	if (0 <= mesh->mMaterialIndex)
@@ -86,19 +86,19 @@ Mesh Model::process_mesh(aiMesh* mesh, const aiScene* scene)
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		vector<TexturePtr> albedo_maps = load_material_textures(material
 			, aiTextureType_DIFFUSE, "albedo");
-		textures.insert(textures.end(), albedo_maps.begin(), albedo_maps.end());
+		textures_.insert(textures_.end(), albedo_maps.begin(), albedo_maps.end());
 		vector<TexturePtr> specular_maps = load_material_textures(material
 			, aiTextureType_SPECULAR, "specular");
-		textures.insert(textures.end(), specular_maps.begin(), specular_maps.end());
+		textures_.insert(textures_.end(), specular_maps.begin(), specular_maps.end());
 	}
-	return Mesh(move(vertices), move(indices), move(textures));
+	return Mesh(move(vertices_), move(indices_), move(textures_));
 }
 
 
 vector<TexturePtr> Model::load_material_textures(
 	aiMaterial* mat, aiTextureType type, string typeName)
 {
-	vector<TexturePtr> textures;
+	vector<TexturePtr> textures_;
 	for (GLuint i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString str;
@@ -108,7 +108,7 @@ vector<TexturePtr> Model::load_material_textures(
 		{
 			if ((t->path == str.C_Str()) && (t->type == typeName))
 			{
-				textures.push_back(t);
+				textures_.push_back(t);
 				skip = true;
 				break;
 			}
@@ -121,10 +121,10 @@ vector<TexturePtr> Model::load_material_textures(
 			texture->id = load_texture_file(str.C_Str(), directory);
 			texture->type = typeName;
 			texture->path = str.C_Str();
-			textures.push_back(texture);
+			textures_.push_back(texture);
 			textures_loaded.push_back(texture);
 		}
 	}
-	return textures;
+	return textures_;
 }
 

@@ -208,6 +208,8 @@
     <ClInclude Include="Vehicle.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shader\cubemap_fragment.glsl" />
+    <None Include="Shader\cubemap_vertex.glsl" />
     <None Include="Shader\fragment.glsl" />
     <None Include="Shader\grass_vertex.glsl" />
     <None Include="Shader\IN_light.glsl" />

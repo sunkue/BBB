@@ -61,6 +61,8 @@ TEMPLATE_SHADER_SET(TexturePtr)
 	glBindTexture(GL_TEXTURE_2D, value->id);
 }
 
+
+
 #define SET_LIGHT_POWER()								\
 set(uniform_var_name + ".power.ambient", value->ambient);		\
 set(uniform_var_name + ".power.diffuse", value->diffuse);		\

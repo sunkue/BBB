@@ -27,7 +27,7 @@ void Renderer::init()
 
 
 
-GLuint Renderer::create_vao(GLuint shader, const Vertex* vertices, GLsizei vertices_num)
+GLuint Renderer::create_vao(GLuint shader, const Vertex* vertices_, GLsizei vertices_num)
 {
 	GLuint retvao;
 	GLuint abo;
@@ -38,7 +38,7 @@ GLuint Renderer::create_vao(GLuint shader, const Vertex* vertices, GLsizei verti
 
 	glGenBuffers(1, &abo);
 	glBindBuffer(GL_ARRAY_BUFFER, abo);
-	glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(Vertex), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices_num * sizeof(Vertex), vertices_, GL_STATIC_DRAW);
 
 
 	GLint positionAttribute = glGetAttribLocation(shader, "a_position");

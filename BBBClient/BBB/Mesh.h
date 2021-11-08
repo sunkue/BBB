@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Shader.h"
 
 struct Vertex
 {
@@ -12,16 +11,14 @@ struct Vertex
 /// //////////////////////////////////////
 
 
-
-
 /// //////////////////////////////////////
 
 class Mesh
 {
-public:
-	vector<Vertex> vertices;
-	vector<GLuint> indices;
-	vector<TexturePtr> textures;
+private:
+	vector<Vertex> vertices_;
+	vector<GLuint> indices_;
+	vector<TexturePtr> textures_;
 	
 public:
 	Mesh( vector<Vertex> vertices
@@ -37,6 +34,26 @@ private:
 	GLuint vao, vbo, ebo;
 };
 
+/// //////////////////////////////////
+using CubeMapPtr = unique_ptr<class CubeMap>;
+class CubeMap
+{
+public:
+	void draw()const;
+
+	CREATE_UNIQUE(CubeMapPtr, CubeMap);
+private:
+	CubeMap(const ShaderPtr& shader
+		, const vector<string_view>& textures, string_view dir);
+
+private:
+	static GLuint setup_mesh();
+
+private:
+	GLuint vao_;
+	GLuint cube_texture_;
+	ShaderPtr cube_shader_;
+};
 
 
 const Vertex box[36]
@@ -92,6 +109,50 @@ const Vertex box[36]
 };
 
 
+const float cube_verticle[108] = {
+	// positions          
+	-1.0f,  1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f
+};
 
 const Vertex cross_billboard_3[18]
 {

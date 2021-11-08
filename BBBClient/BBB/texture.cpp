@@ -121,10 +121,10 @@ GLuint CreateBmpTexture(const char* filePath)
 	return temp;
 }
 
-GLuint load_texture_file(const char* path, const string& directory, bool gamma)
+GLuint load_texture_file(const char* path, const string& directory)
 {
 	string filename = string(path);
-	filename = directory + '/' + filename;
+	filename = directory + "/"s + filename;
 
 	GLuint textureID;
 	glGenTextures(1, &textureID);
@@ -160,4 +160,46 @@ GLuint load_texture_file(const char* path, const string& directory, bool gamma)
 	}
 
 	return textureID;
+}
+
+GLuint load_cube_texture_file(const vector<string_view>& textures, string_view directory)
+{
+	GLuint cube_texture;
+	glGenTextures(1, &cube_texture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cube_texture);
+	cout << cube_texture << endl;
+
+	int width, height, nrComponents;
+	for (int i = 0; i < textures.size(); i++)
+	{
+		string filename = textures[i].data();
+		filename = directory.data() + "/"s + filename;
+		unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+		if (data)
+		{
+			GLenum format;
+			if (nrComponents == 1)
+				format = GL_RED;
+			else if (nrComponents == 3)
+				format = GL_RGB;
+			else if (nrComponents == 4)
+				format = GL_RGBA;
+
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cerr << "Texture failed to load at path: " << filename << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	
+	return cube_texture;
 }

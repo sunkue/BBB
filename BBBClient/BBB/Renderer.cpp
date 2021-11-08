@@ -42,13 +42,13 @@ void Renderer::init_shader()
 	vector<string_view> includesFS;
 	includesFS.emplace_back("./Shader/IN_light.glsl"sv);
 	vector<string_view> empty;
-
 	testing_shader_ = Shader::create("./Shader/test_vertex.glsl"sv, "./Shader/test_fragment.glsl"sv, includesFS);
 	screen_shader_ = Shader::create("./Shader/screen_vertex.glsl"sv, "./Shader/screen_fragment.glsl"sv, empty);
 }
 
 void Renderer::init_resources()
 {
+	glDepthFunc(GL_LEQUAL);
 	load_texture();
 	load_model();
 	testing_directional_light_ = DirectionalLight::create();
@@ -58,6 +58,23 @@ void Renderer::init_resources()
 
 void Renderer::load_model()
 {
+	{
+		vector<string_view> empty;
+		vector<string_view> textures
+		{
+			"right.jpg",
+			"left.jpg",
+			"top.jpg",
+			"bottom.jpg",
+			"front.jpg",
+			"back.jpg"
+		};
+		string_view dir{ "./Resource/Model/skybox" };
+		auto cubeshader = Shader::create("./Shader/cubemap_vertex.glsl"sv, "./Shader/cubemap_fragment.glsl"sv, empty);
+		skybox = CubeMap::create(cubeshader, textures, dir);
+	}
+
+
 	glGenVertexArrays(1, &quad_vao);
 	GLuint vbo, ebo;
 	glGenBuffers(1, &vbo);
@@ -153,14 +170,14 @@ void Renderer::load_texture()
 {
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	
+
 	tbo = Texture::create();
 	glGenTextures(1, &tbo->id);
 	glBindTexture(GL_TEXTURE_2D, tbo->id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_.width, screen_.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0); 
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tbo->id, 0);
 
 	glGenRenderbuffers(1, &rbo);
@@ -168,7 +185,7 @@ void Renderer::load_texture()
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_.width, screen_.height);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-	
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -270,8 +287,9 @@ void Renderer::draw()
 	glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-
+	
 	testing_shader_->use();
 	auto view_pos = main_camera_->get_position();
 	testing_shader_->set("u_view_pos", view_pos);
@@ -285,6 +303,8 @@ void Renderer::draw()
 	default_map->update_uniform_vars(testing_shader_);
 	default_map->draw(testing_shader_);
 	glEnable(GL_CULL_FACE);
+	
+
 
 	for (auto& car : cars_)
 	{
@@ -294,6 +314,9 @@ void Renderer::draw()
 	player_->update_uniform_vars(testing_shader_);
 	player_->draw(testing_shader_);
 
+	
+	skybox->draw();
+	// draw fbo
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -303,7 +326,7 @@ void Renderer::draw()
 	screen_shader_->set("screen_texture", tbo);
 	glBindVertexArray(quad_vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	
+
 
 	// text
 	player_->render_chat({ 1,0,1 });
@@ -344,7 +367,7 @@ void Renderer::draw()
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
-	
+
 
 	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps

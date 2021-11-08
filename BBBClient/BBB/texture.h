@@ -17,4 +17,5 @@ unsigned char* loadBMPRaw(const char* imagepath, unsigned int& outWidth, unsigne
 GLuint CreatePngTexture(const char* filePath);
 GLuint CreateBmpTexture(const char* filePath);
 
-GLuint load_texture_file(const char* path, const string& directory, bool gamma = false);
+GLuint load_texture_file(const char* path, const string& directory);
+GLuint load_cube_texture_file(const vector<string_view>& textures, string_view directory);

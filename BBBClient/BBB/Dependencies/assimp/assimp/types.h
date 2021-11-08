@@ -464,7 +464,7 @@ struct aiMemoryInfo
 
     /** Default constructor */
     aiMemoryInfo()
-        : textures   (0)
+        : textures_   (0)
         , materials  (0)
         , meshes     (0)
         , nodes      (0)
@@ -477,7 +477,7 @@ struct aiMemoryInfo
 #endif
 
     /** Storage allocated for texture data */
-    unsigned int textures;
+    unsigned int textures_;
 
     /** Storage allocated for material data  */
     unsigned int materials;
