@@ -22,10 +22,3 @@ glm::vec3 OBJ::get_project_pos(glm::vec3 origin)
 
 /// ////////////////////////////////////////////
 
-void Billboard::update_uniform_vars(const Shader* shader) const
-{
-	glm::mat4 p = glm::translate(get_position());
-	glm::mat4 rs = glm::toMat4(get_rotation()) * glm::scale(get_scale());
-	shader->set("u_p_mat", p);
-	shader->set("u_rs_mat", rs);
-}

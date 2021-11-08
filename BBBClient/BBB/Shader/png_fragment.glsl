@@ -4,18 +4,26 @@
 
 
 uniform sampler2D u_tex_sampler;
+//uniform sampler2D u_tex_sampler[3];
 
-varying vec3 v_normal;
-varying vec2 v_texcoord;
+in VS_OUT
+{
+	vec3 normal;
+	vec2 texcoord;
+	flat int texture_index;
+} vs_in;
+
+out vec4 o_flagcolor;
 
 void main()
 {
-	vec3 c = v_normal;
+	vec3 c = vs_in.normal;
 	c-= 0.5f;
-		vec2 texcoord = v_texcoord * 50.f;
-	gl_FragColor = texture(u_tex_sampler, v_texcoord) + vec4(0.0f);
-	if(gl_FragColor.a < 0.1)
-        discard;
-	gl_FragColor += vec4(c, 1.0f)*0.01f;
+		vec2 texcoord = vs_in.texcoord * 50.f;
 
+	//o_flagcolor = texture(u_tex_sampler[vs_in.texture_index], vs_in.texcoord) + vec4(0.0f);
+	o_flagcolor = texture(u_tex_sampler, vs_in.texcoord);
+	if(o_flagcolor.a < 0.1)
+        discard;
+	o_flagcolor += vec4(c, 1.0f)*0.01f;
 }

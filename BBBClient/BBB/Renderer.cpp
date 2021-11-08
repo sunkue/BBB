@@ -52,6 +52,12 @@ void Renderer::init_shader()
 	GS.clear();
 	screen_shader_ = Shader::create(VS, FS, GS);
 
+	VS.clear(); VS.emplace_back("./Shader/grass_vertex.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/png_fragment.glsl"sv);
+	GS.clear();
+	billboard_shader_ = Shader::create(VS, FS, GS);
+
+
 	{
 		vector<string_view> textures
 		{
@@ -71,6 +77,7 @@ void Renderer::init_shader()
 	}
 
 	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
+	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
 }
 
 void Renderer::init_resources()
@@ -114,7 +121,7 @@ void Renderer::load_model()
 
 	glBindVertexArray(0);
 
-
+	Texture::create();
 	auto model = Model::create("./Resource/Model/backpack/backpack.obj");
 	auto greencar = Model::create("./Resource/Model/rocket/green/green_car.obj");
 	auto bluecar = Model::create("./Resource/Model/rocket/blue/blue_car.obj");
@@ -149,31 +156,45 @@ void Renderer::load_model()
 	main_camera_->set_ownner(player_.get());
 	main_camera_->set_diff({ -5.f, 3.f, 0.f });
 
-	//	box_vao = terrain_shader_->create_vao(box, 36);
-	//	terrain_ = make_shared<OBJ>(box_data, default_material);
-		//glm::vec3 scale_ = { 100.f, 0.25f, 100.f };
-		//terrain_->scaling(scale_);
-		//glm::vec3 move_ = { 0.f,(scale_.y * -1.f) - 1.f,0.f };
-		//terrain_->move(move_);
 
-		//auto grass_vao = billboard_shader_->create_vao(cross_billboard_3, 36);
-	//	ObjDataPtr grass_data = make_shared<OBJ_DATA>(grass_vao);
-	const auto grass_count = 10;
+
+	vector<Vertex> grassvertices;
+	for (auto& v : cross_billboard_3)
+	{
+		grassvertices.push_back(v);
+	}
+
+	const auto grass_count = 8000;
 	const auto grass_range = 50;
-	grasses_.reserve(grass_count);
+
+	grasses_.set_num_inst(grass_count);
+	grasses_.setup_mesh(grassvertices);
+
+	float scales[grass_count];
+	float yaw[grass_count];
+	float shearseed[grass_count]; // grass.get_position().x / 10;
+	glm::vec3 translate[grass_count];
+
 	for (int i = 0; i < grass_count; i++)
 	{
-		//grasses_.emplace_back(grass_data, default_material);
-	}
-	for (auto& g : grasses_)
-	{
 		glm::vec3 pos = { rand() % (2 * grass_range) - grass_range, 0.f, rand() % (2 * grass_range) - grass_range };
-		g.scaling(glm::vec3(1.0f));
-		g.move(pos);
-		g.move({ -HALF_ROOT3,-1.f,-1.f });
-		g.rotate(glm::vec3{ 0.f, rand() % 360, 0.f });
+		const glm::vec3 default_pos = { -HALF_ROOT3, -1.f, -1.f };
+		translate[i] = (pos + default_pos);
+		shearseed[i] = translate[i].x / 10;
+		scales[i] = 1.f + i % 3 * 0.3f;
+		yaw[i] = glm::radians(static_cast<float>(rand() % 360));
 	}
 
+
+	auto texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass0.png");grasses_.add_texture(texture);
+	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass1.png");		grasses_.add_texture(texture);
+	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/blueflower.png");	grasses_.add_texture(texture);
+	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/redflower.png");	grasses_.add_texture(texture);
+
+	grasses_.setup_instance_attribute(billboard_shader_, "a_scale", scales);
+	grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw);
+	grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate);
+	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed);
 }
 
 void Renderer::load_texture()
@@ -222,70 +243,12 @@ void Renderer::draw()
 	GAME_SYSTEM::get().tick();
 	// 로직분리, 카메라 회전 , 스크롤로 거리조절 >>  1tick == 최소 1ms.
 
-	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time())/1000.f;
+	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
 
-	/*
-	while (true) // render loop
-	{
-		// 1. geometry pass: render all geometric/color data to g-buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		gBufferShader.use();
-		for (Object obj : Objects)
-		{
-			ConfigureShaderTransformsAndUniforms();
-			obj.Draw();
-		}
-		// 2. lighting pass: use g-buffer to \
-		//calculate the scene's lighting
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		lightingPassShader.use();
-		BindAllGBufferTextures();
-		SetLightingUniforms();
-		RenderQuad();
-	}
 
-	unsigned int gBuffer;
-	glGenFramebuffers(1, &gBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-	unsigned int gPosition, gNormal, gColorSpec;
-	// - position color buffer
-	glGenTextures(1, &gPosition);
-	glBindTexture(GL_TEXTURE_2D, gPosition);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen.width, screen.height
-		, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D
-		, gPosition, 0);
-	// - normal color buffer
-	glGenTextures(1, &gNormal);
-	glBindTexture(GL_TEXTURE_2D, gNormal);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, screen.width, screen.height
-		, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D,
-		gNormal, 0);
-	// - color + specular color buffer
-	glGenTextures(1, &gColorSpec);
-	glBindTexture(GL_TEXTURE_2D, gColorSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen.width, screen.height
-		, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D,
-		gColorSpec, 0);
-	// - tell OpenGL which color attachments we'll use
-	// (of this framebuffer) for rendering
-	unsigned int attachments[3]
-		= { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-	glDrawBuffers(3, attachments);
-	// then also add render buffer object as depth buffer and
-	// check for completeness. [...]
-	*/
+
+
 	glViewport(0, 0, screen_.width, screen_.height);
 	glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -295,7 +258,7 @@ void Renderer::draw()
 
 	testing_shader_->use();
 	auto shaket = main_camera_->get_shaking_time();
-	testing_shader_->set("time", abs(1.f - 5 * shaket));
+	testing_shader_->set("time", abs(1.f - shaket * 5.f));
 	testing_shader_->set("explosion", main_camera_->get_shaking());
 	auto view_pos = main_camera_->get_position();
 	testing_shader_->set("u_view_pos", view_pos);
@@ -319,7 +282,25 @@ void Renderer::draw()
 	player_->draw(testing_shader_);
 
 
+	billboard_shader_->use();
+
+
 	skybox->draw();
+
+	// billoards
+	billboard_shader_->use();
+	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
+	glDisable(GL_CULL_FACE);
+	
+	billboard_shader_->set("u_time", gametime / 2);
+	auto tt = grasses_.get_textures();
+	billboard_shader_->set("u_tex_sampler", tt.back());
+	grasses_.draw();
+	
+
+	// text
+	player_->render_chat({ 1,0,1 });
+	render_chatrecord();
 
 	// draw fbo
 	glViewport(screen_.viewport_.x, screen_.viewport_.y, screen_.viewport_.z, screen_.viewport_.w);
@@ -332,75 +313,12 @@ void Renderer::draw()
 	glBindVertexArray(quad_vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	
-	// text
-	player_->render_chat({ 1,0,1 });
-	render_chatrecord();
-
-	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
-	string title = "("s + to_string(fps) + " fps)"s;
-	glutSetWindowTitle(title.c_str());
-	
-	return;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//////
-
-	//terrain_shader_->use();
-	//terrain_->bind_vao();
-	//terrain_->update_uniform_vars(testing_shader_);
-	//testing_shader_->set_texture("u_tex_sampler", terrain_tex_);
-	//glDrawArrays(GL_TRIANGLES, 0, 36);
-	billboard_shader_->use();
-	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
-	glDisable(GL_CULL_FACE);
-	auto time = GAME_SYSTEM::get().game_time();
-	//	grasses_[0].bind_vao();
-	for (int i = 0; auto & grass : grasses_)
-	{
-		glm::mat4 shear = glm::mat4(1);
-		auto t = float(time) / 500 + grass.get_position().x / 10;
-		auto ww = glm::cos(t) / 8;
-		shear[1][0] = ww;
-		shear[1][2] = ww;
-		grass.update_uniform_vars(billboard_shader_.get());
-		//	billboard_shader_->set("u_shear_mat", shear);
-	//		billboard_shader_->set_texture("u_tex_sampler", billboard_tex0_ + (i++ % 4));
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		glDrawArrays(GL_TRIANGLES, 0, 18);
-	}
-	glPolygonMode(GL_FRONT, GLU_FILL);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-
-
-
 	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps
 	// 33	-> 30fps
-	//auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
-	//string title = "("s + to_string(fps) + " fps)"s;
-	//glutSetWindowTitle(title.c_str());
+	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
+	string title = "("s + to_string(fps) + " fps)"s;
+	glutSetWindowTitle(title.c_str());
+	return;
 }
 

@@ -34,7 +34,6 @@ extern SCREEN screen;
 /* clients drawer */
 class Renderer
 {
-	friend Billboard;
 private:
 	SINGLE_TON(Renderer);
 	~Renderer();
@@ -92,7 +91,7 @@ private:
 	//
 protected:
 	ShaderPtr billboard_shader_;
-	vector<Billboard> grasses_;
+	InstancingObj grasses_;
 
 };
 
