@@ -32,17 +32,17 @@ void Camera::update(float time_elpased)
 	}
 
 	/* shake */
-	if (_shaking)
+	if (shaking_)
 	{
-		_shaking_time -= time_elpased;
-		if (_shaking_time <= 0.f)
+		shaking_time_ -= time_elpased;
+		if (shaking_time_ <= 0.f)
 		{
-			_shaking = false;
+			shaking_ = false;
 		}
 		constexpr float magic_limit = 0.171875;
 		constexpr float friq = 10.f;
 		const float rand_val = static_cast<float>(rand() % 10);
-		auto random_friq = _shaking_time * friq * rand_val;
+		auto random_friq = shaking_time_ * friq * rand_val;
 		auto cos_friq = cos(random_friq) * magic_limit;
 		auto sin_friq = sin(random_friq) * magic_limit;
 		position_.x += cos_friq;

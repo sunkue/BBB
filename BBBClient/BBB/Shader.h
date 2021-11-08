@@ -12,12 +12,13 @@ public:
 	GET(shader_id);
 
 	CREATE_SHARED(ShaderPtr, Shader);
+
 private:
-	Shader(string_view filenameVS, string_view filenameFS, vector<string_view>& includesFS);
+	Shader(vector<string>& filenameVS, vector<string>& filenameFS, vector<string>& filenameGS);
 	
 private:
 	void add_shader(GLuint ShaderProgram, const char* pShaderText, GLenum shader_type);
-	GLuint compile_shader(string_view filenameVS, string_view filenameFS, vector<string_view>& includesFS);
+	GLuint compile_shader(vector<string>& filenameVS, vector<string>& filenameFS, vector<string>& filenameGS);
 
 private:
 	GLuint shader_id_;

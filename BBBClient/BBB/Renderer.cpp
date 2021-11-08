@@ -39,29 +39,20 @@ void render_chatrecord(glm::vec3 color = {}, void* font = GLUT_BITMAP_HELVETICA_
 
 void Renderer::init_shader()
 {
-	vector<string_view> includesFS;
-	includesFS.emplace_back("./Shader/IN_light.glsl"sv);
-	vector<string_view> empty;
-	testing_shader_ = Shader::create("./Shader/test_vertex.glsl"sv, "./Shader/test_fragment.glsl"sv, includesFS);
-	screen_shader_ = Shader::create("./Shader/screen_vertex.glsl"sv, "./Shader/screen_fragment.glsl"sv, empty);
-	
-	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
+	vector<string> VS;
+	vector<string> FS;
+	vector<string> GS;
+	VS.clear(); VS.emplace_back("./Shader/test_vertex.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/test_fragment.glsl"sv);
+	GS.clear(); GS.emplace_back("./Shader/test_geometry.glsl"sv);
+	testing_shader_ = Shader::create(VS, FS, GS);
 
-}
+	VS.clear(); VS.emplace_back("./Shader/screen_vertex.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/screen_fragment.glsl"sv);
+	GS.clear();
+	screen_shader_ = Shader::create(VS, FS, GS);
 
-void Renderer::init_resources()
-{
-	load_texture();
-	load_model();
-	testing_directional_light_ = DirectionalLight::create();
-	testing_point_light_ = PointLight::create();
-	testing_spot_light_ = SpotLight::create();
-}
-
-void Renderer::load_model()
-{
 	{
-		vector<string_view> empty;
 		vector<string_view> textures
 		{
 			"right.jpg",
@@ -72,10 +63,26 @@ void Renderer::load_model()
 			"back.jpg"
 		};
 		string_view dir{ "./Resource/Model/skybox" };
-		auto cubeshader = Shader::create("./Shader/cubemap_vertex.glsl"sv, "./Shader/cubemap_fragment.glsl"sv, empty);
+		VS.clear(); VS.emplace_back("./Shader/cubemap_vertex.glsl"sv);
+		FS.clear(); FS.emplace_back("./Shader/cubemap_fragment.glsl"sv);
+		GS.clear();
+		auto cubeshader = Shader::create(VS, FS, GS);
 		skybox = CubeMap::create(cubeshader, textures, dir);
 	}
 
+	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
+}
+
+void Renderer::init_resources()
+{
+	load_model();
+	testing_directional_light_ = DirectionalLight::create();
+	testing_point_light_ = PointLight::create();
+	testing_spot_light_ = SpotLight::create();
+}
+
+void Renderer::load_model()
+{
 
 	glGenVertexArrays(1, &quad_vao);
 	GLuint vbo, ebo;
@@ -106,8 +113,6 @@ void Renderer::load_model()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
 
 	glBindVertexArray(0);
-
-
 
 
 	auto model = Model::create("./Resource/Model/backpack/backpack.obj");
@@ -180,26 +185,25 @@ void Renderer::load_texture()
 	glGenTextures(1, &tbo->id);
 	glBindTexture(GL_TEXTURE_2D, tbo->id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_.width, screen_.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tbo->id, 0);
 
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_.width, screen_.height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 /////////////////////////////////////////////////////////////////////
 
 void Renderer::ready_draw()
 {
-	vp_mat_ = proj_mat() * main_camera_->view_mat();
-	ubo_vp_mat.update(glm::value_ptr(vp_mat_));
+	auto vp_mat = proj_mat() * main_camera_->view_mat();
+	ubo_vp_mat.update(glm::value_ptr(vp_mat));
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -218,7 +222,7 @@ void Renderer::draw()
 	GAME_SYSTEM::get().tick();
 	// 로직분리, 카메라 회전 , 스크롤로 거리조절 >>  1tick == 최소 1ms.
 
-
+	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time())/1000.f;
 
 
 	/*
@@ -282,7 +286,6 @@ void Renderer::draw()
 	// then also add render buffer object as depth buffer and
 	// check for completeness. [...]
 	*/
-
 	glViewport(0, 0, screen_.width, screen_.height);
 	glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -291,6 +294,9 @@ void Renderer::draw()
 	glEnable(GL_DEPTH_TEST);
 
 	testing_shader_->use();
+	auto shaket = main_camera_->get_shaking_time();
+	testing_shader_->set("time", abs(1.f - 5 * shaket));
+	testing_shader_->set("explosion", main_camera_->get_shaking());
 	auto view_pos = main_camera_->get_position();
 	testing_shader_->set("u_view_pos", view_pos);
 	testing_spot_light_->direction = main_camera_->get_look_dir();
@@ -303,7 +309,7 @@ void Renderer::draw()
 	default_map->update_uniform_vars(testing_shader_);
 	default_map->draw(testing_shader_);
 	glEnable(GL_CULL_FACE);
-	
+
 	for (auto& car : cars_)
 	{
 		car->update_uniform_vars(testing_shader_);
@@ -312,12 +318,12 @@ void Renderer::draw()
 	player_->update_uniform_vars(testing_shader_);
 	player_->draw(testing_shader_);
 
-	
-	skybox->draw();
-	// draw fbo
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	skybox->draw();
+
+	// draw fbo
 	glViewport(screen_.viewport_.x, screen_.viewport_.y, screen_.viewport_.z, screen_.viewport_.w);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
 	glDisable(GL_DEPTH_TEST);
@@ -326,7 +332,7 @@ void Renderer::draw()
 	glBindVertexArray(quad_vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-
+	
 	// text
 	player_->render_chat({ 1,0,1 });
 	render_chatrecord();
@@ -334,7 +340,29 @@ void Renderer::draw()
 	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
 	string title = "("s + to_string(fps) + " fps)"s;
 	glutSetWindowTitle(title.c_str());
+	
 	return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//////
 

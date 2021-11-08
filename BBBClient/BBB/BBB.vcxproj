@@ -153,6 +153,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="BO.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ChatManager.cpp" />
     <ClCompile Include="DynamicObj.cpp" />
@@ -186,6 +187,7 @@
     <ClInclude Include="..\..\Share\Protocol.h" />
     <ClInclude Include="..\..\Share\SUNKUE.h" />
     <ClInclude Include="..\..\Share\Thread_Pool.h" />
+    <ClInclude Include="BO.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ChatManager.h" />
     <ClInclude Include="gl_defines.h" />
@@ -218,6 +220,7 @@
     <None Include="Shader\screen_vertex.glsl" />
     <None Include="Shader\terrain_fragment.glsl" />
     <None Include="Shader\test_fragment.glsl" />
+    <None Include="Shader\test_geometry.glsl" />
     <None Include="Shader\test_vertex.glsl" />
     <None Include="Shader\vertex.glsl" />
   </ItemGroup>

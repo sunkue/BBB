@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Shader.h"
 
-Shader::Shader(string_view filenameVS, string_view filenameFS, vector<string_view>& includesFS)
-	: shader_id_{ compile_shader(filenameVS, filenameFS, includesFS) } {}
+Shader::Shader(vector<string>& filenameVS, vector<string>& filenameFS, vector<string>& filenameGS)
+	: shader_id_{ compile_shader(filenameVS, filenameFS, filenameGS) } {}
 
 /// //////////////////////////////////////////////
 
@@ -56,38 +56,60 @@ void Shader::add_shader(GLuint shader_program, const char* raw_shader, GLenum sh
 	glDeleteShader(ShaderObj);
 }
 
-GLuint Shader::compile_shader(string_view filenameVS, string_view filenameFS, vector<string_view>& includesFS)
+GLuint Shader::compile_shader(vector<string>& filenameVS, vector<string>& filenameFS, vector<string>& filenameGS)
 {
 	GLuint ShaderProgram = glCreateProgram();
 
-	if (ShaderProgram == 0) {
+	if (ShaderProgram == 0) 
+	{
 		fprintf(stderr, "Error creating shader program\n");
 	}
 
-	std::string vs, fs;
+	std::string vs, fs, gs;
 
-	if (!read_file(filenameVS, vs)) {
-		printf("Error compiling vertex shader\n");
-		return -1;
-	};
-
-	for (auto& include : includesFS)
+	for (auto& vertex : filenameVS)
 	{
 		std::string temp;
-		if (!read_file(include, temp)) {
-			printf("Error compiling includes\n");
+		if (!read_file(vertex, temp)) {
+			printf("Error compiling vertex shader\n");
+			return -1;
+		};
+		vs += temp;
+	}
+
+	for (auto& fragment : filenameFS)
+	{
+		std::string temp;
+		if (!read_file(fragment, temp)) {
+			printf("Error compiling fragment shader\n");
 			return -1;
 		};
 		fs += temp;
 	}
 
-	if (!read_file(filenameFS, fs)) {
-		printf("Error compiling fragment shader\n");
-		return -1;
-	};
+	for (auto& geometry : filenameGS)
+	{
+		std::string temp;
+		if (!read_file(geometry, temp)) {
+			printf("Error compiling geometry shader\n");
+			return -1;
+		};
+		gs += temp;
+	}
+//	cout << vs<<"==\n\n\n";
+//	cout << fs<<"==\n\n\n";
+//	cout << gs<<"==\n\n\n";
 
 	add_shader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 	add_shader(ShaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
+	if (filenameGS.empty())
+	{
+		filenameGS.emplace_back("none_geometry");
+	}
+	else 
+	{
+		add_shader(ShaderProgram, gs.c_str(), GL_GEOMETRY_SHADER);
+	}
 
 	GLint Success = 0;
 	GLchar ErrorLog[1024] = { 0 };
@@ -97,7 +119,7 @@ GLuint Shader::compile_shader(string_view filenameVS, string_view filenameFS, ve
 
 	if (Success == 0) {
 		glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
-		std::cout << filenameVS << ", " << filenameFS << " Error linking shader program\n" << ErrorLog;
+		std::cerr << filenameVS.back() << ", " << filenameFS.back() << ", " << filenameGS.back() << " Error linking shader program\n" << ErrorLog;
 		return -1;
 	}
 
@@ -105,12 +127,12 @@ GLuint Shader::compile_shader(string_view filenameVS, string_view filenameFS, ve
 	glGetProgramiv(ShaderProgram, GL_VALIDATE_STATUS, &Success);
 	if (!Success) {
 		glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
-		std::cout << filenameVS << ", " << filenameFS << " Error validating shader program\n" << ErrorLog;
+		std::cerr << filenameVS.back() << ", " << filenameFS.back() << ", " << filenameGS.back() << " Error validating shader program\n" << ErrorLog;
 		return -1;
 	}
 
 	glUseProgram(0);
-	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done.\n";
+	std::cerr << filenameVS.back() << ", " << filenameFS.back() << ", " << filenameGS.back() << " Shader compiling is done.\n";
 
 	return ShaderProgram;
 }

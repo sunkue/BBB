@@ -8,7 +8,8 @@
 class OBJ;
 
 /* 소유된 (붙은) 카메라 */
-class Camera 
+using CameraPtr = shared_ptr<class Camera>;
+class Camera
 {
 	friend class OBJ;
 public:
@@ -25,8 +26,9 @@ public:
 
 	void set_ownner(OBJ* ownner) { _ownner = ownner; }
 
-	void camera_shake(float duration) { _shaking = true; _shaking_time = duration; };
-
+	void camera_shake(float duration) { shaking_ = true; shaking_time_ = duration; };
+	GET(shaking);
+	GET(shaking_time);
 	GET(position);
 private:
 	milliseconds _rotate_lag{ 200ms };
@@ -38,10 +40,9 @@ private:
 	glm::vec3 _target{ V_ZERO };
 	glm::vec3 _up{ Y_DEFAULT };
 
-	bool _shaking = false;
-	float _shaking_time = 0.f;
+	bool shaking_ = false;
+	float shaking_time_ = 0.f;
 };
 
-using CameraPtr = shared_ptr<Camera>;
 
 /// /////////////////////////////////////////////////////////////////////////

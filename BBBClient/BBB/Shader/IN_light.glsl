@@ -37,17 +37,18 @@ struct SpotLight
 	float out_cutoff;
 }; 
 
-	uniform SpotLight u_spot_light;
-	uniform PointLight u_point_light;
-	uniform DirectionalLight u_directinal_light;
+uniform SpotLight u_spot_light;
+uniform PointLight u_point_light;
+uniform DirectionalLight u_directinal_light;
 
 uniform Material u_material;
 uniform vec3 u_view_pos;
 
-
-in vec3 v_world_pos;
-in vec3 v_normal;
-in vec2 v_texcoord;
+in GS_OUT {
+    vec3 world_pos;
+	vec3 normal;
+    vec2 texcoord;
+} gs_in;
 
 
 float caculate_attenuation(vec3 light_pos,vec3 attenuation_param, vec3 world_pos)
@@ -62,14 +63,14 @@ vec3 caculate_light(DirectionalLight light, vec3 albedo, vec3 specular_color, fl
 {
 	vec3 ambient = light.power.ambient * albedo; 
 	//
-	vec3 normal = normalize(v_normal); 
+	vec3 normal = normalize(gs_in.normal); 
 	vec3 light_dir = normalize(-light.direction);
 	vec3 reflect_dir = reflect(-light_dir, normal);
 	//
 	float diff = max(dot(normal, light_dir), 0); 
 	vec3 diffuse = light.power.diffuse * (diff * albedo);
 	//
-	vec3 view_dir = normalize(u_view_pos - v_world_pos); 
+	vec3 view_dir = normalize(u_view_pos - gs_in.world_pos); 
 	float spec = pow(max(dot(view_dir, reflect_dir), 0), shininess);
 	vec3 specular = light.power.specular * (spec * specular_color);
 	//
@@ -81,18 +82,18 @@ vec3 caculate_light(PointLight light, vec3 albedo, vec3 specular_color, float sh
 {
 	vec3 ambient = light.power.ambient * albedo; 
 	//
-	vec3 normal = normalize(v_normal); 
-	vec3 light_dir = normalize(light.position - v_world_pos);
+	vec3 normal = normalize(gs_in.normal); 
+	vec3 light_dir = normalize(light.position - gs_in.world_pos);
 	vec3 reflect_dir = reflect(-light_dir, normal);
 	//
 	float diff = max(dot(normal, light_dir), 0); 
 	vec3 diffuse = light.power.diffuse * (diff * albedo);
 	//
-	vec3 view_dir = normalize(u_view_pos - v_world_pos); 
+	vec3 view_dir = normalize(u_view_pos - gs_in.world_pos); 
 	float spec = pow(max(dot(view_dir, reflect_dir), 0), shininess);
 	vec3 specular = light.power.specular * (spec * specular_color);
 	//
-	float attenuation = caculate_attenuation(light.position, light.attenuation, v_world_pos);
+	float attenuation = caculate_attenuation(light.position, light.attenuation, gs_in.world_pos);
 	vec3 ret = (ambient + diffuse + specular) * attenuation;
 	return ret;
 }
@@ -101,21 +102,21 @@ vec3 caculate_light(SpotLight light, vec3 albedo, vec3 specular_color, float shi
 {
 	vec3 ambient = light.power.ambient * albedo;
 	//
-	vec3 light_dir = normalize(light.position - v_world_pos);
+	vec3 light_dir = normalize(light.position - gs_in.world_pos);
 	float theta = dot(light_dir, normalize(-light.direction));
 	float epsilon = light.in_cutoff - light.out_cutoff; 
 	float intensity = clamp((theta - light.out_cutoff) / epsilon, 0, 1);
-	vec3 normal = normalize(v_normal); 
+	vec3 normal = normalize(gs_in.normal); 
 	vec3 reflect_dir = reflect(-light_dir, normal);
 	//
 	float diff = max(dot(normal, light_dir), 0); 
 	vec3 diffuse = light.power.diffuse * (diff * albedo) * intensity;
 	//
-	vec3 view_dir = normalize(u_view_pos - v_world_pos); 
+	vec3 view_dir = normalize(u_view_pos - gs_in.world_pos); 
 	float spec = pow(max(dot(view_dir, reflect_dir), 0), shininess);
 	vec3 specular = light.power.specular * (spec * specular_color) * intensity;
 	//
-	float attenuation = caculate_attenuation(light.position, light.attenuation, v_world_pos);
+	float attenuation = caculate_attenuation(light.position, light.attenuation, gs_in.world_pos);
 	vec3 ret = (ambient + diffuse + specular) * attenuation;
 	return ret;
 }

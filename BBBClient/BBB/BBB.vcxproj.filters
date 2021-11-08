@@ -62,6 +62,9 @@
     <Filter Include="Render\Model">
       <UniqueIdentifier>{fa34afe7-6cc8-4c5c-a2cd-20dfc0fdf4df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\Shader\BufferObj">
+      <UniqueIdentifier>{67dca7b6-ee8c-4350-8696-2d2e984ffb62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -118,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Render\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="BO.cpp">
+      <Filter>Render\Shader\BufferObj</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +211,9 @@
     <ClInclude Include="sunkue_glm.hpp">
       <Filter>helper</Filter>
     </ClInclude>
+    <ClInclude Include="BO.h">
+      <Filter>Render\Shader\BufferObj</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\fragment.glsl">
@@ -241,6 +250,9 @@
       <Filter>Render\Shader\glsl</Filter>
     </None>
     <None Include="Shader\cubemap_vertex.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\test_geometry.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
   </ItemGroup>
