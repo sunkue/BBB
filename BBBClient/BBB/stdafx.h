@@ -49,6 +49,14 @@ using clk = std::chrono::high_resolution_clock;
 
 
 
+#include "Dependencies/imgui/imgui.h"
+#include "Dependencies/imgui/imconfig.h"
+#include "Dependencies/imgui/imgui_impl_glut.h"
+#include "Dependencies/imgui/imgui_impl_opengl3.h"
+#define gui ImGui
+
+
+
 #include "../../Share/includes.h"
 #include "gl_defines.h"
 #include "sunkue_glm.hpp"

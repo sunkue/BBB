@@ -57,7 +57,6 @@ void Renderer::init_shader()
 	GS.clear();
 	billboard_shader_ = Shader::create(VS, FS, GS);
 
-
 	{
 		vector<string_view> textures
 		{
@@ -76,7 +75,8 @@ void Renderer::init_shader()
 		skybox = CubeMap::create(cubeshader, textures, dir);
 	}
 
-	screen_renderer = make_shared<ScreenRenderer>();
+	screen_renderer = make_unique<ScreenRenderer>();
+	screen_renderer->init();
 }
 
 void Renderer::init_resources()
@@ -134,37 +134,36 @@ void Renderer::load_model()
 		grassvertices.push_back(v);
 	}
 
-	const auto grass_count = 80;
-	const auto grass_range = 50;
+	const auto grass_count = 10;
+	const auto grass_range = 80;
 
 	grasses_.set_num_inst(grass_count);
 	grasses_.setup_mesh(grassvertices);
 
-	float scales[grass_count];
-	float yaw[grass_count];
-	float shearseed[grass_count]; // grass.get_position().x / 10;
-	glm::vec3 translate[grass_count];
+	vector<float> scales; scales.reserve(grass_count);
+	vector<float> yaw; yaw.reserve(grass_count);
+	vector<float> shearseed; shearseed.reserve(grass_count);
+	vector<glm::vec3> translate; translate.reserve(grass_count);
 
 	for (int i = 0; i < grass_count; i++)
 	{
 		glm::vec3 pos = { rand() % (2 * grass_range) - grass_range, 0.f, rand() % (2 * grass_range) - grass_range };
 		const glm::vec3 default_pos = { -HALF_ROOT3, -1.f, -1.f };
-		translate[i] = (pos + default_pos);
-		shearseed[i] = translate[i].x / 10;
-		scales[i] = 1.f + i % 3 * 0.3f;
-		yaw[i] = glm::radians(static_cast<float>(rand() % 360));
+		translate.push_back(pos + default_pos);
+		shearseed.push_back(translate[i].x / 10);
+		scales.push_back(1.f + i % 3 * 0.3f);
+		yaw.push_back(glm::radians(static_cast<float>(rand() % 360)));
 	}
-
 
 	auto texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass0.png");grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass1.png");		grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/blueflower.png");	grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/redflower.png");	grasses_.add_texture(texture);
 
-	grasses_.setup_instance_attribute(billboard_shader_, "a_scale", scales);
-	grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw);
-	grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate);
-	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed);
+	grasses_.setup_instance_attribute(billboard_shader_, "a_scale", scales.data());
+	grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw.data());
+	grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate.data());
+	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed.data());
 }
 
 
@@ -185,6 +184,9 @@ void Renderer::ready_draw()
 
 void Renderer::draw()
 {
+	
+	
+	
 	//timer::TIMER::instance().start();
 	ready_draw();
 
@@ -199,7 +201,7 @@ void Renderer::draw()
 
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
-	screen_renderer->bind_scene_fbo();
+	screen_renderer->bind_predraw_fbo();
 	
 	{
 		testing_shader_->use();
@@ -245,7 +247,22 @@ void Renderer::draw()
 	}
 
 	screen_renderer->blit_fbo();
+
 	screen_renderer->draw_screen();
+
+	glUseProgram(0);
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGLUT_NewFrame();
+	gui::NewFrame();
+
+
+
+	gui::Begin("Hi!! Is it alright??>>");
+	gui::Text("Hello !!");
+	gui::End();
+
+	gui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(gui::GetDrawData());
 
 	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps
@@ -256,3 +273,79 @@ void Renderer::draw()
 	return;
 }
 
+void ScreenRenderer::init()
+{
+	glGenVertexArrays(1, &quad_vao);
+	GLuint vbo, ebo;
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
+	struct QUAD
+	{
+		glm::vec2 pos;
+		glm::vec2 tex;
+	};
+	QUAD quadv[] =
+	{
+		{{-1,-1},{0,0}},
+		{{ 1, 1},{1,1}},
+		{{-1, 1},{0,1}},
+		{{-1,-1},{0,0}},
+		{{ 1,-1},{1,0}},
+		{{ 1, 1},{1,1}}
+	};
+
+	glBindVertexArray(quad_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadv), quadv, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, pos));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
+
+	glBindVertexArray(0);
+
+	/// /
+
+	glGenFramebuffers(1, &predraw_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, predraw_fbo);
+
+	predraw_tbo = Texture::create();
+	glGenTextures(1, &predraw_tbo->id);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, predraw_tbo->id);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB,
+		screen.width, screen.height, GL_TRUE);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0
+		, GL_TEXTURE_2D_MULTISAMPLE, predraw_tbo->id, 0);
+
+	glGenRenderbuffers(1, &predraw_rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, predraw_rbo);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, screen.width, screen.height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, predraw_rbo);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+	glGenFramebuffers(1, &screen_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, screen_fbo);
+
+	screen_tbo = Texture::create();
+	glGenTextures(1, &screen_tbo->id);
+	glBindTexture(GL_TEXTURE_2D, screen_tbo->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen.width, screen.height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screen_tbo->id, 0);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cerr << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	vector<string> VS; VS.emplace_back("./Shader/screen_vertex.glsl"sv);
+	vector<string> FS; FS.emplace_back("./Shader/screen_fragment.glsl"sv);
+	vector<string> GS;
+	screen_shader = Shader::create(VS, FS, GS);
+}

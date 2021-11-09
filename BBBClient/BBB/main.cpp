@@ -115,6 +115,13 @@ void Position(int x, int y)
 	RenderScene();
 }
 
+void Close()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGLUT_Shutdown();
+	gui::DestroyContext();
+}
+
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
@@ -133,6 +140,14 @@ int main(int argc, char** argv)
 	}
 	
 
+	IMGUI_CHECKVERSION();
+	gui::CreateContext();
+	ImGuiIO& io = gui::GetIO(); (void)io;
+	gui::StyleColorsDark();
+	ImGui_ImplGLUT_Init();
+	ImGui_ImplOpenGL3_Init("#version 450");
+
+
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
 	glutKeyboardFunc(KeyInput);
@@ -142,6 +157,7 @@ int main(int argc, char** argv)
 	glutSpecialFunc(SpecialKeyInput);
 	glutReshapeFunc(Reshape);
 	glutPositionFunc(Position);
+	glutCloseFunc(Close);
 
 	glutMainLoop();
 }

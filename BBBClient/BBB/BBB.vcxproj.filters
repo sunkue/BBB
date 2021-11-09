@@ -65,6 +65,15 @@
     <Filter Include="Render\Shader\BufferObj">
       <UniqueIdentifier>{67dca7b6-ee8c-4350-8696-2d2e984ffb62}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\GUI">
+      <UniqueIdentifier>{231f2f47-ba4e-4224-8397-0a418aa634e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\GUI\imgui">
+      <UniqueIdentifier>{7e1d445c-ae34-4f70-8182-db6eae8501e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\GUI\gui">
+      <UniqueIdentifier>{6c8b1f5b-8c67-4dd6-8955-47c2684ac2aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -124,6 +133,27 @@
     </ClCompile>
     <ClCompile Include="BO.cpp">
       <Filter>Render\Shader\BufferObj</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\imgui\imgui_widgets.cpp">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\imgui\imgui_tables.cpp">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\imgui\imgui_impl_glut.cpp">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\imgui\imgui_draw.cpp">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\imgui\imgui_demo.cpp">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\imgui\imgui.cpp">
+      <Filter>Render\GUI\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +243,33 @@
     </ClInclude>
     <ClInclude Include="BO.h">
       <Filter>Render\Shader\BufferObj</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imstb_truetype.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imstb_textedit.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imstb_rectpack.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imgui_internal.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imgui_impl_opengl3.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imgui_impl_opengl3_loader.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imgui_impl_glut.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imgui.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imconfig.h">
+      <Filter>Render\GUI\imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

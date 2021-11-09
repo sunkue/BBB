@@ -99,6 +99,7 @@ vec4 kerneling(float kernel[9])
 
 void main() 
 { 
-	o_flagcolor = origin();
+    float gamma = 1.6f;
+	o_flagcolor = vec4(pow(origin().rgb, vec3(1.0/gamma)), 1.0f);
 } 
 

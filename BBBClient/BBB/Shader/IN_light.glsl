@@ -65,13 +65,13 @@ vec3 caculate_light(DirectionalLight light, vec3 albedo, vec3 specular_color, fl
 	//
 	vec3 normal = normalize(gs_in.normal); 
 	vec3 light_dir = normalize(-light.direction);
-	vec3 reflect_dir = reflect(-light_dir, normal);
 	//
 	float diff = max(dot(normal, light_dir), 0); 
 	vec3 diffuse = light.power.diffuse * (diff * albedo);
 	//
 	vec3 view_dir = normalize(u_view_pos - gs_in.world_pos); 
-	float spec = pow(max(dot(view_dir, reflect_dir), 0), shininess);
+	vec3 halfway_dir = normalize(light_dir + view_dir);
+	float spec = pow(max(dot(normal, halfway_dir), 0), shininess);
 	vec3 specular = light.power.specular * (spec * specular_color);
 	//
 	vec3 ret = (ambient + diffuse + specular);
