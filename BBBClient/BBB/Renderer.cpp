@@ -42,7 +42,6 @@ void Renderer::init()
 	init_resources();
 }
 
-
 void Renderer::init_shader()
 {
 	vector<string> VS;
@@ -52,11 +51,6 @@ void Renderer::init_shader()
 	FS.clear(); FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/test_fragment.glsl"sv);
 	GS.clear(); GS.emplace_back("./Shader/test_geometry.glsl"sv);
 	testing_shader_ = Shader::create(VS, FS, GS);
-
-	VS.clear(); VS.emplace_back("./Shader/screen_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/screen_fragment.glsl"sv);
-	GS.clear();
-	screen_shader_ = Shader::create(VS, FS, GS);
 
 	VS.clear(); VS.emplace_back("./Shader/grass_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/png_fragment.glsl"sv);
@@ -82,53 +76,24 @@ void Renderer::init_shader()
 		skybox = CubeMap::create(cubeshader, textures, dir);
 	}
 
+	screen_renderer = make_shared<ScreenRenderer>();
 }
 
 void Renderer::init_resources()
 {
 	load_model();
+
 	testing_directional_light_ = DirectionalLight::create();
 	testing_point_light_ = PointLight::create();
 	testing_spot_light_ = SpotLight::create();
 
 	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
 	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
+
 }
 
 void Renderer::load_model()
 {
-	
-	glGenVertexArrays(1, &quad_vao);
-	GLuint vbo, ebo;
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-	struct QUAD
-	{
-		glm::vec2 pos;
-		glm::vec2 tex;
-	};
-	QUAD quadv[] =
-	{
-		{{-1,-1},{0,0}},
-		{{ 1, 1},{1,1}},
-		{{-1, 1},{0,1}},
-		{{-1,-1},{0,0}},
-		{{ 1,-1},{1,0}},
-		{{ 1, 1},{1,1}}
-	};
-
-	glBindVertexArray(quad_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadv), quadv, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, pos));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
-
-	glBindVertexArray(0);
-
-	Texture::create();
 	auto model = Model::create("./Resource/Model/backpack/backpack.obj");
 	auto greencar = Model::create("./Resource/Model/rocket/green/green_car.obj");
 	auto bluecar = Model::create("./Resource/Model/rocket/blue/blue_car.obj");
@@ -163,15 +128,13 @@ void Renderer::load_model()
 	main_camera_->set_ownner(player_.get());
 	main_camera_->set_diff({ -5.f, 3.f, 0.f });
 
-
-
 	vector<Vertex> grassvertices;
 	for (auto& v : cross_billboard_3)
 	{
 		grassvertices.push_back(v);
 	}
 
-	const auto grass_count = 8000;
+	const auto grass_count = 80;
 	const auto grass_range = 50;
 
 	grasses_.set_num_inst(grass_count);
@@ -204,41 +167,9 @@ void Renderer::load_model()
 	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed);
 }
 
-GLuint intermediateFBO;
-GLuint screenTexture;
 
 void Renderer::load_texture()
 {
-	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-	tbo = Texture::create();
-	glGenTextures(1, &tbo->id);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tbo->id);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA,
-		screen_.width, screen_.height, GL_TRUE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, tbo->id, 0);
-
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, screen_.width, screen_.height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-
-
-	glGenFramebuffers(1, &intermediateFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
-	// create a color attachment texture
-	glGenTextures(1, &screenTexture);
-	glBindTexture(GL_TEXTURE_2D, screenTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_.width, screen_.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		cout << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
 
 }
 
@@ -268,17 +199,9 @@ void Renderer::draw()
 
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
-
-
-
+	screen_renderer->bind_scene_fbo();
+	
 	{
-		glViewport(0, 0, screen_.width, screen_.height);
-		glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-
 		testing_shader_->use();
 		auto shaket = main_camera_->get_shaking_time();
 		testing_shader_->set("time", abs(1.f - shaket * 5.f));
@@ -316,33 +239,13 @@ void Renderer::draw()
 		billboard_shader_->set("u_tex_sampler", tt);
 		grasses_.draw();
 
-
 		// text
 		player_->render_chat({ 1,0,1 });
 		render_chatrecord();
 	}
 
-
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
-	glBlitFramebuffer(0, 0, screen_.width, screen_.height, 0, 0, screen_.width, screen_.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-
-
-	// draw fbo
-	glViewport(screen_.viewport_.x, screen_.viewport_.y, screen_.viewport_.z, screen_.viewport_.w);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
-	glDisable(GL_DEPTH_TEST);
-	screen_shader_->use();
-
-	glActiveTexture(GL_TEXTURE0 + screenTexture);
-	glBindTexture(GL_TEXTURE_2D, screenTexture);
-	glUniform1i(glGetUniformLocation(screen_shader_->get_shader_id(), "screen_texture"), screenTexture);
-//	screen_shader_->set("screen_texture", screenTexture);
-	glBindVertexArray(quad_vao);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	screen_renderer->blit_fbo();
+	screen_renderer->draw_screen();
 
 	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps
