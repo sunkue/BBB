@@ -10,7 +10,7 @@ Renderer::Renderer()
 	glPolygonMode(GL_FRONT, GLU_FILL);
 	glEnable(GL_BLEND);
 	glDepthFunc(GL_LEQUAL);
-
+	glEnable(GL_MULTISAMPLE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	init();
 }

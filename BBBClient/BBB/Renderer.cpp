@@ -97,7 +97,7 @@ void Renderer::init_resources()
 
 void Renderer::load_model()
 {
-
+	
 	glGenVertexArrays(1, &quad_vao);
 	GLuint vbo, ebo;
 	glGenBuffers(1, &vbo);
@@ -204,6 +204,9 @@ void Renderer::load_model()
 	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed);
 }
 
+GLuint intermediateFBO;
+GLuint screenTexture;
+
 void Renderer::load_texture()
 {
 	glGenFramebuffers(1, &fbo);
@@ -211,18 +214,31 @@ void Renderer::load_texture()
 
 	tbo = Texture::create();
 	glGenTextures(1, &tbo->id);
-	glBindTexture(GL_TEXTURE_2D, tbo->id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_.width, screen_.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tbo->id, 0);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tbo->id);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA,
+		screen_.width, screen_.height, GL_TRUE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, tbo->id, 0);
 
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, screen_.width, screen_.height);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, screen_.width, screen_.height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+
+
+	glGenFramebuffers(1, &intermediateFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, intermediateFBO);
+	// create a color attachment texture
+	glGenTextures(1, &screenTexture);
+	glBindTexture(GL_TEXTURE_2D, screenTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_.width, screen_.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cout << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
 
 }
 
@@ -255,55 +271,63 @@ void Renderer::draw()
 
 
 
-
-	glViewport(0, 0, screen_.width, screen_.height);
-	glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-
-	testing_shader_->use();
-	auto shaket = main_camera_->get_shaking_time();
-	testing_shader_->set("time", abs(1.f - shaket * 5.f));
-	testing_shader_->set("explosion", main_camera_->get_shaking());
-	auto view_pos = main_camera_->get_position();
-	testing_shader_->set("u_view_pos", view_pos);
-	testing_spot_light_->direction = main_camera_->get_look_dir();
-	testing_spot_light_->position = main_camera_->get_position();
-	testing_shader_->set("u_point_light", testing_point_light_);
-	testing_shader_->set("u_directinal_light", testing_directional_light_);
-	testing_shader_->set("u_spot_light", testing_spot_light_);
-
-	glDisable(GL_CULL_FACE);
-	default_map->update_uniform_vars(testing_shader_);
-	default_map->draw(testing_shader_);
-	glEnable(GL_CULL_FACE);
-
-	for (auto& car : cars_)
 	{
-		car->update_uniform_vars(testing_shader_);
-		car->draw(testing_shader_);
+		glViewport(0, 0, screen_.width, screen_.height);
+		glBindFramebuffer(GL_FRAMEBUFFER, tbo->id);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+
+		testing_shader_->use();
+		auto shaket = main_camera_->get_shaking_time();
+		testing_shader_->set("time", abs(1.f - shaket * 5.f));
+		testing_shader_->set("explosion", main_camera_->get_shaking());
+		auto view_pos = main_camera_->get_position();
+		testing_shader_->set("u_view_pos", view_pos);
+		testing_spot_light_->direction = main_camera_->get_look_dir();
+		testing_spot_light_->position = main_camera_->get_position();
+		testing_shader_->set("u_point_light", testing_point_light_);
+		testing_shader_->set("u_directinal_light", testing_directional_light_);
+		testing_shader_->set("u_spot_light", testing_spot_light_);
+
+		glDisable(GL_CULL_FACE);
+		default_map->update_uniform_vars(testing_shader_);
+		default_map->draw(testing_shader_);
+		glEnable(GL_CULL_FACE);
+
+		for (auto& car : cars_)
+		{
+			car->update_uniform_vars(testing_shader_);
+			car->draw(testing_shader_);
+		}
+		player_->update_uniform_vars(testing_shader_);
+		player_->draw(testing_shader_);
+
+		skybox->draw();
+
+		// billoards
+		glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
+		glDisable(GL_CULL_FACE);
+
+		billboard_shader_->use();
+		billboard_shader_->set("u_time", gametime);
+		auto tt = grasses_.get_textures();
+		billboard_shader_->set("u_tex_sampler", tt);
+		grasses_.draw();
+
+
+		// text
+		player_->render_chat({ 1,0,1 });
+		render_chatrecord();
 	}
-	player_->update_uniform_vars(testing_shader_);
-	player_->draw(testing_shader_);
 
-	skybox->draw();
 
-	// billoards
-	glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
-	glDisable(GL_CULL_FACE);
-	
-	billboard_shader_->use();
-	billboard_shader_->set("u_time", gametime);
-	auto tt = grasses_.get_textures();
-	billboard_shader_->set("u_tex_sampler", tt);
-	grasses_.draw();
-	
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+	glBlitFramebuffer(0, 0, screen_.width, screen_.height, 0, 0, screen_.width, screen_.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-	// text
-	player_->render_chat({ 1,0,1 });
-	render_chatrecord();
+
 
 	// draw fbo
 	glViewport(screen_.viewport_.x, screen_.viewport_.y, screen_.viewport_.z, screen_.viewport_.w);
@@ -312,7 +336,11 @@ void Renderer::draw()
 	glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
 	glDisable(GL_DEPTH_TEST);
 	screen_shader_->use();
-	screen_shader_->set("screen_texture", tbo);
+
+	glActiveTexture(GL_TEXTURE0 + screenTexture);
+	glBindTexture(GL_TEXTURE_2D, screenTexture);
+	glUniform1i(glGetUniformLocation(screen_shader_->get_shader_id(), "screen_texture"), screenTexture);
+//	screen_shader_->set("screen_texture", screenTexture);
 	glBindVertexArray(quad_vao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
