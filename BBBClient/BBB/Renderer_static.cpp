@@ -7,7 +7,7 @@ Renderer::Renderer()
 	glFrontFace(GL_CCW);
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glPolygonMode(GL_FRONT, GLU_FILL);
+//	glPolygonMode(GL_FRONT, GLU_FILL);
 	glEnable(GL_BLEND);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_MULTISAMPLE);

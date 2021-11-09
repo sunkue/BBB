@@ -7,7 +7,7 @@
 SCREEN screen;
 
 ////////////////////////////
-
+/*
 void render_chatrecord(glm::vec3 color = {}, void* font = GLUT_BITMAP_HELVETICA_18)
 {
 	const auto& record = ChatManager::get().get_record();
@@ -32,6 +32,7 @@ void render_chatrecord(glm::vec3 color = {}, void* font = GLUT_BITMAP_HELVETICA_
 		p._y += TextRenderer::get_height(font);
 	}
 }
+*/
 
 ////////////////////////////
 
@@ -232,7 +233,7 @@ void Renderer::draw()
 		skybox->draw();
 
 		// billoards
-		glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
+		//glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
 		glDisable(GL_CULL_FACE);
 
 		billboard_shader_->use();
@@ -242,8 +243,8 @@ void Renderer::draw()
 		grasses_.draw();
 
 		// text
-		player_->render_chat({ 1,0,1 });
-		render_chatrecord();
+		//player_->render_chat({ 1,0,1 });
+		//render_chatrecord();
 	}
 
 	screen_renderer->blit_fbo();
@@ -251,25 +252,13 @@ void Renderer::draw()
 	screen_renderer->draw_screen();
 
 	glUseProgram(0);
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGLUT_NewFrame();
-	gui::NewFrame();
-
-
-
-	gui::Begin("Hi!! Is it alright??>>");
-	gui::Text("Hello !!");
-	gui::End();
-
-	gui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(gui::GetDrawData());
-
+	
 	//timer::TIMER::instance().end("T::");
 	// 16.6	-> 60fps
 	// 33	-> 30fps
 	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
 	string title = "("s + to_string(fps) + " fps)"s;
-	glutSetWindowTitle(title.c_str());
+	//glutSetWindowTitle(title.c_str());
 	return;
 }
 

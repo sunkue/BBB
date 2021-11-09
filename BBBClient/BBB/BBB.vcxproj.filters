@@ -143,9 +143,6 @@
     <ClCompile Include="Dependencies\imgui\imgui_impl_opengl3.cpp">
       <Filter>Render\GUI\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Dependencies\imgui\imgui_impl_glut.cpp">
-      <Filter>Render\GUI\imgui</Filter>
-    </ClCompile>
     <ClCompile Include="Dependencies\imgui\imgui_draw.cpp">
       <Filter>Render\GUI\imgui</Filter>
     </ClCompile>
@@ -153,6 +150,12 @@
       <Filter>Render\GUI\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Dependencies\imgui\imgui.cpp">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\glad\src\glad.c">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\imgui\imgui_impl_glfw.cpp">
       <Filter>Render\GUI\imgui</Filter>
     </ClCompile>
   </ItemGroup>
@@ -262,13 +265,13 @@
     <ClInclude Include="Dependencies\imgui\imgui_impl_opengl3_loader.h">
       <Filter>Render\GUI\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Dependencies\imgui\imgui_impl_glut.h">
-      <Filter>Render\GUI\imgui</Filter>
-    </ClInclude>
     <ClInclude Include="Dependencies\imgui\imgui.h">
       <Filter>Render\GUI\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Dependencies\imgui\imconfig.h">
+      <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="Dependencies\imgui\imgui_impl_glfw.h">
       <Filter>Render\GUI\imgui</Filter>
     </ClInclude>
   </ItemGroup>

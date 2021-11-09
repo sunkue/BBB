@@ -3,7 +3,9 @@
 #pragma comment(lib,"./Dependencies/OPGL/x64GL/glew32.lib")
 #pragma comment(lib,"./Dependencies/OPGL/x64GL/glew32s.lib")
 #pragma comment(lib,"./Dependencies/OPGL/x64GL/freeglut.lib")
-
+#pragma comment(lib,"./Dependencies/GLFW/glfw3.lib")
+#pragma comment(lib,"./Dependencies/GLFW/glfw3_mt.lib")
+#pragma comment(lib,"./Dependencies/GLFW/glfw3dll.lib")
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -35,10 +37,14 @@ using clk = std::chrono::high_resolution_clock;
 #pragma warning(disable: 26812)
 
 
-#include "Dependencies/OPGL/glew.h"
-#include "Dependencies/OPGL/wglew.h"
-#include "Dependencies/OPGL/freeglut.h"
+#include "Dependencies/glad/include/glad/glad.h"
+//#include "Dependencies/glad/include/KHR/khrplatform.h"
 
+//#include "Dependencies/OPGL/glew.h"
+//#include "Dependencies/OPGL/wglew.h"
+//#/include "Dependencies/OPGL/freeglut.h"
+#include "Dependencies/GLFW/GLFW/glfw3.h"
+#include "Dependencies/GLFW/GLFW/glfw3native.h"
 
 #include "Dependencies/OPGL/glm/glm.hpp"
 #include "Dependencies/OPGL/glm/gtx/projection.hpp"
@@ -48,10 +54,9 @@ using clk = std::chrono::high_resolution_clock;
 #include "Dependencies/OPGL/glm/ext.hpp"
 
 
-
 #include "Dependencies/imgui/imgui.h"
 #include "Dependencies/imgui/imconfig.h"
-#include "Dependencies/imgui/imgui_impl_glut.h"
+#include "Dependencies/imgui/imgui_impl_glfw.h"
 #include "Dependencies/imgui/imgui_impl_opengl3.h"
 #define gui ImGui
 

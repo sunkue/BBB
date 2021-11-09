@@ -90,7 +90,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\glad\include;C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\imgui;C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\GLFW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -107,7 +107,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\glad\include;C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\imgui;C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\GLFW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,7 +124,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\glad\include;C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\imgui;C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\GLFW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,7 +141,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\glad\include;C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\imgui;C:\Users\Sunkue 01077661299\SUNKUE\_core\project\My\BBB\BBBClient\BBB\Dependencies\GLFW;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -160,6 +160,12 @@
     <ClCompile Include="BO.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ChatManager.cpp" />
+    <ClCompile Include="Dependencies\glad\src\glad.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="Dependencies\imgui\imgui.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -178,7 +184,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Dependencies\imgui\imgui_impl_glut.cpp">
+    <ClCompile Include="Dependencies\imgui\imgui_impl_glfw.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -238,7 +244,7 @@
     <ClInclude Include="ChatManager.h" />
     <ClInclude Include="Dependencies\imgui\imconfig.h" />
     <ClInclude Include="Dependencies\imgui\imgui.h" />
-    <ClInclude Include="Dependencies\imgui\imgui_impl_glut.h" />
+    <ClInclude Include="Dependencies\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="Dependencies\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="Dependencies\imgui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="Dependencies\imgui\imgui_internal.h" />

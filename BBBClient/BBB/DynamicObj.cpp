@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "DynamicObj.h"
 #include "TextRenderer.h"
-
+/*
 void ControllObj::render_chat(glm::vec3 color)
 {
 	TextOpt opt;
@@ -91,3 +91,4 @@ void ControllObj::apply_input_unpress(UCHAR key)
 		break;
 	}
 }
+*/

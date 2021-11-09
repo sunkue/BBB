@@ -137,11 +137,11 @@ private:
 	}
 
 public:
-	void render_chat(glm::vec3 color = {});
+//	void render_chat(glm::vec3 color = {});
 	
 public:
-	void apply_input_press(UCHAR key);
-	void apply_input_unpress(UCHAR key);
+//	void apply_input_press(UCHAR key);
+//	void apply_input_unpress(UCHAR key);
 
 private:
 	CONTROLL _accel_control{ CONTROLL::none };
