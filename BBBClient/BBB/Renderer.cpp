@@ -6,35 +6,7 @@
 
 SCREEN screen;
 
-////////////////////////////
-/*
-void render_chatrecord(glm::vec3 color = {}, void* font = GLUT_BITMAP_HELVETICA_18)
-{
-	const auto& record = ChatManager::get().get_record();
-	TextOpt opt;
-	opt._align = TEXT_ALIGNMENT::left;
-	opt._space = { 0.0f, 0.0f };
-	Pointf p = { -0.985f, -0.8f };
-	auto rv_it_record = views::reverse(record).begin();
-	for (int i = 0; i < min(10ull, record.size()); i++, rv_it_record++)
-	{
-		const auto& record = rv_it_record;
-		glColor3f(color.r, color.g, color.b);
-		auto chat_header = "player" + to_string(record->id) + ":: ";
-		TextRenderer::rend_text(chat_header, p, opt, true, glm::vec4(0), font);
 
-		glColor3f(color.r, color.g, color.b);
-		auto header_w = TextRenderer::get_width(chat_header.data(), font) + 0.025f;
-		p._x += header_w;
-		TextRenderer::rend_text(record->str, p, opt, true, glm::vec4(0), font);
-		p._x -= header_w;
-
-		p._y += TextRenderer::get_height(font);
-	}
-}
-*/
-
-////////////////////////////
 
 void Renderer::init()
 {
@@ -185,20 +157,7 @@ void Renderer::ready_draw()
 
 void Renderer::draw()
 {
-	
-	
-	
-	//timer::TIMER::instance().start();
 	ready_draw();
-
-	/* logic */
-	Sleep(1);
-	float milli_tick = static_cast<float>(GAME_SYSTEM::get().tick_time().count());
-	float tick = milli_tick / 1000.f;
-	player_->update(tick);
-	main_camera_->update(tick);
-	GAME_SYSTEM::get().tick();
-	// 로직분리, 카메라 회전 , 스크롤로 거리조절 >>  1tick == 최소 1ms.
 
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
@@ -233,7 +192,7 @@ void Renderer::draw()
 		skybox->draw();
 
 		// billoards
-		//glPolygonMode(GL_FRONT_AND_BACK, GLU_FILL);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDisable(GL_CULL_FACE);
 
 		billboard_shader_->use();
@@ -242,9 +201,6 @@ void Renderer::draw()
 		billboard_shader_->set("u_tex_sampler", tt);
 		grasses_.draw();
 
-		// text
-		//player_->render_chat({ 1,0,1 });
-		//render_chatrecord();
 	}
 
 	screen_renderer->blit_fbo();
@@ -253,12 +209,8 @@ void Renderer::draw()
 
 	glUseProgram(0);
 	
-	//timer::TIMER::instance().end("T::");
-	// 16.6	-> 60fps
-	// 33	-> 30fps
-	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
-	string title = "("s + to_string(fps) + " fps)"s;
-	//glutSetWindowTitle(title.c_str());
+	
+
 	return;
 }
 

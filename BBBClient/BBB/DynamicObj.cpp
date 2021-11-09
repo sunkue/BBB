@@ -18,6 +18,7 @@ void ControllObj::render_chat(glm::vec3 color)
 		p.y += h;
 	}
 }
+*/
 
 void ControllObj::apply_input_press(UCHAR key)
 {
@@ -91,4 +92,3 @@ void ControllObj::apply_input_unpress(UCHAR key)
 		break;
 	}
 }
-*/

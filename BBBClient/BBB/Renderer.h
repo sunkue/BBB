@@ -82,6 +82,7 @@ class ScreenRenderer
 /* clients drawer */
 class Renderer
 {
+	friend GAME_SYSTEM;
 private:
 	SINGLE_TON(Renderer);
 	~Renderer();
