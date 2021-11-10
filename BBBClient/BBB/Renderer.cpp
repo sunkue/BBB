@@ -107,8 +107,8 @@ void Renderer::load_model()
 		grassvertices.push_back(v);
 	}
 
-	const auto grass_count = 10;
-	const auto grass_range = 80;
+	const auto grass_count = 18000;
+	const auto grass_range = 100;
 
 	grasses_.set_num_inst(grass_count);
 	grasses_.setup_mesh(grassvertices);
@@ -208,11 +208,9 @@ void Renderer::draw()
 	screen_renderer->draw_screen();
 
 	glUseProgram(0);
-	
-	
-
-	return;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 void ScreenRenderer::init()
 {

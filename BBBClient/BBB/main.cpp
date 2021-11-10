@@ -10,6 +10,10 @@ GLFWwindow* window;
 
 
 
+bool x;
+float ff;
+float color[4];
+
 void DoNextFrame()
 {
 	KEY_BOARD_EVENT_MANAGER::get().ProcessInput();
@@ -20,13 +24,31 @@ void DoNextFrame()
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	gui::NewFrame();
+	
+	if (!gui::GetIO().WantCaptureMouse)
+	{
+		//cout << "!" << endl;
+	}
+	else
+	{
+		//cout << "?" << endl;
+	}
 
 	gui::Begin("Hi!! Is it alright??>>");
 	gui::Text("Hello !!");
+	gui::Checkbox("check_box", &x);
+	gui::SliderFloat("aaa", &ff, 0.1f, 5.7f);
+	gui::ColorEdit4("x", color);
+	gui::End();
+
+
+	gui::Begin("Hi!!weght??>>");
+	gui::Text("Hellsdsdo !!");
 	gui::End();
 
 	gui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(gui::GetDrawData());
+
 
 	glfwPollEvents();
 	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
@@ -35,6 +57,16 @@ void DoNextFrame()
 
 	glfwSwapBuffers(window);
 }
+
+
+
+
+
+
+
+
+
+
 
 void MouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 {
@@ -51,14 +83,10 @@ void MouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 		auto diff = camera->get_diff();
 		camera->set_diff(diff * 1.125f);
 	}
-	DoNextFrame();
 }
-
-
 
 void CursorPos(GLFWwindow* window, double xpos, double ypos)
 {
-
 }
 
 void MouseButton(GLFWwindow* window, int button, int action, int mods)
@@ -74,7 +102,7 @@ void MouseButton(GLFWwindow* window, int button, int action, int mods)
 
 void bind_key_func()
 {
-	KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_LEFT_SHIFT, 
+	KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_LEFT_SHIFT,
 		[] { Game::get().renderer.get_main_camera()->camera_shake(0.2f); });
 
 }
@@ -86,7 +114,6 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-
 	window = glfwCreateWindow(screen.width, screen.height, "SUNKUE", NULL, NULL);
 	if (window == NULL)
 	{
@@ -94,6 +121,7 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+
 	glfwMakeContextCurrent(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -105,17 +133,18 @@ int main()
 	glfwSetFramebufferSizeCallback(window,
 		[](GLFWwindow* window, int w, int h)
 		{ Renderer::get().reshape(w, h); DoNextFrame(); });
-
 	glfwSetScrollCallback(window, MouseWheel);
 	glfwSetMouseButtonCallback(window, MouseButton);
 	glfwSetCursorPosCallback(window, CursorPos);
 	glfwSetKeyCallback(window,
 		[](GLFWwindow* window, int key, int code, int action, int modifiers)
-		{ KEY_BOARD_EVENT_MANAGER::get().KeyBoard(window, key, code, action, modifiers); });
+		{ KEY_BOARD_EVENT_MANAGER::get().KeyBoard(window, key, code, action, modifiers); DoNextFrame(); });
 
 	IMGUI_CHECKVERSION();
 	gui::CreateContext();
-	ImGuiIO& io = gui::GetIO(); (void)io;
+
+	ImGuiIO& io = gui::GetIO();
+
 	gui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
@@ -124,6 +153,7 @@ int main()
 
 	bind_key_func();
 
+	// MAIN LOOP
 	while (!glfwWindowShouldClose(window))
 	{
 		DoNextFrame();
