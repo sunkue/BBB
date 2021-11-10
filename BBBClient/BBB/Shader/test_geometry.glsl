@@ -10,7 +10,7 @@ in VS_OUT {
     vec2 texcoord;
 } vs_in[];
 
-out GS_OUT {
+out FS_IN {
     vec3 world_pos;
 	vec3 normal;
     vec2 texcoord;

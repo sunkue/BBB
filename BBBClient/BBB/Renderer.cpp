@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Renderer.h"
-#include "TextRenderer.h"
 
 ////////////////////////////
 
@@ -13,6 +12,9 @@ void Renderer::init()
 	load_texture();
 	init_shader();
 	init_resources();
+	KEY_BOARD_EVENT_MANAGER::get().BindMainKeyFunc(
+		[this](const KEY_BOARD_EVENT_MANAGER::key_event& key)->bool
+		{return player_->process_input(key); });
 }
 
 void Renderer::init_shader()
@@ -26,7 +28,7 @@ void Renderer::init_shader()
 	testing_shader_ = Shader::create(VS, FS, GS);
 
 	VS.clear(); VS.emplace_back("./Shader/grass_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/png_fragment.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/png_fragment.glsl"sv);
 	GS.clear();
 	billboard_shader_ = Shader::create(VS, FS, GS);
 
@@ -76,30 +78,30 @@ void Renderer::load_model()
 	// create objs, give vaos for models
 
 	cout << "model_load_done" << endl;
-	default_map = make_shared<OBJ>(map);
+	default_map = make_shared<Obj>(map);
 	default_map->scaling(glm::vec3{ 50.f });
 
-	cars_.emplace_back(make_shared<OBJ>(model));
+	cars_.emplace_back(make_shared<Obj>(model));
 	cars_[0]->move({ 10.f,5.f,2.f });
 
-	cars_.emplace_back(make_shared<OBJ>(bluecar));
+	cars_.emplace_back(make_shared<Obj>(bluecar));
 	cars_[1]->move({ 2.f,0.f,6.f });
 	cars_[1]->scaling(glm::vec3{ 4.0f });
 
-	cars_.emplace_back(make_shared<OBJ>(pinkcar));
+	cars_.emplace_back(make_shared<Obj>(pinkcar));
 	cars_[2]->move({ 5.f,0.f,10.f });
 	cars_[2]->scaling(glm::vec3{ 4.0f });
 
-	cars_.emplace_back(make_shared<OBJ>(greencar));
+	cars_.emplace_back(make_shared<Obj>(greencar));
 	cars_[3]->move({ 8.f,0.f,14.f });
 	cars_[3]->scaling(glm::vec3{ 4.0f });
 
-	player_ = make_shared<ControllObj>(size_t{ 0 }, bluecar);
+	player_ = make_shared<VehicleObj>(size_t{ 0 }, bluecar);
 	player_->scaling(glm::vec3{ 4.0f });
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
-	main_camera_->set_diff({ -5.f, 3.f, 0.f });
+	main_camera_->set_diff(glm::vec3{ -5.f, 3.f, 0.f });
 
 	vector<Vertex> grassvertices;
 	for (auto& v : cross_billboard_3)
@@ -195,7 +197,11 @@ void Renderer::draw()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDisable(GL_CULL_FACE);
 
+
 		billboard_shader_->use();
+		billboard_shader_->set("u_point_light", testing_point_light_);
+		billboard_shader_->set("u_directinal_light", testing_directional_light_);
+		billboard_shader_->set("u_spot_light", testing_spot_light_);
 		billboard_shader_->set("u_time", gametime);
 		auto tt = grasses_.get_textures();
 		billboard_shader_->set("u_tex_sampler", tt);

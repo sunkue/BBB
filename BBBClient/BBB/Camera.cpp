@@ -1,37 +1,14 @@
 #include "stdafx.h"
-
 #include "Camera.h"
 #include "DynamicObj.h"
 
 void Camera::update(float time_elpased)
 {
-	glm::vec3 target_dir; // using for target & position
-
-	/* target */
+	if (ownner_)
 	{
-		const auto head_dir = _ownner->get_head_dir();
-		const auto moving_speed = reinterpret_cast<DynamicObj*>(_ownner)->get_speed();
-		const auto moving_len = glm::length(moving_speed);
-		auto moving_dir = glm::normalize(moving_speed);
-		if (moving_len < 0.125f)
-		{
-			moving_dir = head_dir;
-		}
-		target_dir = glm::lerp(head_dir, moving_dir, clamp(0.2f * moving_len, 0.00f, 0.4f));
-		_target = _ownner->get_position() + target_dir * 10.0f;
+		ownner_->update_camera(this, time_elpased);
 	}
 
-	/* position */
-	{
-		auto rotate = quat_from2vectors({ _diff.x, 0,_diff.z }, { -target_dir.x, 0, -target_dir.z });
-		const auto trans_diff = glm::translate(_diff);
-		const auto trans = glm::translate(_ownner->get_position());
-		const auto scale = glm::scale(_ownner->get_scale());
-		auto m = trans * glm::toMat4(rotate) * scale * trans_diff;
-		position_ = m * V4_DEFAULT;
-	}
-
-	/* shake */
 	if (shaking_)
 	{
 		shaking_time_ -= time_elpased;

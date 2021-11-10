@@ -16,16 +16,16 @@ float color[4];
 
 void DoNextFrame()
 {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	gui::NewFrame();
+
 	KEY_BOARD_EVENT_MANAGER::get().ProcessInput();
 	Game::get().update();
 
 	Renderer::get().draw();
-
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	gui::NewFrame();
 	
-	if (!gui::GetIO().WantCaptureMouse)
+	if (gui::GetIO().WantCaptureMouse)
 	{
 		//cout << "!" << endl;
 	}

@@ -17,9 +17,6 @@
     <Filter Include="Render\Camera">
       <UniqueIdentifier>{6e52468e-34e3-4d5a-97a9-4c0018019f27}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Render\Chatting">
-      <UniqueIdentifier>{3f0402d2-0f0d-4e22-9e14-ffcd129f9d24}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Render\Obj">
       <UniqueIdentifier>{a65b6d00-8427-4b4a-8a36-75820c031231}</UniqueIdentifier>
     </Filter>
@@ -81,12 +78,6 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
       <Filter>Render\Camera</Filter>
-    </ClCompile>
-    <ClCompile Include="ChatManager.cpp">
-      <Filter>Render\Chatting</Filter>
-    </ClCompile>
-    <ClCompile Include="TextRenderer.cpp">
-      <Filter>Render\Chatting</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Render\Texture</Filter>
@@ -164,16 +155,11 @@
     <ClCompile Include="KeyboardEvent.cpp">
       <Filter>Render\Event</Filter>
     </ClCompile>
+    <ClCompile Include="OOBB.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
       <Filter>Render\Camera</Filter>
-    </ClInclude>
-    <ClInclude Include="ChatManager.h">
-      <Filter>Render\Chatting</Filter>
-    </ClInclude>
-    <ClInclude Include="TextRenderer.h">
-      <Filter>Render\Chatting</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Render\Texture</Filter>
@@ -283,6 +269,7 @@
     <ClInclude Include="KeyboardEvent.h">
       <Filter>Render\Event</Filter>
     </ClInclude>
+    <ClInclude Include="OOBB.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\grass_vertex.glsl">

@@ -4,17 +4,26 @@
 #include "Model.h"
 
 /////////////////////////////////////////////////////////////////
-
+const static glm::vec3 HEADING_DEFAULT = X_DEFAULT;
 
 /////////////////////////////////////////////////////////////////
+class Obj;
+class Camera;
 
-const glm::vec3 HEADING_DEFAULT = X_DEFAULT;
+__interface IObj
+{
+	virtual void update_uniform_vars(const ShaderPtr& shader)const = 0;
+	virtual void update(float time_elapsed) = 0;
+	virtual void draw(const ShaderPtr& shader)const = 0;
+	virtual void collision_detect(const Obj& other)const = 0;
+	virtual void update_camera(class Camera* camera, float time_elpased) const = 0;
+};
 
 /* 그려지는 모든 물체 */
-class OBJ
+class Obj : public IObj
 {
 public:
-	explicit OBJ(const ModelPtr& model) : model_{ model } {}
+	explicit Obj(const ModelPtr& model) : model_{ model } {}
 
 	glm::mat4 model_mat()const { return glm::translate(translate_) * glm::toMat4(quaternion_) * glm::scale(scale_); }
 
@@ -29,14 +38,28 @@ public:
 	void scaling(glm::vec3 ratio) { scale_ *= ratio; }
 
 public:
-	void update_uniform_vars(const ShaderPtr& shader)const;
+	virtual void update_uniform_vars(const ShaderPtr& shader)const;
 
-public:
-	glm::vec3 get_project_pos(glm::vec3 origin = {});
-	void draw(const ShaderPtr& shader)const
+	virtual void update(float time_elapsed) {};
+
+	virtual void draw(const ShaderPtr& shader)const
 	{
 		model_->draw(shader);
 	}
+
+	virtual void collision_detect(const Obj& other)const
+	{
+
+	}
+
+	virtual void update_camera(Camera* camera, float time_elpased) const
+	{
+
+	}
+
+public:
+	glm::vec3 get_project_pos(glm::vec3 origin = {});
+
 
 private:
 	glm::vec3 translate_;
@@ -44,7 +67,7 @@ private:
 	glm::vec3 scale_{ V3_DEFAULT };
 	ModelPtr model_;
 };
-using ObjPtr = shared_ptr<OBJ>;
+using ObjPtr = shared_ptr<Obj>;
 
 ///////////////////////////////////////////
 

@@ -5,43 +5,52 @@
 
 /// /////////////////////////////////////////////////////////////////////////
 
-class OBJ;
+class Obj;
 
 /* 소유된 (붙은) 카메라 */
 using CameraPtr = shared_ptr<class Camera>;
 class Camera
 {
-	friend class OBJ;
 public:
 	void update(float time_elapsed);
+
+	glm::mat4 view_mat()const { return glm::lookAt(position_, target_, up_); };
+
+	glm::vec3 get_look_dir()const { return glm::normalize(target_ - position_); };
+	glm::vec3 get_right()const { return glm::normalize(glm::cross(up_, - get_look_dir())); };
+
+	SET(ownner);
+	GET(ownner);
 	
-	glm::vec3 get_diff()const { return _diff; };
-	void set_diff(glm::vec3 d) { _diff = d; };
+	SET(diff);
+	GET(diff);
 
-	glm::mat4 view_mat()const { return glm::lookAt(position_, _target, _up); };
+	SET(target);
+	GET(target);
 
-	glm::vec3 get_look_dir()const { return glm::normalize(_target - position_); };
-	glm::vec3 get_right()const { return glm::normalize(glm::cross(_up, - get_look_dir())); };
-	glm::vec3 get_up()const { return _up; };
+	SET(up);
+	GET(up);
 
-	void set_ownner(OBJ* ownner) { _ownner = ownner; }
+	GET(position);
+	SET(position);
 
-	void camera_shake(float duration) { shaking_ = true; shaking_time_ = duration; };
+public:
 	GET(shaking);
 	GET(shaking_time);
-	GET(position);
+
+	void camera_shake(float duration) { shaking_ = true; shaking_time_ = duration; };
 private:
-	milliseconds _rotate_lag{ 200ms };
-	glm::vec3 _diff{};
-	
-	OBJ* _ownner = nullptr;
-
-	glm::vec3 position_{ V_ZERO };
-	glm::vec3 _target{ V_ZERO };
-	glm::vec3 _up{ Y_DEFAULT };
-
 	bool shaking_ = false;
 	float shaking_time_ = 0.f;
+
+private:
+	Obj* ownner_ = nullptr;
+	
+	glm::vec3 diff_{};
+
+	glm::vec3 position_{ V_ZERO };
+	glm::vec3 target_{ V_ZERO };
+	glm::vec3 up_{ Y_DEFAULT };
 };
 
 

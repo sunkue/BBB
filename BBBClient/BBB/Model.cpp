@@ -13,7 +13,7 @@
 
 void Model::draw(const ShaderPtr& shader) const
 {
-	for (auto m : meshes)
+	for (const auto& m : meshes)
 	{
 		m.draw(shader);
 	}

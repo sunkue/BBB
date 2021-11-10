@@ -44,11 +44,11 @@ uniform DirectionalLight u_directinal_light;
 uniform Material u_material;
 uniform vec3 u_view_pos;
 
-in GS_OUT {
+in FS_IN {
     vec3 world_pos;
 	vec3 normal;
     vec2 texcoord;
-} gs_in;
+} fs_in;
 
 
 float caculate_attenuation(vec3 light_pos,vec3 attenuation_param, vec3 world_pos)

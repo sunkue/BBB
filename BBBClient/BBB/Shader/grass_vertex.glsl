@@ -18,13 +18,14 @@ in float a_yaw;
 in float a_shearseed;
 in vec3 a_translate;
 
-out VS_OUT
+out FS_IN
 {
+	vec3 world_pos;
 	vec3 normal;
 	vec2 texcoord;
-	flat int texture_index;
 } vs_out;
 
+flat out int texture_index;
 
 vec2 rotate(vec2 v, float radian)
 {
@@ -60,7 +61,8 @@ void main()
 	pos = vec4(pos.xyz + a_translate, 1.f);
 
 	gl_Position = u_vp_mat * pos;
-	vs_out.texture_index = gl_InstanceID % 4;
+	texture_index = gl_InstanceID % 4;
 	vs_out.normal = a_normal;	
+	vs_out.world_pos = a_translate;	
 	vs_out.texcoord = a_texcoord;
 }

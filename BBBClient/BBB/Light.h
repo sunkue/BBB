@@ -8,7 +8,7 @@
 
 struct LightBasic
 {
-	glm::vec3 ambient{ .2f };
+	glm::vec3 ambient{ .1f };
 	glm::vec3 diffuse{ .5f };
 	glm::vec3 specular{ 1.f };
 };

@@ -18,6 +18,7 @@ Mesh::Mesh
 
 void Mesh::draw(const ShaderPtr& shader)const
 {
+	shader->use();
 	GLuint albedo_n = 1;
 	GLuint specular_n = 1;
 	for (const auto& t : textures_)
