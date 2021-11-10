@@ -4,15 +4,15 @@
 #include "VAO_OBJ.h"
 #include "Camera.h"
 #include "Game.h"
+#include "KeyboardEvent.h"
 
 GLFWwindow* window;
 
 
-void processInput(GLFWwindow* window);
 
-void DoNextFrame(void)
+void DoNextFrame()
 {
-	processInput(window);
+	KEY_BOARD_EVENT_MANAGER::get().ProcessInput();
 	Game::get().update();
 
 	Renderer::get().draw();
@@ -36,7 +36,8 @@ void DoNextFrame(void)
 	glfwSwapBuffers(window);
 }
 
-void MouseWheel(GLFWwindow* window, double xoffset, double yoffset) {
+void MouseWheel(GLFWwindow* window, double xoffset, double yoffset)
+{
 	auto camera = Renderer::get().get_main_camera();
 	if (yoffset > 0)
 	{
@@ -53,39 +54,30 @@ void MouseWheel(GLFWwindow* window, double xoffset, double yoffset) {
 	DoNextFrame();
 }
 
-void processInput(GLFWwindow* window)
+
+
+void CursorPos(GLFWwindow* window, double xpos, double ypos)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS);
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
-	if (glfwGetKey(window, 's') == GLFW_PRESS);
-	if (glfwGetKey(window, 'd') == GLFW_PRESS);
-	if (glfwGetKey(window, 'a') == GLFW_PRESS);
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
+
 }
 
-
-void SpecialKeyInput(int key, int x, int y)
+void MouseButton(GLFWwindow* window, int button, int action, int mods)
 {
-	//	switch (key)
-	//	{
-	//	case GLUT_KEY_SHIFT_L:
-	//		Game::get().renderer.get_main_camera()->camera_shake(0.2f);
-	//		break;
-	//	default: break;
-	//	}
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS);
+	//popup_menu();
+
+	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+	if (state == GLFW_PRESS)
+	{
+	};
 }
 
-void Resize(GLFWwindow* window, int w, int h)
+void bind_key_func()
 {
-	Renderer::get().reshape(w, h);
-	DoNextFrame();
-}
+	KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_LEFT_SHIFT, 
+		[] { Game::get().renderer.get_main_camera()->camera_shake(0.2f); });
 
-void Position(int x, int y)
-{
-	DoNextFrame();
 }
-
 
 int main()
 {
@@ -110,12 +102,16 @@ int main()
 		return -1;
 	}
 
-	glfwSetFramebufferSizeCallback(window, Resize);
-	glfwSetWindowSizeCallback(window, [](GLFWwindow* window, int w, int h) { Renderer::get().reshape(w, h); });
-	glfwSetScrollCallback(window, MouseWheel);
-	//glfwSetMouseButtonCallback(window, );
-	//glfwSetCursorPosCallback();
+	glfwSetFramebufferSizeCallback(window,
+		[](GLFWwindow* window, int w, int h)
+		{ Renderer::get().reshape(w, h); DoNextFrame(); });
 
+	glfwSetScrollCallback(window, MouseWheel);
+	glfwSetMouseButtonCallback(window, MouseButton);
+	glfwSetCursorPosCallback(window, CursorPos);
+	glfwSetKeyCallback(window,
+		[](GLFWwindow* window, int key, int code, int action, int modifiers)
+		{ KEY_BOARD_EVENT_MANAGER::get().KeyBoard(window, key, code, action, modifiers); });
 
 	IMGUI_CHECKVERSION();
 	gui::CreateContext();
@@ -123,6 +119,10 @@ int main()
 	gui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
+
+	Renderer::get().reshape(screen.width, screen.height);
+
+	bind_key_func();
 
 	while (!glfwWindowShouldClose(window))
 	{

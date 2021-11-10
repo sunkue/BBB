@@ -26,6 +26,7 @@
 namespace MY_NAME_SPACE {} using namespace MY_NAME_SPACE; using namespace std;
 #endif // NONAMESPACE
 
+#define CASE break; case
 
 /// CODE GENERATE
 namespace MY_NAME_SPACE

@@ -2,6 +2,7 @@
 
 #include "VAO_OBJ.h"
 #include "ChatManager.h"
+#include "KeyboardEvent.h"
 
 /* moving obj */
 class DynamicObj : public OBJ
@@ -83,11 +84,6 @@ protected:
 
 };
 
-enum class PLAYER_STATE
-{
-	idle,
-	chat
-};
 
 /* controllable obj */
 class ControllObj : public DynamicObj
@@ -140,8 +136,7 @@ public:
 //	void render_chat(glm::vec3 color = {});
 	
 public:
-	void apply_input_press(UCHAR key);
-	void apply_input_unpress(UCHAR key);
+	void process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key);
 
 private:
 	CONTROLL _accel_control{ CONTROLL::none };
@@ -154,8 +149,6 @@ private:
 
 	bool _brake_on = false;
 	bool _use_item = false;
-
-	PLAYER_STATE _state{ PLAYER_STATE::idle };
 
 	size_t _id;
 	ChatMachine _chat;

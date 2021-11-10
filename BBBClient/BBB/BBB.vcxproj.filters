@@ -74,6 +74,9 @@
     <Filter Include="Render\GUI\gui">
       <UniqueIdentifier>{6c8b1f5b-8c67-4dd6-8955-47c2684ac2aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\Event">
+      <UniqueIdentifier>{522df6f0-d1b5-4f6a-8a2c-6f8d2d0b5845}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="Dependencies\imgui\imgui_impl_glfw.cpp">
       <Filter>Render\GUI\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyboardEvent.cpp">
+      <Filter>Render\Event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -273,6 +279,9 @@
     </ClInclude>
     <ClInclude Include="Dependencies\imgui\imgui_impl_glfw.h">
       <Filter>Render\GUI\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyboardEvent.h">
+      <Filter>Render\Event</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
