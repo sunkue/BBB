@@ -98,6 +98,8 @@ public:
 	GET_REF(main_camera);
 	GET_REF(player);	
 	GET_REF(ghost);
+	SET(ghost);
+	GET_REF(cars);
 
 	void swap_player_ghost();
 
@@ -130,8 +132,8 @@ private:
 	vector<ObjPtr> cars_;
 
 	//
-	Player0Ptr player_;
-	Player0Ptr ghost_;
+	ObjPtr player_;
+	ObjPtr ghost_;
 	//
 
 	ShaderPtr billboard_shader_;

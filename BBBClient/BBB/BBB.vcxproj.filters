@@ -88,7 +88,7 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Render\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="VAO_OBJ.cpp">
+    <ClCompile Include="Obj.cpp">
       <Filter>Render\Obj</Filter>
     </ClCompile>
     <ClCompile Include="DynamicObj.cpp">
@@ -175,7 +175,7 @@
     <ClInclude Include="Renderer.h">
       <Filter>Render\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="VAO_OBJ.h">
+    <ClInclude Include="Obj.h">
       <Filter>Render\Obj</Filter>
     </ClInclude>
     <ClInclude Include="DynamicObj.h">

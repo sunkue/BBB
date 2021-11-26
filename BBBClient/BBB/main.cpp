@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "Renderer.h"
-#include "VAO_OBJ.h"
+#include "Obj.h"
 #include "Camera.h"
 #include "Game.h"
 #include "KeyboardEvent.h"
@@ -26,8 +26,8 @@ void DoNextFrame()
 	gui::Checkbox("R", &MOUSE_EVENT_MANAGER::get().get_R_click());
 	gui::Checkbox("Wheel", &MOUSE_EVENT_MANAGER::get().get_Wheel_click());
 	gui::Text("MOUSE_POS_CHECK");
-	float y = MOUSE_EVENT_MANAGER::get().get_prev_y();
 	float x = MOUSE_EVENT_MANAGER::get().get_prev_x();
+	float y = MOUSE_EVENT_MANAGER::get().get_prev_y();
 	gui::InputFloat("x", &x);
 	gui::InputFloat("y", &y);
 	gui::End();
@@ -104,7 +104,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window = glfwCreateWindow(screen.width, screen.height, "SUNKUE", NULL, NULL);
-	if (window == NULL)
+	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VAO_OBJ.h"
+#include "Obj.h"
 #include "KeyboardEvent.h"
 
 class Camera;
@@ -122,7 +122,4 @@ private:
 
 	size_t id_;
 };
-
-using Player0Ptr = shared_ptr<DynamicObj>;
-
 

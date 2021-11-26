@@ -21,7 +21,7 @@ public:
 	Renderer& renderer = Renderer::get();
 	GAME_SYSTEM& game_system = GAME_SYSTEM::get();
 
-	Player0Ptr player = renderer.get_player();
+	ObjPtr player = renderer.get_player();
 	GLFWwindow* window = nullptr;
 };
 

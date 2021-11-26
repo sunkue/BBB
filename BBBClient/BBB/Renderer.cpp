@@ -102,36 +102,38 @@ void Renderer::load_model()
 	player_ = make_shared<VehicleObj>(id++, bluecar);
 	player_->scaling(glm::vec3{ 4.0f });
 
+	cars_.push_back(player_);
+
 	cars_.emplace_back(make_shared<VehicleObj>(id++, model));
-	cars_[0]->move({ 10.f,5.f,2.f });
+	cars_.back()->move({ 10.f,5.f,2.f });
 
 	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
-	cars_[1]->move({ 2.f,0.f,6.f });
-	cars_[1]->scaling(glm::vec3{ 4.0f });
+	cars_.back()->move({ 2.f,0.f,6.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
 	cars_.emplace_back(make_shared<VehicleObj>(id++, pinkcar));
-	cars_[2]->move({ 5.f,0.f,10.f });
-	cars_[2]->scaling(glm::vec3{ 4.0f });
+	cars_.back()->move({ 5.f,0.f,10.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
 	cars_.emplace_back(make_shared<VehicleObj>(id++, greencar));
-	cars_[3]->move({ 8.f,0.f,14.f });
-	cars_[3]->scaling(glm::vec3{ 4.0f });
+	cars_.back()->move({ 8.f,0.f,14.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
 	cars_.emplace_back(make_shared<VehicleObj>(id++, greencar));
-	cars_[4]->move({ 0.f,0.f,0.f });
-	cars_[4]->scaling(glm::vec3{ 1.0f, 10.0f, 1.0f });
+	cars_.back()->move({ 0.f,0.f,0.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
 	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
-	cars_[5]->move({ 0.f,0.f,1.f });
-	cars_[5]->scaling(glm::vec3{ 1.0f, 10.0f, 1.0f });
+	cars_.back()->move({ 0.f,15.f,1.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
 	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
-	cars_[6]->move({ 0.f,0.f,3.f });
-	cars_[6]->scaling(glm::vec3{ 1.0f, 10.0f, 1.0f });
+	cars_.back()->move({ 4.f,8.f,3.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
 	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
-	cars_[7]->move({ 0.f,0.f,7.f });
-	cars_[7]->scaling(glm::vec3{ 1.0f, 10.0f, 1.0f });
+	cars_.back()->move({ 0.f,8.f,7.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
@@ -199,7 +201,6 @@ void Renderer::draw()
 {
 	ready_draw();
 
-
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
 	screen_renderer->bind_predraw_fbo();
@@ -233,25 +234,6 @@ void Renderer::draw()
 		ghost_->update_uniform_vars(testing_shader_);
 		ghost_->draw(testing_shader_);
 
-		auto ray = Ray::create(
-			MOUSE_EVENT_MANAGER::get().get_prev_x(),
-			MOUSE_EVENT_MANAGER::get().get_prev_y()
-		);
-
-		float dist = 0;
-		if (player_->get_boundings().intersects(ray, dist))
-		{
-			cout << "intersect::" << std::setw(10)
-				<< std::setprecision(5) << dist << endl;
-		}
-		else
-		{
-			cout << "NON" << std::setw(10)
-				<< std::setprecision(5) << dist << endl;
-		}
-
-
-
 		skybox->draw();
 
 		// billoards
@@ -266,7 +248,6 @@ void Renderer::draw()
 		billboard_shader_->set("u_tex_sampler", tt);
 		grasses_.draw();
 		glUseProgram(0);
-
 	}
 
 	screen_renderer->blit_fbo();

@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "VAO_OBJ.h"
+#include "Obj.h"
 #include "Renderer.h"
 
 

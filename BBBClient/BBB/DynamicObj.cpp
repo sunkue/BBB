@@ -226,6 +226,26 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::button_event& button)
 			rotate(glm::inverse(get_rotation()));
 		}
 	}
+
+	if (GLFW_MOUSE_BUTTON_LEFT == button.button)
+	{
+		if (GLFW_PRESS == button.action)
+		{
+			auto& renderer = Renderer::get();
+			auto mouse_ray = Ray::create(mm.get_prev_x(), mm.get_prev_y());
+			for (const auto& car : renderer.get_cars())
+			{
+				float dist;
+				if (car->get_boundings().intersects(mouse_ray, dist))
+				{
+					renderer.set_ghost(car);
+					renderer.swap_player_ghost();
+					break;
+				}
+			}
+		}
+	}
+
 	// 오브젝트 선택. 클릭시 선택 (ray_collision)
 	return false;
 }
@@ -249,7 +269,7 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::pos_event& pos)
 			auto xm = glm::rotate(glm::radians(-xoffset), camera->get_up());
 			//auto ym = glm::rotate(glm::radians(-yoffset), camera->get_right());
 			auto ym = glm::rotate(glm::radians(-yoffset), camera->get_right());
-			
+
 			rotate({ xm * ym });
 			return true;
 		}

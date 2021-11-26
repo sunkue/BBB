@@ -230,7 +230,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="VAO_OBJ.cpp" />
+    <ClCompile Include="Obj.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Share\SocketUtil.h" />
@@ -270,7 +270,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="sunkue_glm.hpp" />
     <ClInclude Include="Texture.h" />
-    <ClInclude Include="VAO_OBJ.h" />
+    <ClInclude Include="Obj.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\cubemap_fragment.glsl" />
