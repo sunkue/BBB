@@ -8,7 +8,7 @@ Renderer::Renderer()
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT, GL_FILL);
-	glEnable(GL_BLEND);
+	glDisable(GL_BLEND);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_MULTISAMPLE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -7,14 +7,31 @@ SCREEN screen;
 
 
 
+void Renderer::swap_player_ghost()
+{
+	player_.swap(ghost_);
+	main_camera_->set_ownner(player_.get());
+}
+
 void Renderer::init()
 {
 	load_texture();
 	init_shader();
 	init_resources();
+
 	KEY_BOARD_EVENT_MANAGER::get().BindMainKeyFunc(
 		[this](const KEY_BOARD_EVENT_MANAGER::key_event& key)->bool
-		{return player_->process_input(key); });
+		{ return get_player()->process_input(key); });
+
+	MOUSE_EVENT_MANAGER::get().BindMainScrollFunc(
+		[this](const MOUSE_EVENT_MANAGER::scroll_event& scroll)->bool
+		{ return get_player()->process_input(scroll); });
+	MOUSE_EVENT_MANAGER::get().BindMainButtonFunc(
+		[this](const MOUSE_EVENT_MANAGER::button_event& button)->bool
+		{ return get_player()->process_input(button); });
+	MOUSE_EVENT_MANAGER::get().BindMainPosFunc(
+		[this](const MOUSE_EVENT_MANAGER::pos_event& pos)->bool
+		{ return get_player()->process_input(pos); });
 }
 
 void Renderer::init_shader()
@@ -80,24 +97,41 @@ void Renderer::load_model()
 	cout << "model_load_done" << endl;
 	default_map = make_shared<Obj>(map);
 	default_map->scaling(glm::vec3{ 50.f });
+	size_t id = 0;
 
-	cars_.emplace_back(make_shared<Obj>(model));
+	player_ = make_shared<VehicleObj>(id++, bluecar);
+	player_->scaling(glm::vec3{ 4.0f });
+
+	cars_.emplace_back(make_shared<VehicleObj>(id++, model));
 	cars_[0]->move({ 10.f,5.f,2.f });
 
-	cars_.emplace_back(make_shared<Obj>(bluecar));
+	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
 	cars_[1]->move({ 2.f,0.f,6.f });
 	cars_[1]->scaling(glm::vec3{ 4.0f });
 
-	cars_.emplace_back(make_shared<Obj>(pinkcar));
+	cars_.emplace_back(make_shared<VehicleObj>(id++, pinkcar));
 	cars_[2]->move({ 5.f,0.f,10.f });
 	cars_[2]->scaling(glm::vec3{ 4.0f });
 
-	cars_.emplace_back(make_shared<Obj>(greencar));
+	cars_.emplace_back(make_shared<VehicleObj>(id++, greencar));
 	cars_[3]->move({ 8.f,0.f,14.f });
 	cars_[3]->scaling(glm::vec3{ 4.0f });
 
-	player_ = make_shared<VehicleObj>(size_t{ 0 }, bluecar);
-	player_->scaling(glm::vec3{ 4.0f });
+	cars_.emplace_back(make_shared<VehicleObj>(id++, greencar));
+	cars_[4]->move({ 0.f,0.f,0.f });
+	cars_[4]->scaling(glm::vec3{ 1.0f, 10.0f, 1.0f });
+
+	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
+	cars_[5]->move({ 0.f,0.f,1.f });
+	cars_[5]->scaling(glm::vec3{ 1.0f, 10.0f, 1.0f });
+
+	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
+	cars_[6]->move({ 0.f,0.f,3.f });
+	cars_[6]->scaling(glm::vec3{ 1.0f, 10.0f, 1.0f });
+
+	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
+	cars_[7]->move({ 0.f,0.f,7.f });
+	cars_[7]->scaling(glm::vec3{ 1.0f, 10.0f, 1.0f });
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
@@ -126,11 +160,11 @@ void Renderer::load_model()
 		const glm::vec3 default_pos = { -HALF_ROOT3, -1.f, -1.f };
 		translate.push_back(pos + default_pos);
 		shearseed.push_back(translate[i].x / 10);
-		scales.push_back(1.f + i % 3 * 0.3f);
+		scales.push_back(1.f + i % 3 * 0.6f);
 		yaw.push_back(glm::radians(static_cast<float>(rand() % 360)));
 	}
 
-	auto texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass0.png");grasses_.add_texture(texture);
+	auto texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass0.png"); grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass1.png");		grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/blueflower.png");	grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/redflower.png");	grasses_.add_texture(texture);
@@ -139,6 +173,10 @@ void Renderer::load_model()
 	grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw.data());
 	grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate.data());
 	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed.data());
+
+
+	auto no_model = Model::create("");
+	ghost_ = make_unique<GhostObj>(no_model);
 }
 
 
@@ -161,10 +199,11 @@ void Renderer::draw()
 {
 	ready_draw();
 
+
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
 	screen_renderer->bind_predraw_fbo();
-	
+
 	{
 		testing_shader_->use();
 		auto shaket = main_camera_->get_shaking_time();
@@ -188,16 +227,36 @@ void Renderer::draw()
 			car->update_uniform_vars(testing_shader_);
 			car->draw(testing_shader_);
 		}
+
 		player_->update_uniform_vars(testing_shader_);
 		player_->draw(testing_shader_);
+		ghost_->update_uniform_vars(testing_shader_);
+		ghost_->draw(testing_shader_);
+
+		auto ray = Ray::create(
+			MOUSE_EVENT_MANAGER::get().get_prev_x(),
+			MOUSE_EVENT_MANAGER::get().get_prev_y()
+		);
+
+		float dist = 0;
+		if (player_->get_boundings().intersects(ray, dist))
+		{
+			cout << "intersect::" << std::setw(10)
+				<< std::setprecision(5) << dist << endl;
+		}
+		else
+		{
+			cout << "NON" << std::setw(10)
+				<< std::setprecision(5) << dist << endl;
+		}
+
+
 
 		skybox->draw();
 
 		// billoards
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDisable(GL_CULL_FACE);
-
-
 		billboard_shader_->use();
 		billboard_shader_->set("u_point_light", testing_point_light_);
 		billboard_shader_->set("u_directinal_light", testing_directional_light_);
@@ -206,6 +265,7 @@ void Renderer::draw()
 		auto tt = grasses_.get_textures();
 		billboard_shader_->set("u_tex_sampler", tt);
 		grasses_.draw();
+		glUseProgram(0);
 
 	}
 

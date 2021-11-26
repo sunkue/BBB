@@ -34,6 +34,8 @@ void Mesh::draw(const ShaderPtr& shader)const
 	}
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 void Mesh::setup_mesh()
@@ -70,8 +72,10 @@ CubeMap::CubeMap(const ShaderPtr& shader, const vector<string_view>& textures, c
 	, vao_{ setup_mesh() }
 {
 }
+
 void CubeMap::draw() const
 {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	cube_shader_->use();
 	auto& renderer = Renderer::get();
 	glm::mat4 p = renderer.proj_mat();
@@ -84,7 +88,10 @@ void CubeMap::draw() const
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cube_texture_);
 	glBindVertexArray(vao_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glUseProgram(0);
 }
+
 
 GLuint CubeMap::setup_mesh()
 {

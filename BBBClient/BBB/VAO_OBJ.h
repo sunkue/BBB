@@ -2,9 +2,12 @@
 
 #include "Light.h"
 #include "Model.h"
+#include "MouseEvent.h"
+#include "KeyboardEvent.h"
+#include "Collision.h"
 
 /////////////////////////////////////////////////////////////////
-const static glm::vec3 HEADING_DEFAULT = X_DEFAULT;
+
 
 /////////////////////////////////////////////////////////////////
 class Obj;
@@ -12,18 +15,25 @@ class Camera;
 
 __interface IObj
 {
-	virtual void update_uniform_vars(const ShaderPtr& shader)const = 0;
-	virtual void update(float time_elapsed) = 0;
-	virtual void draw(const ShaderPtr& shader)const = 0;
-	virtual void collision_detect(const Obj& other)const = 0;
-	virtual void update_camera(class Camera* camera, float time_elpased) const = 0;
+	void update_uniform_vars(const ShaderPtr& shader)const;
+	void update(float time_elapsed);
+	void draw(const ShaderPtr& shader)const;
+	void collision_detect(const Obj& other)const;
+	void update_camera(class Camera* camera, float time_elpased) const;
+	bool process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key);
+	bool process_input(const MOUSE_EVENT_MANAGER::scroll_event& scroll);
+	bool process_input(const MOUSE_EVENT_MANAGER::button_event& button);
+	bool process_input(const MOUSE_EVENT_MANAGER::pos_event& pos);
+	void draw_gui();
 };
 
 /* 그려지는 모든 물체 */
 class Obj : public IObj
 {
 public:
+	
 	explicit Obj(const ModelPtr& model) : model_{ model } {}
+	virtual ~Obj() {}
 
 	glm::mat4 model_mat()const { return glm::translate(translate_) * glm::toMat4(quaternion_) * glm::scale(scale_); }
 
@@ -32,30 +42,35 @@ public:
 	glm::vec3 get_scale()const { return scale_; }
 
 	glm::vec3 get_head_dir()const { return get_rotation() * HEADING_DEFAULT; }
+	glm::vec3 get_up_dir()const { return get_rotation() * UP_DEFAULT; }
+	glm::vec3 get_right_dir()const { return get_rotation() * RIGHT_DEFAULT; }
 
-	void rotate(glm::quat q) { quaternion_ = q * quaternion_; }
-	void move(glm::vec3 dif) { translate_ += dif; }
-	void scaling(glm::vec3 ratio) { scale_ *= ratio; }
+	void rotate(glm::quat q) { quaternion_ *= q; boundings_.rotate(q); }
+	void move(glm::vec3 dif) { translate_ += dif; boundings_.move(dif); }
+	void scaling(glm::vec3 ratio) { scale_ *= ratio; boundings_.scaling(ratio); }
 
 public:
 	virtual void update_uniform_vars(const ShaderPtr& shader)const;
 
-	virtual void update(float time_elapsed) {};
+	virtual void update(float time_elapsed) {}
 
 	virtual void draw(const ShaderPtr& shader)const
 	{
 		model_->draw(shader);
+		boundings_.draw();
 	}
-
-	virtual void collision_detect(const Obj& other)const
+	virtual void draw_gui() 
 	{
+		boundings_.draw_gui();
+	};
 
-	}
+	virtual void collision_detect(const Obj& other)const {}
 
-	virtual void update_camera(Camera* camera, float time_elpased) const
-	{
-
-	}
+	virtual void update_camera(Camera* camera, float time_elpased) const {}
+	virtual bool process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key) { return false; };
+	virtual bool process_input(const MOUSE_EVENT_MANAGER::scroll_event& scroll) { return false; };
+	virtual bool process_input(const MOUSE_EVENT_MANAGER::button_event& button) { return false; };
+	virtual bool process_input(const MOUSE_EVENT_MANAGER::pos_event& pos) { return false; };
 
 public:
 	glm::vec3 get_project_pos(glm::vec3 origin = {});
@@ -66,6 +81,11 @@ private:
 	glm::quat quaternion_;
 	glm::vec3 scale_{ V3_DEFAULT };
 	ModelPtr model_;
+
+public:
+	GET_REF(boundings);
+private:
+	Boundings boundings_;
 };
 using ObjPtr = shared_ptr<Obj>;
 

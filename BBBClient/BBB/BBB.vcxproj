@@ -218,7 +218,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="OOBB.cpp" />
+    <ClCompile Include="MouseEvent.cpp" />
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Renderer_static.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -230,7 +231,6 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="VAO_OBJ.cpp" />
-    <ClCompile Include="Vehicle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Share\SocketUtil.h" />
@@ -261,7 +261,8 @@
     <ClInclude Include="LoadPng.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="OOBB.h" />
+    <ClInclude Include="MouseEvent.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Shader.hpp" />
@@ -270,11 +271,11 @@
     <ClInclude Include="sunkue_glm.hpp" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="VAO_OBJ.h" />
-    <ClInclude Include="Vehicle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\cubemap_fragment.glsl" />
     <None Include="Shader\cubemap_vertex.glsl" />
+    <None Include="Shader\default_fragment.glsl" />
     <None Include="Shader\grass_vertex.glsl" />
     <None Include="Shader\IN_light.glsl" />
     <None Include="Shader\png_fragment.glsl" />

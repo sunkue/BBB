@@ -13,6 +13,18 @@ public:
 
 	CREATE_SHARED(ShaderPtr, Shader);
 
+	static ShaderPtr basic()
+	{
+		vector<string> VS;
+		vector<string> FS;
+		vector<string> GS;
+		VS.clear(); VS.emplace_back("./Shader/test_vertex.glsl"sv);
+		FS.clear(); FS.emplace_back("./Shader/default_fragment.glsl"sv);
+		GS.clear(); 
+		static ShaderPtr basic = Shader::create(VS, FS, GS);
+		return basic;
+	}
+	
 private:
 	Shader(vector<string>& filenameVS, vector<string>& filenameFS, vector<string>& filenameGS);
 	

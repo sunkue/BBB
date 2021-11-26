@@ -15,8 +15,8 @@ layout (location = 2) in vec2 a_texcoord;
 
 out VS_OUT
 {
-	out vec3 world_pos;
-	out vec3 normal;
+	vec3 world_pos;
+	vec3 normal;
     vec2 texcoord;
 } vs_out;
 

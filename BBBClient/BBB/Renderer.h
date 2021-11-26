@@ -95,8 +95,11 @@ public:
 
 	glm::mat4 proj_mat()const { return screen_.proj_mat(); }
 
-	CameraPtr get_main_camera()const { return main_camera_; }
-	Player0Ptr get_player()const { return player_; }
+	GET_REF(main_camera);
+	GET_REF(player);	
+	GET_REF(ghost);
+
+	void swap_player_ghost();
 
 private:
 	void init();
@@ -125,7 +128,10 @@ private:
 	//
 
 	vector<ObjPtr> cars_;
+
+	//
 	Player0Ptr player_;
+	Player0Ptr ghost_;
 	//
 
 	ShaderPtr billboard_shader_;

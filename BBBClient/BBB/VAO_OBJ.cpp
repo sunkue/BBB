@@ -5,8 +5,10 @@
 
 void Obj::update_uniform_vars(const ShaderPtr& shader)const
 {
+	shader->use();
 	glm::mat4 m = model_mat();
 	shader->set("u_m_mat", m);
+	glUseProgram(0);
 }
 
 // [-1, 1]

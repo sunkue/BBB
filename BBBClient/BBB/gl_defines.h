@@ -17,3 +17,6 @@ constexpr float HALF_ROOT3 = { 0.8662109375 };
 constexpr float ellipsis = { 0.00001f };
 constexpr float ellipsis2 = { 0.1f };
 
+const glm::vec3 HEADING_DEFAULT = X_DEFAULT;
+const glm::vec3 UP_DEFAULT = Y_DEFAULT;
+const glm::vec3 RIGHT_DEFAULT = Z_DEFAULT;

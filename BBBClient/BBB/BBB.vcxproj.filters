@@ -26,9 +26,6 @@
     <Filter Include="helper">
       <UniqueIdentifier>{57d288d0-9226-4988-8ea4-f5fbc75b9de9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Render\Vehicle">
-      <UniqueIdentifier>{626679ba-74a2-49ad-ae1c-2516436f5c32}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Render\Shader">
       <UniqueIdentifier>{15fe09d3-a721-40e2-a80c-bc9139d6c330}</UniqueIdentifier>
     </Filter>
@@ -74,6 +71,9 @@
     <Filter Include="Render\Event">
       <UniqueIdentifier>{522df6f0-d1b5-4f6a-8a2c-6f8d2d0b5845}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\Collision">
+      <UniqueIdentifier>{262789bf-8636-4157-8f8c-cd3896e2320e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -102,9 +102,6 @@
     </ClCompile>
     <ClCompile Include="game_system.cpp">
       <Filter>Game</Filter>
-    </ClCompile>
-    <ClCompile Include="Vehicle.cpp">
-      <Filter>Render\Vehicle</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="..\..\Share\SocketUtil.cpp">
@@ -155,7 +152,12 @@
     <ClCompile Include="KeyboardEvent.cpp">
       <Filter>Render\Event</Filter>
     </ClCompile>
-    <ClCompile Include="OOBB.cpp" />
+    <ClCompile Include="Collision.cpp">
+      <Filter>Render\Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="MouseEvent.cpp">
+      <Filter>Render\Event</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -190,9 +192,6 @@
     </ClInclude>
     <ClInclude Include="game_system.h">
       <Filter>Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Vehicle.h">
-      <Filter>Render\Vehicle</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Share\includes.h">
       <Filter>Share</Filter>
@@ -269,7 +268,12 @@
     <ClInclude Include="KeyboardEvent.h">
       <Filter>Render\Event</Filter>
     </ClInclude>
-    <ClInclude Include="OOBB.h" />
+    <ClInclude Include="Collision.h">
+      <Filter>Render\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseEvent.h">
+      <Filter>Render\Event</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\grass_vertex.glsl">
@@ -300,6 +304,9 @@
       <Filter>Render\Shader\glsl</Filter>
     </None>
     <None Include="Shader\test_geometry.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\default_fragment.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
   </ItemGroup>

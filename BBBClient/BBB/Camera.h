@@ -19,6 +19,18 @@ public:
 	glm::vec3 get_look_dir()const { return glm::normalize(target_ - position_); };
 	glm::vec3 get_right()const { return glm::normalize(glm::cross(up_, - get_look_dir())); };
 
+	void draw_gui()
+	{
+		gui::Begin("Camera");
+		auto look = get_look_dir();
+		auto right = get_right();
+		
+		gui::DragFloat3("look", glm::value_ptr(look));
+		gui::DragFloat3("right", glm::value_ptr(right));
+		gui::DragFloat3("Up", glm::value_ptr(up_));
+		gui::End();
+	}
+
 	SET(ownner);
 	GET(ownner);
 	
@@ -37,7 +49,6 @@ public:
 public:
 	GET(shaking);
 	GET(shaking_time);
-
 	void camera_shake(float duration) { shaking_ = true; shaking_time_ = duration; };
 private:
 	bool shaking_ = false;

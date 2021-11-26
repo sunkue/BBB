@@ -17,11 +17,23 @@ public:
 	CREATE_SHARED(ModelPtr, Model);
 
 	void draw(const ShaderPtr& shader)const;
+
+	static ModelPtr sphere()
+	{
+		static ModelPtr sphere = create("./Resource/Model/sphere/sphere.obj");
+		return sphere;
+	}
+	
+	static ModelPtr box()
+	{
+		static ModelPtr box = create("./Resource/Model/box/box.obj");
+		return box;
+	}
+
 private:
 	Model(string_view path)
 	{
 		load_model(path);
-		
 	}
 
 
