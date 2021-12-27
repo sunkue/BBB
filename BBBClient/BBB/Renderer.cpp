@@ -72,10 +72,10 @@ void Renderer::init_shader()
 		skybox = CubeMap::create(cubeshader, textures, dir);
 	}
 
-	screen_renderer = make_unique<ScreenRenderer>();
-	screen_renderer->init();
-	depth_renderer = make_unique<DepthRenderer>();
-	depth_renderer->init();
+	screen_renderer_ = make_unique<ScreenRenderer>();
+	screen_renderer_->init();
+	depth_renderer_ = make_unique<DepthRenderer>();
+	depth_renderer_->init();
 }
 
 void Renderer::init_resources()
@@ -88,7 +88,11 @@ void Renderer::init_resources()
 
 	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
 	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
+	ubo_lightspace_mat.bind(testing_shader_, "LIGHTSPACE_MAT");
+	ubo_lightspace_mat.bind(billboard_shader_, "LIGHTSPACE_MAT");
 
+	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
+	ubo_lightspace_mat.update(glm::value_ptr(depth_renderer_->lightspace_mat[index]));
 }
 
 void Renderer::load_model()
@@ -198,13 +202,13 @@ void Renderer::load_texture()
 
 void Renderer::ready_draw()
 {
-	main_camera_->set_position(-testing_directional_light_->direction*100);
-	main_camera_->set_target(glm::vec3(0));
-	main_camera_->set_up(glm::vec3(0,1,0));
+	//main_camera_->set_position(-testing_directional_light_->direction*100);
+	//main_camera_->set_target(glm::vec3(0));
+	//main_camera_->set_up(glm::vec3(0,1,0));
 	glm::mat4 lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, screen.n, screen.f);
 
-	auto vp_mat = lightProjection* main_camera_->view_mat();
-	vp_mat = proj_mat()*  main_camera_->view_mat();
+	auto vp_mat = lightProjection * main_camera_->view_mat();
+	vp_mat = proj_mat() * main_camera_->view_mat();
 	ubo_vp_mat.update(glm::value_ptr(vp_mat));
 }
 
@@ -215,11 +219,10 @@ void Renderer::draw()
 	ready_draw();
 
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
-	
 
 	// 1. first render to depth map 
-	depth_renderer->bind_depthmap_fbo(depthmap_shader_, testing_directional_light_);
-	
+	depth_renderer_->bind_depthmap_fbo(depthmap_shader_, 0);
+
 	{
 		glDisable(GL_CULL_FACE);
 		default_map->update_uniform_vars(depthmap_shader_);
@@ -232,15 +235,14 @@ void Renderer::draw()
 			car->draw(depthmap_shader_);
 		}
 	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// 2. then render scene as normal with shadow mapping (using depth map) 
-	depth_renderer->draw_screen(screen_renderer->quad_vao);
-
-
-	
-	/*
-	screen_renderer->bind_predraw_fbo();
+	//depth_renderer_->draw_depthmap_debug(screen_renderer_->quad_vao);
+	static int i = 0;
+	if (i++ % 1000 < 500)return;
+	screen_renderer_->bind_predraw_fbo();
 	
 	{
 		testing_shader_->use();
@@ -254,6 +256,7 @@ void Renderer::draw()
 		testing_shader_->set("u_point_light", testing_point_light_);
 		testing_shader_->set("u_directinal_light", testing_directional_light_);
 		testing_shader_->set("u_spot_light", testing_spot_light_);
+		testing_shader_->set("u_shadowmap", depth_renderer_->depthmap_tbo);
 
 		glDisable(GL_CULL_FACE);
 		default_map->update_uniform_vars(testing_shader_);
@@ -275,20 +278,15 @@ void Renderer::draw()
 		billboard_shader_->set("u_point_light", testing_point_light_);
 		billboard_shader_->set("u_directinal_light", testing_directional_light_);
 		billboard_shader_->set("u_spot_light", testing_spot_light_);
+		billboard_shader_->set("u_shadowmap", depth_renderer_->depthmap_tbo);
 		billboard_shader_->set("u_time", gametime);
-		auto tt = grasses_.get_textures();
-		billboard_shader_->set("u_tex_sampler", tt);
+		billboard_shader_->set("u_tex_sampler", grasses_.get_textures());
 		grasses_.draw();
 		glUseProgram(0);
 	}
-	
-	screen_renderer->blit_fbo();
-	screen_renderer->draw_screen();
-	
-	*/
-	
-	
-	
+
+	screen_renderer_->blit_fbo();
+	screen_renderer_->draw_screen();
 	
 
 	glUseProgram(0);

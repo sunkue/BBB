@@ -17,7 +17,7 @@ struct LightBasic
 using DirectionalLightPtr = shared_ptr<struct DirectionalLight>;
 struct DirectionalLight : LightBasic
 {
-	glm::vec3 direction{ -1.f,-1.f,0.f };
+	glm::vec3 direction{ -5.f,-7.f,0.f };
 
 	CREATE_SHARED(DirectionalLightPtr, DirectionalLight);
 private:

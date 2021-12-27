@@ -12,6 +12,7 @@ uniform Material u_material;
 
 in VS_OUT
 {
+	vec4 lightspacefragpos;
 	vec3 world_pos;
 	vec3 normal;
     vec2 texcoord;

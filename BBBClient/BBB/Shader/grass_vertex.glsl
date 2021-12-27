@@ -20,6 +20,7 @@ in vec3 a_translate;
 
 out FS_IN
 {
+	vec4 lightspacefragpos;
 	vec3 world_pos;
 	vec3 normal;
 	vec2 texcoord;

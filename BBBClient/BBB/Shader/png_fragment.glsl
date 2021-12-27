@@ -19,8 +19,8 @@ void main()
 	if(o_flagcolor.a < 0.1)
         discard;
 	float shininess = 512;
-	vec3 result = caculate_light(u_spot_light, normal, world_pos, o_flagcolor.xyz, o_flagcolor.xyz, shininess);
-	result = result + caculate_light(u_point_light, normal, world_pos, o_flagcolor.xyz, o_flagcolor.xyz, shininess);
-	result = result + caculate_light(u_directinal_light, normal, world_pos, o_flagcolor.xyz, o_flagcolor.xyz, shininess);
+	vec3 result = caculate_light(u_spot_light, normal, world_pos, o_flagcolor.xyz, o_flagcolor.xyz, shininess, 0);
+	result = result + caculate_light(u_point_light, normal, world_pos, o_flagcolor.xyz, o_flagcolor.xyz, shininess, 0);
+	result = result + caculate_light(u_directinal_light, normal, world_pos, o_flagcolor.xyz, o_flagcolor.xyz, shininess, 0);
 	o_flagcolor = vec4(result, 1); 
 }

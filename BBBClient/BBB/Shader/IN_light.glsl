@@ -41,11 +41,14 @@ uniform SpotLight u_spot_light;
 uniform PointLight u_point_light;
 uniform DirectionalLight u_directinal_light;
 
+uniform sampler2D u_shadowmap;
 uniform Material u_material;
 uniform vec3 u_view_pos;
 
-in FS_IN {
-    vec3 world_pos;
+in FS_IN
+{
+	vec4 lightspacefragpos;
+	vec3 world_pos;
 	vec3 normal;
     vec2 texcoord;
 } fs_in;
@@ -59,7 +62,24 @@ float caculate_attenuation(vec3 light_pos,vec3 attenuation_param, vec3 world_pos
 	return attenuation;
 }
 
-vec3 caculate_light(DirectionalLight light, vec3 normal, vec3 world_pos, vec3 albedo, vec3 specular_color, float shininess)
+float caculate_shadow(vec4 lightspacefragpos)
+{
+	// perform perspective divide 
+	vec3 projCoords = lightspacefragpos.xyz / lightspacefragpos.w;
+	// transform to [0,1] range 
+	projCoords = projCoords * 0.5 + 0.5; 
+	// get closest depth value from light's perspective (using [0,1] range frag
+	// PosLight as coords) 
+	float closestDepth = texture(u_shadowmap, projCoords.xy).r;
+	// get depth of current fragment from light's perspective 
+	float currentDepth = projCoords.z;
+	// check whether current frag pos is in shadow 
+	float shadow = currentDepth > closestDepth ? 1.0 : 0.0; 
+	
+	return shadow;
+}
+
+vec3 caculate_light(DirectionalLight light, vec3 normal, vec3 world_pos, vec3 albedo, vec3 specular_color, float shininess, float shadow)
 {
 	vec3 ambient = light.power.ambient * albedo; 
 	//
@@ -74,11 +94,11 @@ vec3 caculate_light(DirectionalLight light, vec3 normal, vec3 world_pos, vec3 al
 	float spec = pow(max(dot(normal, halfway_dir), 0), shininess);
 	vec3 specular = light.power.specular * (spec * specular_color);
 	//
-	vec3 ret = (ambient + diffuse + specular);
+	vec3 ret = (ambient + (1.0 - shadow) * (diffuse + specular));
 	return ret;
 }
 
-vec3 caculate_light(PointLight light, vec3 normal, vec3 world_pos, vec3 albedo, vec3 specular_color, float shininess)
+vec3 caculate_light(PointLight light, vec3 normal, vec3 world_pos, vec3 albedo, vec3 specular_color, float shininess, float shadow)
 {
 	vec3 ambient = light.power.ambient * albedo; 
 	//
@@ -94,11 +114,11 @@ vec3 caculate_light(PointLight light, vec3 normal, vec3 world_pos, vec3 albedo, 
 	vec3 specular = light.power.specular * (spec * specular_color);
 	//
 	float attenuation = caculate_attenuation(light.position, light.attenuation, world_pos);
-	vec3 ret = (ambient + diffuse + specular) * attenuation;
+	vec3 ret = (ambient + (1.0-shadow) * (diffuse + specular)) * attenuation;
 	return ret;
 }
 
-vec3 caculate_light(SpotLight light, vec3 normal, vec3 world_pos, vec3 albedo, vec3 specular_color, float shininess)
+vec3 caculate_light(SpotLight light, vec3 normal, vec3 world_pos, vec3 albedo, vec3 specular_color, float shininess, float shadow)
 {
 	vec3 ambient = light.power.ambient * albedo;
 	//
@@ -117,7 +137,7 @@ vec3 caculate_light(SpotLight light, vec3 normal, vec3 world_pos, vec3 albedo, v
 	vec3 specular = light.power.specular * (spec * specular_color) * intensity;
 	//
 	float attenuation = caculate_attenuation(light.position, light.attenuation, world_pos);
-	vec3 ret = (ambient + diffuse + specular) * attenuation;
+	vec3 ret = (ambient + (1.0 - shadow) * (diffuse + specular)) * attenuation;
 	return ret;
 }
 

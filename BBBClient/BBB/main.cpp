@@ -46,6 +46,21 @@ void DoNextFrame()
 		//cout << "?" << endl;
 	}
 
+	// gui texture buffers
+	const float gui_tex_buffer_ratio = 0.1f;
+	auto gui_texture_size = ImVec2(screen.width * gui_tex_buffer_ratio, screen.height * gui_tex_buffer_ratio);
+
+	auto depthbuffer = Renderer::get().get_depth_renderer()->depthmap_tbo->id;
+	gui::Begin("depthbuffer(shadow)");
+	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	auto renderbuffer = Renderer::get().get_screen_renderer()->screen_tbo->id;
+	gui::Begin("renderbuffer(predraw)");
+	gui::Image((void*)renderbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	// gui::ShowMetricsWindow();
 
 	gui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(gui::GetDrawData());
@@ -125,10 +140,10 @@ int main()
 	glfwSetScrollCallback(window,
 		[](GLFWwindow* window, double xoffset, double yoffset)
 		{ MOUSE_EVENT_MANAGER::get().Scroll(window, xoffset, yoffset);  });
-	glfwSetMouseButtonCallback(window, 
+	glfwSetMouseButtonCallback(window,
 		[](GLFWwindow* window, int key, int action, int modifiers)
 		{ MOUSE_EVENT_MANAGER::get().MouseButton(window, key, action, modifiers);  });
-	glfwSetCursorPosCallback(window, 
+	glfwSetCursorPosCallback(window,
 		[](GLFWwindow* window, double xpos, double ypos)
 		{ MOUSE_EVENT_MANAGER::get().CursorPosition(window, xpos, ypos);  });
 	glfwSetKeyCallback(window,

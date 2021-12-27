@@ -25,6 +25,7 @@ extern SCREEN screen;
 
 class DepthRenderer
 {
+public:
 	friend class Renderer;
 	static const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 
@@ -33,9 +34,12 @@ class DepthRenderer
 
 	ShaderPtr t_shader;
 
+	vector<glm::mat4> lightspace_mat;
+
 	void init()
 	{
 		glGenFramebuffers(1, &depthmap_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthmap_fbo);
 
 		depthmap_tbo = Texture::create();
 		glGenTextures(1, &depthmap_tbo->id);
@@ -51,6 +55,7 @@ class DepthRenderer
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		vector<string> VS; VS.emplace_back("./Shader/t_vertex.glsl"sv);
 		vector<string> FS; FS.emplace_back("./Shader/t_fragment.glsl"sv);
@@ -58,35 +63,43 @@ class DepthRenderer
 		t_shader = Shader::create(VS, FS, GS);
 	}
 
-	void bind_depthmap_fbo(ShaderPtr& depthmap_shader, DirectionalLightPtr& light)
+	int add_lightspace_mat(const DirectionalLightPtr& light)
+	{
+		glm::mat4 lightProjection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, screen.n, screen.f);
+		glm::mat4 lightView = glm::lookAt(-light->direction * 200, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+		lightspace_mat.emplace_back(lightSpaceMatrix);
+		return lightspace_mat.size() - 1;
+	}
+
+	void bind_depthmap_fbo(const ShaderPtr& depthmap_shader, int lightmat_index)
 	{
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthmap_fbo);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, screen.n, screen.f);
-		glm::mat4 lightView = glm::lookAt(-light->direction * 200, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 		depthmap_shader->use();
-		depthmap_shader->set("u_vp_mat", lightSpaceMatrix);
+		depthmap_shader->set("u_vp_mat", lightspace_mat[lightmat_index]);
 	}
 
-	void draw_screen(GLuint quad_vao)
+	void draw_depthmap_debug(GLuint quad_vao)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(screen.viewport_.x, screen.viewport_.y, screen.viewport_.z, screen.viewport_.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
-
 		t_shader->use();
 		t_shader->set("depthmap", depthmap_tbo);
 		glBindVertexArray(quad_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glUseProgram(0);
 	}
 };
 
 class ScreenRenderer
 {
+public:
 	friend class Renderer;
 
 	GLuint predraw_fbo;
@@ -159,6 +172,8 @@ public:
 	GET_REF(ghost);
 	SET(ghost);
 	GET_REF(cars);
+	GET_REF(depth_renderer);
+	GET_REF(screen_renderer);
 
 	void swap_player_ghost();
 
@@ -182,11 +197,12 @@ private:
 	CubeMapPtr skybox;
 	ObjPtr default_map;
 
-	unique_ptr<ScreenRenderer> screen_renderer;
-	unique_ptr<DepthRenderer> depth_renderer;
+	unique_ptr<ScreenRenderer> screen_renderer_;
+	unique_ptr<DepthRenderer> depth_renderer_;
 
 	//
 	UBO<glm::mat4> ubo_vp_mat{ 0 };
+	UBO<glm::mat4> ubo_lightspace_mat{ 1 };
 	//
 
 	vector<ObjPtr> cars_;
