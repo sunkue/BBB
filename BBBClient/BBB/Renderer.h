@@ -142,6 +142,7 @@ public:
 		screen_shader->set("screen_texture", screen_tbo);
 		glBindVertexArray(quad_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glEnable(GL_DEPTH_TEST);
 	}
 };
 

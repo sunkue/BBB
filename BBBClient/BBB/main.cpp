@@ -33,6 +33,7 @@ void DoNextFrame()
 	gui::End();
 
 	Renderer::get().draw();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	Renderer::get().get_player()->draw_gui();
 	Renderer::get().get_main_camera()->draw_gui();

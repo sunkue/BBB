@@ -240,8 +240,9 @@ void Renderer::draw()
 
 	// 2. then render scene as normal with shadow mapping (using depth map) 
 	//depth_renderer_->draw_depthmap_debug(screen_renderer_->quad_vao);
-	static int i = 0;
-	if (i++ % 1000 < 500)return;
+	//static int i = 0;
+	//if (i++ % 1000 < 500)return;
+
 	screen_renderer_->bind_predraw_fbo();
 	
 	{
