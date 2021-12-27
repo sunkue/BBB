@@ -81,7 +81,7 @@ GLuint CreatePngTexture(const char* filePath)
 	if (error != 0)
 	{
 		lodepng_error_text(error);
-		cout <<"[ERROR] png :: " << filePath << "don't  exist" << endl;
+		cout << "[ERROR] png :: " << filePath << "don't  exist" << endl;
 		return -1;
 	}
 
@@ -105,7 +105,7 @@ GLuint CreatePngTexture(const char* filePath)
 	glBindTexture(GL_TEXTURE_2D, temp);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	return temp;
@@ -132,7 +132,7 @@ GLuint CreateBmpTexture(const char* filePath)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bmp);
-
+	delete[] bmp;
 	return temp;
 }
 
@@ -148,15 +148,14 @@ GLuint load_texture_file(const char* path, const string& directory)
 	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
 	if (data)
 	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
+		GLint format = GL_GREEN + nrComponents;
+		//if (nrComponents == 1)
+		//	format = GL_RED;
+		//else if (nrComponents == 3)
+		//	format = GL_RGB;
+		//else if (nrComponents == 4)
+		//	format = GL_RGBA;
 
-		
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -171,7 +170,6 @@ GLuint load_texture_file(const char* path, const string& directory)
 	else
 	{
 		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
 	}
 
 	return textureID;
@@ -200,10 +198,10 @@ GLuint load_cube_texture_file(const vector<string_view>& textures, string_view d
 				format = GL_RGBA;
 
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 			stbi_image_free(data);
@@ -214,6 +212,6 @@ GLuint load_cube_texture_file(const vector<string_view>& textures, string_view d
 			stbi_image_free(data);
 		}
 	}
-	
+
 	return cube_texture;
 }

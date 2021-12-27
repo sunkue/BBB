@@ -309,6 +309,18 @@
     <None Include="Shader\default_fragment.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
+    <None Include="Shader\depthmap_vertex.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\depthmap_fragment.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\t_fragment.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\t_vertex.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\Texture\blueflower.png">

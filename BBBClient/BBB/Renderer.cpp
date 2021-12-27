@@ -49,6 +49,11 @@ void Renderer::init_shader()
 	GS.clear();
 	billboard_shader_ = Shader::create(VS, FS, GS);
 
+	VS.clear(); VS.emplace_back("./Shader/depthmap_vertex.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/depthmap_fragment.glsl"sv);
+	GS.clear();
+	depthmap_shader_ = Shader::create(VS, FS, GS);
+
 	{
 		vector<string_view> textures
 		{
@@ -69,6 +74,8 @@ void Renderer::init_shader()
 
 	screen_renderer = make_unique<ScreenRenderer>();
 	screen_renderer->init();
+	depth_renderer = make_unique<DepthRenderer>();
+	depth_renderer->init();
 }
 
 void Renderer::init_resources()
@@ -137,7 +144,7 @@ void Renderer::load_model()
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
-	main_camera_->set_diff(glm::vec3{ -5.f, 3.f, 0.f });
+	main_camera_->set_diff(glm::vec3{ -12.f, 5.f, 0.f });
 
 	vector<Vertex> grassvertices;
 	for (auto& v : cross_billboard_3)
@@ -145,8 +152,8 @@ void Renderer::load_model()
 		grassvertices.push_back(v);
 	}
 
-	const auto grass_count = 18000;
-	const auto grass_range = 100;
+	const auto grass_count = 62000;
+	const auto grass_range = 200;
 
 	grasses_.set_num_inst(grass_count);
 	grasses_.setup_mesh(grassvertices);
@@ -191,7 +198,13 @@ void Renderer::load_texture()
 
 void Renderer::ready_draw()
 {
-	auto vp_mat = proj_mat() * main_camera_->view_mat();
+	main_camera_->set_position(-testing_directional_light_->direction*100);
+	main_camera_->set_target(glm::vec3(0));
+	main_camera_->set_up(glm::vec3(0,1,0));
+	glm::mat4 lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, screen.n, screen.f);
+
+	auto vp_mat = lightProjection* main_camera_->view_mat();
+	vp_mat = proj_mat()*  main_camera_->view_mat();
 	ubo_vp_mat.update(glm::value_ptr(vp_mat));
 }
 
@@ -202,9 +215,33 @@ void Renderer::draw()
 	ready_draw();
 
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
+	
 
+	// 1. first render to depth map 
+	depth_renderer->bind_depthmap_fbo(depthmap_shader_, testing_directional_light_);
+	
+	{
+		glDisable(GL_CULL_FACE);
+		default_map->update_uniform_vars(depthmap_shader_);
+		default_map->draw(depthmap_shader_);
+		glEnable(GL_CULL_FACE);
+
+		for (auto& car : cars_)
+		{
+			car->update_uniform_vars(depthmap_shader_);
+			car->draw(depthmap_shader_);
+		}
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0); 
+
+	// 2. then render scene as normal with shadow mapping (using depth map) 
+	depth_renderer->draw_screen(screen_renderer->quad_vao);
+
+
+	
+	/*
 	screen_renderer->bind_predraw_fbo();
-
+	
 	{
 		testing_shader_->use();
 		auto shaket = main_camera_->get_shaking_time();
@@ -229,11 +266,6 @@ void Renderer::draw()
 			car->draw(testing_shader_);
 		}
 
-		player_->update_uniform_vars(testing_shader_);
-		player_->draw(testing_shader_);
-		ghost_->update_uniform_vars(testing_shader_);
-		ghost_->draw(testing_shader_);
-
 		skybox->draw();
 
 		// billoards
@@ -249,10 +281,15 @@ void Renderer::draw()
 		grasses_.draw();
 		glUseProgram(0);
 	}
-
+	
 	screen_renderer->blit_fbo();
-
 	screen_renderer->draw_screen();
+	
+	*/
+	
+	
+	
+	
 
 	glUseProgram(0);
 }
@@ -315,6 +352,7 @@ void ScreenRenderer::init()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
+	//
 
 	glGenFramebuffers(1, &screen_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, screen_fbo);

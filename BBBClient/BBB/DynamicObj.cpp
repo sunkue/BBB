@@ -137,7 +137,7 @@ void VehicleObj::update_camera(Camera* camera, float time_elpased) const
 			moving_dir = head_dir;
 		}
 		target_dir = glm::lerp(head_dir, moving_dir, clamp(0.2f * moving_len, 0.00f, 0.4f));
-		camera->set_target(get_position() + target_dir * 10.0f);
+		camera->set_target(get_position() + target_dir * 8.0f + Y_DEFAULT * 2.f);
 	}
 
 	/* position */

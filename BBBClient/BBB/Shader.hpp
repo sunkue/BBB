@@ -63,7 +63,7 @@ TEMPLATE_SHADER_SET(TexturePtr)
 
 TEMPLATE_SHADER_SET(vector<TexturePtr>)
 {
-	vector<GLsizei> ids;
+	vector<GLsizei> ids; ids.reserve(value.size());
 	for (auto& t : value)
 	{
 		ids.push_back(t->id);

@@ -276,6 +276,8 @@
     <None Include="Shader\cubemap_fragment.glsl" />
     <None Include="Shader\cubemap_vertex.glsl" />
     <None Include="Shader\default_fragment.glsl" />
+    <None Include="Shader\depthmap_fragment.glsl" />
+    <None Include="Shader\depthmap_vertex.glsl" />
     <None Include="Shader\grass_vertex.glsl" />
     <None Include="Shader\IN_light.glsl" />
     <None Include="Shader\png_fragment.glsl" />
@@ -284,6 +286,8 @@
     <None Include="Shader\test_fragment.glsl" />
     <None Include="Shader\test_geometry.glsl" />
     <None Include="Shader\test_vertex.glsl" />
+    <None Include="Shader\t_fragment.glsl" />
+    <None Include="Shader\t_vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\Texture\blueflower.png" />
