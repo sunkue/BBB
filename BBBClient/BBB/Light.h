@@ -17,7 +17,7 @@ struct LightBasic
 using DirectionalLightPtr = shared_ptr<struct DirectionalLight>;
 struct DirectionalLight : LightBasic
 {
-	glm::vec3 direction{ -5.f,-7.f,0.f };
+	glm::vec3 direction{ glm::normalize(glm::vec3(-15.f,-27.f,14.f)) };
 
 	CREATE_SHARED(DirectionalLightPtr, DirectionalLight);
 private:
@@ -51,7 +51,7 @@ private:
 public:
 	void set_in_cutoff(float angle) { in_cutoff = glm::cos(glm::radians(angle)); }
 	void set_out_cutoff(float angle) { out_cutoff = glm::cos(glm::radians(angle)); }
-	
+
 	CREATE_SHARED(SpotLightPtr, SpotLight);
 private:
 	explicit SpotLight() noexcept = default;

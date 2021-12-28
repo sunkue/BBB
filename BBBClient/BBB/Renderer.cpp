@@ -112,6 +112,7 @@ void Renderer::load_model()
 
 	player_ = make_shared<VehicleObj>(id++, bluecar);
 	player_->scaling(glm::vec3{ 4.0f });
+	player_->move({ 200.f,-1.1f,0.f });
 
 	cars_.push_back(player_);
 
@@ -223,6 +224,8 @@ void Renderer::draw()
 	// 1. first render to depth map 
 	depth_renderer_->bind_depthmap_fbo(depthmap_shader_, 0);
 
+	glCullFace(GL_FRONT);
+
 	{
 		glDisable(GL_CULL_FACE);
 		default_map->update_uniform_vars(depthmap_shader_);
@@ -236,6 +239,7 @@ void Renderer::draw()
 		}
 	}
 
+	glCullFace(GL_BACK);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// 2. then render scene as normal with shadow mapping (using depth map) 
@@ -244,7 +248,7 @@ void Renderer::draw()
 	//if (i++ % 1000 < 500)return;
 
 	screen_renderer_->bind_predraw_fbo();
-	
+
 	{
 		testing_shader_->use();
 		auto shaket = main_camera_->get_shaking_time();
@@ -257,7 +261,7 @@ void Renderer::draw()
 		testing_shader_->set("u_point_light", testing_point_light_);
 		testing_shader_->set("u_directinal_light", testing_directional_light_);
 		testing_shader_->set("u_spot_light", testing_spot_light_);
-		testing_shader_->set("u_shadowmap", depth_renderer_->depthmap_tbo);
+		testing_shader_->set("u_shadowmap", depth_renderer_->directional_depthmap_tbo);
 
 		glDisable(GL_CULL_FACE);
 		default_map->update_uniform_vars(testing_shader_);
@@ -279,16 +283,16 @@ void Renderer::draw()
 		billboard_shader_->set("u_point_light", testing_point_light_);
 		billboard_shader_->set("u_directinal_light", testing_directional_light_);
 		billboard_shader_->set("u_spot_light", testing_spot_light_);
-		billboard_shader_->set("u_shadowmap", depth_renderer_->depthmap_tbo);
+		billboard_shader_->set("u_shadowmap", depth_renderer_->directional_depthmap_tbo);
 		billboard_shader_->set("u_time", gametime);
 		billboard_shader_->set("u_tex_sampler", grasses_.get_textures());
-		grasses_.draw();
+		//grasses_.draw();
 		glUseProgram(0);
 	}
 
 	screen_renderer_->blit_fbo();
 	screen_renderer_->draw_screen();
-	
+
 
 	glUseProgram(0);
 }

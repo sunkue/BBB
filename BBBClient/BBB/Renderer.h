@@ -27,31 +27,34 @@ class DepthRenderer
 {
 public:
 	friend class Renderer;
-	static const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	static const GLuint SHADOW_WIDTH = 1024 * 20, SHADOW_HEIGHT = 1024 * 20;
 
-	GLuint depthmap_fbo;
-	TexturePtr depthmap_tbo;
+	GLuint directional_depthmap_fbo;
+	TexturePtr directional_depthmap_tbo;
+	ShaderPtr directional_t_shader;
 
-	ShaderPtr t_shader;
+
 
 	vector<glm::mat4> lightspace_mat;
 
 	void init()
 	{
-		glGenFramebuffers(1, &depthmap_fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthmap_fbo);
+		glGenFramebuffers(1, &directional_depthmap_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, directional_depthmap_fbo);
 
-		depthmap_tbo = Texture::create();
-		glGenTextures(1, &depthmap_tbo->id);
-		glBindTexture(GL_TEXTURE_2D, depthmap_tbo->id);
+		directional_depthmap_tbo = Texture::create();
+		glGenTextures(1, &directional_depthmap_tbo->id);
+		glBindTexture(GL_TEXTURE_2D, directional_depthmap_tbo->id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		float bordercolor[] = { 1.0,1.0,1.0,1.0 };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, depthmap_fbo);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthmap_tbo->id, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, directional_depthmap_fbo);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, directional_depthmap_tbo->id, 0);
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -60,13 +63,13 @@ public:
 		vector<string> VS; VS.emplace_back("./Shader/t_vertex.glsl"sv);
 		vector<string> FS; FS.emplace_back("./Shader/t_fragment.glsl"sv);
 		vector<string> GS;
-		t_shader = Shader::create(VS, FS, GS);
+		directional_t_shader = Shader::create(VS, FS, GS);
 	}
 
 	int add_lightspace_mat(const DirectionalLightPtr& light)
 	{
 		glm::mat4 lightProjection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, screen.n, screen.f);
-		glm::mat4 lightView = glm::lookAt(-light->direction * 200, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightView = glm::lookAt(-light->direction * 1000, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 		lightspace_mat.emplace_back(lightSpaceMatrix);
 		return lightspace_mat.size() - 1;
@@ -75,7 +78,7 @@ public:
 	void bind_depthmap_fbo(const ShaderPtr& depthmap_shader, int lightmat_index)
 	{
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthmap_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, directional_depthmap_fbo);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		depthmap_shader->use();
@@ -88,8 +91,8 @@ public:
 		glViewport(screen.viewport_.x, screen.viewport_.y, screen.viewport_.z, screen.viewport_.w);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
-		t_shader->use();
-		t_shader->set("depthmap", depthmap_tbo);
+		directional_t_shader->use();
+		directional_t_shader->set("depthmap", directional_depthmap_tbo);
 		glBindVertexArray(quad_vao);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

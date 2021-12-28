@@ -51,7 +51,7 @@ void DoNextFrame()
 	const float gui_tex_buffer_ratio = 0.1f;
 	auto gui_texture_size = ImVec2(screen.width * gui_tex_buffer_ratio, screen.height * gui_tex_buffer_ratio);
 
-	auto depthbuffer = Renderer::get().get_depth_renderer()->depthmap_tbo->id;
+	auto depthbuffer = Renderer::get().get_depth_renderer()->directional_depthmap_tbo->id;
 	gui::Begin("depthbuffer(shadow)");
 	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
 	gui::End();
