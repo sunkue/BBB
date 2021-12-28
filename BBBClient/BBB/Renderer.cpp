@@ -59,6 +59,11 @@ void Renderer::init_shader()
 	GS.clear(); GS.emplace_back("./Shader/point_depthmap_geomatry.glsl"sv);
 	point_depthmap_shader_ = Shader::create(VS, FS, GS);
 
+	VS.clear(); VS.emplace_back("./Shader/gbuffer_vertex.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/gbuffer_fragment.glsl"sv);
+	GS.clear(); //GS.emplace_back("./Shader/gbuffer_geomatry.glsl"sv);
+	gbuffer_shader_ = Shader::create(VS, FS, GS);
+	 
 	{
 		vector<string_view> textures
 		{
@@ -81,6 +86,8 @@ void Renderer::init_shader()
 	screen_renderer_->init();
 	depth_renderer_ = make_unique<DepthRenderer>();
 	depth_renderer_->init();
+	gbuffer_renderer_ = make_unique<gBufferRenderer>();
+	gbuffer_renderer_->init();
 }
 
 void Renderer::init_resources()
@@ -93,6 +100,7 @@ void Renderer::init_resources()
 
 	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
 	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
+	ubo_vp_mat.bind(gbuffer_shader_, "VP_MAT");
 	ubo_lightspace_mat.bind(testing_shader_, "LIGHTSPACE_MAT");
 	ubo_lightspace_mat.bind(billboard_shader_, "LIGHTSPACE_MAT");
 
@@ -209,13 +217,7 @@ void Renderer::load_texture()
 
 void Renderer::ready_draw()
 {
-	//main_camera_->set_position(-testing_directional_light_->direction*100);
-	//main_camera_->set_target(glm::vec3(0));
-	//main_camera_->set_up(glm::vec3(0,1,0));
-	glm::mat4 lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, screen.n, screen.f);
-
-	auto vp_mat = lightProjection * main_camera_->view_mat();
-	vp_mat = proj_mat() * main_camera_->view_mat();
+	auto vp_mat = proj_mat() * main_camera_->view_mat();
 	ubo_vp_mat.update(glm::value_ptr(vp_mat));
 }
 
@@ -226,6 +228,8 @@ void Renderer::draw()
 	ready_draw();
 
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
+
+
 
 	// 1. first render to depth map 
 	depth_renderer_->bind_directional_depthmap_fbo(directional_depthmap_shader_, 0);
@@ -246,6 +250,25 @@ void Renderer::draw()
 	}
 
 	glCullFace(GL_BACK);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	/// //
+	gbuffer_renderer_->bind_gbuffer_fbo();
+	
+	{
+		glDisable(GL_CULL_FACE);
+		default_map->update_uniform_vars(gbuffer_shader_);
+		default_map->draw(gbuffer_shader_);
+		glEnable(GL_CULL_FACE);
+
+		for (auto& car : cars_)
+		{
+			car->update_uniform_vars(gbuffer_shader_);
+			car->draw(gbuffer_shader_);
+		}
+	}
+	
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	/*
@@ -312,6 +335,7 @@ void Renderer::draw()
 		billboard_shader_->set("u_time", gametime);
 		billboard_shader_->set("u_tex_sampler", grasses_.get_textures());
 		//grasses_.draw();
+		glEnable(GL_CULL_FACE);
 		glUseProgram(0);
 	}
 

@@ -23,6 +23,89 @@ extern SCREEN screen;
 
 //////////////////////////////////////////////////////
 
+class gBufferRenderer
+{
+public:
+	friend class Renderer;
+
+	GLuint gbuffer_fbo;
+
+	TexturePtr position_tbo;
+	TexturePtr normal_tbo;
+	TexturePtr albedospec_tbo;
+
+	void init()
+	{
+		glGenFramebuffers(1, &gbuffer_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer_fbo);
+
+		//position
+		position_tbo = Texture::create();
+		glGenTextures(1, &position_tbo->id);
+		glBindTexture(GL_TEXTURE_2D, position_tbo->id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, position_tbo->id, 0);
+
+		//normal
+		normal_tbo = Texture::create();
+		glGenTextures(1, &normal_tbo->id);
+		glBindTexture(GL_TEXTURE_2D, normal_tbo->id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normal_tbo->id, 0);
+
+		// color spec
+		albedospec_tbo = Texture::create();
+		glGenTextures(1, &albedospec_tbo->id);
+		glBindTexture(GL_TEXTURE_2D, albedospec_tbo->id);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen.width, screen.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, albedospec_tbo->id, 0);
+
+		// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+		GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 }; 
+		glDrawBuffers(3, attachments);
+
+		// add depth bufer,, etc..
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void bind_gbuffer_fbo()
+	{
+		glViewport(0, 0, screen.width, screen.height);
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer_fbo);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	void draw_screen()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(screen.viewport_.x, screen.viewport_.y, screen.viewport_.z, screen.viewport_.w);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
+		glDisable(GL_DEPTH_TEST);
+
+		//screen_shader->use();
+	//	screen_shader->set("screen_texture", screen_tbo);
+		//glBindVertexArray(quad_vao);
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
+	//	glEnable(GL_DEPTH_TEST);
+	}
+};
+
 class DepthRenderer
 {
 public:
@@ -220,6 +303,7 @@ public:
 	GET_REF(cars);
 	GET_REF(depth_renderer);
 	GET_REF(screen_renderer);
+	GET_REF(gbuffer_renderer);
 
 	void swap_player_ghost();
 
@@ -249,6 +333,9 @@ private:
 	unique_ptr<DepthRenderer> depth_renderer_;
 	ShaderPtr directional_depthmap_shader_;
 	ShaderPtr point_depthmap_shader_;
+
+	unique_ptr<gBufferRenderer> gbuffer_renderer_;
+	ShaderPtr gbuffer_shader_;
 
 	//
 	UBO<glm::mat4> ubo_vp_mat{ 0 };

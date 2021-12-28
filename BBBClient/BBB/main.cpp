@@ -56,9 +56,19 @@ void DoNextFrame()
 	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
 	gui::End();
 
-	depthbuffer = Renderer::get().get_depth_renderer()->point_depthcubemap_tbo->id;
-	gui::Begin("point_depthcubebuffer(shadow)");
-	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	auto gbuffer = Renderer::get().get_gbuffer_renderer()->position_tbo->id;
+	gui::Begin("g_position");
+	gui::Image((void*)gbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	gbuffer = Renderer::get().get_gbuffer_renderer()->normal_tbo->id;
+	gui::Begin("g_normal");
+	gui::Image((void*)gbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	gbuffer = Renderer::get().get_gbuffer_renderer()->albedospec_tbo->id;
+	gui::Begin("g_albedospec");
+	gui::Image((void*)gbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
 	gui::End();
 
 	auto renderbuffer = Renderer::get().get_screen_renderer()->screen_tbo->id;

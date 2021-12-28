@@ -278,6 +278,9 @@
     <None Include="Shader\default_fragment.glsl" />
     <None Include="Shader\directional_depthmap_fragment.glsl" />
     <None Include="Shader\directional_depthmap_vertex.glsl" />
+    <None Include="Shader\gbuffer_fragment.glsl" />
+    <None Include="Shader\gbuffer_geometry.glsl" />
+    <None Include="Shader\gbuffer_vertex.glsl" />
     <None Include="Shader\grass_vertex.glsl" />
     <None Include="Shader\IN_light.glsl" />
     <None Include="Shader\png_fragment.glsl" />
