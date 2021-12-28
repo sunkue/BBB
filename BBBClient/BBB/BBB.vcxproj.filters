@@ -309,16 +309,19 @@
     <None Include="Shader\default_fragment.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\depthmap_vertex.glsl">
+    <None Include="Shader\directional_depthmap_vertex.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\depthmap_fragment.glsl">
+    <None Include="Shader\directional_depthmap_fragment.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\t_fragment.glsl">
+    <None Include="Shader\point_depthmap_geomatry.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\t_vertex.glsl">
+    <None Include="Shader\point_depthmap_fragment.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\point_depthmap_vertex.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
   </ItemGroup>

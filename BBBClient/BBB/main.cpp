@@ -52,7 +52,12 @@ void DoNextFrame()
 	auto gui_texture_size = ImVec2(screen.width * gui_tex_buffer_ratio, screen.height * gui_tex_buffer_ratio);
 
 	auto depthbuffer = Renderer::get().get_depth_renderer()->directional_depthmap_tbo->id;
-	gui::Begin("depthbuffer(shadow)");
+	gui::Begin("directinal_depthbuffer(shadow)");
+	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	depthbuffer = Renderer::get().get_depth_renderer()->point_depthcubemap_tbo->id;
+	gui::Begin("point_depthcubebuffer(shadow)");
 	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
 	gui::End();
 

@@ -49,10 +49,15 @@ void Renderer::init_shader()
 	GS.clear();
 	billboard_shader_ = Shader::create(VS, FS, GS);
 
-	VS.clear(); VS.emplace_back("./Shader/depthmap_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/depthmap_fragment.glsl"sv);
+	VS.clear(); VS.emplace_back("./Shader/directional_depthmap_vertex.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/directional_depthmap_fragment.glsl"sv);
 	GS.clear();
-	depthmap_shader_ = Shader::create(VS, FS, GS);
+	directional_depthmap_shader_ = Shader::create(VS, FS, GS);
+
+	VS.clear(); VS.emplace_back("./Shader/point_depthmap_vertex.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/point_depthmap_fragment.glsl"sv);
+	GS.clear(); GS.emplace_back("./Shader/point_depthmap_geomatry.glsl"sv);
+	point_depthmap_shader_ = Shader::create(VS, FS, GS);
 
 	{
 		vector<string_view> textures
@@ -67,7 +72,7 @@ void Renderer::init_shader()
 		string_view dir{ "./Resource/Model/skybox" };
 		VS.clear(); VS.emplace_back("./Shader/cubemap_vertex.glsl"sv);
 		FS.clear(); FS.emplace_back("./Shader/cubemap_fragment.glsl"sv);
-		GS.clear();
+		GS.clear(); 
 		auto cubeshader = Shader::create(VS, FS, GS);
 		skybox = CubeMap::create(cubeshader, textures, dir);
 	}
@@ -92,7 +97,8 @@ void Renderer::init_resources()
 	ubo_lightspace_mat.bind(billboard_shader_, "LIGHTSPACE_MAT");
 
 	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
-	ubo_lightspace_mat.update(glm::value_ptr(depth_renderer_->lightspace_mat[index]));
+	ubo_lightspace_mat.update(glm::value_ptr(depth_renderer_->directional_lightspace_mat[index]));
+	index = depth_renderer_->add_lightspace_mat(testing_point_light_);
 }
 
 void Renderer::load_model()
@@ -222,31 +228,50 @@ void Renderer::draw()
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
 	// 1. first render to depth map 
-	depth_renderer_->bind_depthmap_fbo(depthmap_shader_, 0);
+	depth_renderer_->bind_directional_depthmap_fbo(directional_depthmap_shader_, 0);
 
 	glCullFace(GL_FRONT);
 
 	{
 		glDisable(GL_CULL_FACE);
-		default_map->update_uniform_vars(depthmap_shader_);
-		default_map->draw(depthmap_shader_);
+		default_map->update_uniform_vars(directional_depthmap_shader_);
+		default_map->draw(directional_depthmap_shader_);
 		glEnable(GL_CULL_FACE);
 
 		for (auto& car : cars_)
 		{
-			car->update_uniform_vars(depthmap_shader_);
-			car->draw(depthmap_shader_);
+			car->update_uniform_vars(directional_depthmap_shader_);
+			car->draw(directional_depthmap_shader_);
 		}
 	}
 
 	glCullFace(GL_BACK);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	// 2. then render scene as normal with shadow mapping (using depth map) 
-	//depth_renderer_->draw_depthmap_debug(screen_renderer_->quad_vao);
-	//static int i = 0;
-	//if (i++ % 1000 < 500)return;
+	/*
+	depth_renderer_->bind_point_depthmap_fbo(point_depthmap_shader_, testing_point_light_, 0);
 
+	glCullFace(GL_FRONT);
+
+	{
+		glDisable(GL_CULL_FACE);
+		default_map->update_uniform_vars(point_depthmap_shader_);
+		default_map->draw(point_depthmap_shader_);
+		glEnable(GL_CULL_FACE);
+
+		for (auto& car : cars_)
+		{
+			car->update_uniform_vars(point_depthmap_shader_);
+			car->draw(point_depthmap_shader_);
+		}
+	}
+
+	glCullFace(GL_BACK);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	*/
+	
+
+	// 2. predraw with depthmap 
 	screen_renderer_->bind_predraw_fbo();
 
 	{
@@ -290,6 +315,7 @@ void Renderer::draw()
 		glUseProgram(0);
 	}
 
+	// 3. render
 	screen_renderer_->blit_fbo();
 	screen_renderer_->draw_screen();
 

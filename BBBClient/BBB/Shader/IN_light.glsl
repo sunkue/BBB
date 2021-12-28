@@ -77,7 +77,7 @@ float caculate_shadow(vec4 lightspacefragpos, vec3 normal, vec3 lightdir)
 	// need bias. to avoid moire
 	
 	float shadow = 0.0; 
-	const int smaplelevel = 0;
+	const int smaplelevel = 5;
 	vec2 texelSize = 1.0 / textureSize(u_shadowmap, 0);
 	float bias = max(0.000002 * (1.0 - dot(normal, lightdir)), 0.00005);
 	
