@@ -229,11 +229,8 @@ void Renderer::draw()
 
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
-
-
 	// 1. first render to depth map 
 	depth_renderer_->bind_directional_depthmap_fbo(directional_depthmap_shader_, 0);
-
 	glCullFace(GL_FRONT);
 
 	{

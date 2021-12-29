@@ -48,6 +48,7 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, position_tbo->id, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		//normal
 		normal_tbo = Texture::create();
@@ -58,6 +59,7 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normal_tbo->id, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// color spec
 		albedospec_tbo = Texture::create();
@@ -68,34 +70,42 @@ public:
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, albedospec_tbo->id, 0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
 		GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 }; 
 		glDrawBuffers(3, attachments);
 
 		// add depth bufer,, etc..
+		GLuint rboDepth;
+		glGenRenderbuffers(1, &rboDepth);
+		glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen.width, screen.height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+		// finally check if framebuffer is complete
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "Framebuffer not complete!" << std::endl;
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	void bind_gbuffer_fbo()
 	{
-		glViewport(0, 0, screen.width, screen.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer_fbo);
+		glViewport(0, 0, screen.width, screen.height);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
+		
 	}
 
 	void draw_screen()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(screen.viewport_.x, screen.viewport_.y, screen.viewport_.z, screen.viewport_.w);
-		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 
 		//screen_shader->use();
@@ -108,6 +118,7 @@ public:
 
 class DepthRenderer
 {
+// 미리계산가능한 섀도우맵은 미리 계산해두자,
 public:
 	friend class Renderer;
 	static const GLuint SHADOW_WIDTH_H = 1024 * 20, SHADOW_HEIGHT_H = 1024 * 20;
