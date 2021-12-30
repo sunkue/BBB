@@ -283,10 +283,12 @@
     <None Include="Shader\gbuffer_vertex.glsl" />
     <None Include="Shader\grass_vertex.glsl" />
     <None Include="Shader\IN_light.glsl" />
+    <None Include="Shader\lightpass_fragment.glsl" />
     <None Include="Shader\png_fragment.glsl" />
     <None Include="Shader\point_depthmap_geomatry.glsl" />
     <None Include="Shader\point_depthmap_fragment.glsl" />
     <None Include="Shader\point_depthmap_vertex.glsl" />
+    <None Include="Shader\quad_vertex.glsl" />
     <None Include="Shader\screen_fragment.glsl" />
     <None Include="Shader\screen_vertex.glsl" />
     <None Include="Shader\test_fragment.glsl" />

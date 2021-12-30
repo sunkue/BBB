@@ -244,6 +244,7 @@ void Renderer::draw()
 			car->update_uniform_vars(directional_depthmap_shader_);
 			car->draw(directional_depthmap_shader_);
 		}
+
 	}
 
 	glCullFace(GL_BACK);

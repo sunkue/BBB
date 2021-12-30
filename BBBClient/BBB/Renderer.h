@@ -33,7 +33,9 @@ public:
 	TexturePtr position_tbo;
 	TexturePtr normal_tbo;
 	TexturePtr albedospec_tbo;
+	
 
+	
 	void init()
 	{
 		glGenFramebuffers(1, &gbuffer_fbo);
@@ -256,8 +258,8 @@ public:
 	{
 		glViewport(0, 0, screen.width, screen.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, predraw_fbo);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 	}
@@ -273,8 +275,8 @@ public:
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(screen.viewport_.x, screen.viewport_.y, screen.viewport_.z, screen.viewport_.w);
-		glClear(GL_COLOR_BUFFER_BIT);
 		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 
 		screen_shader->use();

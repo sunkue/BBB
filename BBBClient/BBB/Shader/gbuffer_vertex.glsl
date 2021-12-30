@@ -15,7 +15,7 @@ layout(location = 2) in vec2 a_texcoord;
 
 out VS_OUT
 {
-	vec3 position;
+	vec3 world_pos;
 	vec3 normal;
 	vec2 texcoord;
 } vs_out;
@@ -23,9 +23,9 @@ out VS_OUT
 
 void main()
 {
-	gl_Position = u_vp_mat * u_m_mat * vec4(a_position, 1.0f);
-
+	vs_out.world_pos = vec3(u_m_mat * vec4(a_position, 1.0f));
 	vs_out.normal = normalize(mat3(transpose(inverse(u_m_mat))) * a_normal);
 	vs_out.texcoord = a_texcoord;
-	vs_out.position = gl_Position.xyz;
+
+	gl_Position = u_vp_mat * vec4(vs_out.world_pos, 1);
 }

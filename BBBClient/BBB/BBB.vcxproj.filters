@@ -333,6 +333,12 @@
     <None Include="Shader\gbuffer_vertex.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
+    <None Include="Shader\lightpass_fragment.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\quad_vertex.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\Texture\blueflower.png">
