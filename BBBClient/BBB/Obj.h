@@ -119,7 +119,7 @@ public:
 		verticlesize_ = vertices.size();
 	}
 
-	void setup_instance_attribute(const ShaderPtr& shader, string_view name, auto* data, GLenum type = GL_FLOAT, GLuint divisor = 1)
+	void setup_instance_attribute(string_view name, const auto* data, GLenum type = GL_FLOAT, GLuint divisor = 1)
 	{
 		GLuint inst_abo;
 		glGenBuffers(1, &inst_abo);
@@ -128,7 +128,8 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		glBindVertexArray(vao);
-		auto index = glGetAttribLocation(shader->get_shader_id(), name.data());
+		auto index = attbLoc_[name];
+			//glGetAttribLocation(shader->get_shader_id(), name.data());
 		glEnableVertexAttribArray(index);
 		glBindBuffer(GL_ARRAY_BUFFER, inst_abo);
 		glVertexAttribPointer(index, sizeof(*data) / 4, type, GL_FALSE, sizeof(*data), 0);
@@ -137,11 +138,16 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void draw()const
+	void update_uniform_vars(const ShaderPtr& shader)const;
+
+
+	void draw(const ShaderPtr& shader)const
 	{
+		shader->use();
 		glBindVertexArray(vao);
 		glDrawArraysInstanced(GL_TRIANGLES, 0, verticlesize_, num_inst_);
 		glBindVertexArray(0);
+		glUseProgram(0);
 	}
 
 	SET(num_inst);
@@ -149,11 +155,16 @@ public:
 	GET_REF(textures);
 
 	void add_texture(TexturePtr& texture) { textures_.emplace_back(texture); }
+
+	void add_instancing_attribute(string_view name, GLuint attbLoc) { attbLoc_[name] = attbLoc; }
+
 private:
 	GLuint vao;
 	GLuint num_inst_;
 	GLsizei verticlesize_;
 	vector<TexturePtr> textures_;
+	unordered_map<string_view, GLuint> attbLoc_;
 };
+using InstancingObjPtr = shared_ptr<InstancingObj>;
 
 ///////////////////////////////////////////

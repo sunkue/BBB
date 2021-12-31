@@ -40,15 +40,20 @@ void Renderer::init_shader()
 	vector<string> FS;
 	vector<string> GS;
 
-	VS.clear(); VS.emplace_back("./Shader/grass_vertex.glsl"sv);
+	VS.clear(); VS.emplace_back("./Shader/H_grass_vertex.glsl"sv); VS.emplace_back("./Shader/grass_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/png_fragment.glsl"sv);
 	GS.clear();
-	billboard_g_shader_ = Shader::create(VS, FS, GS);
+	grass_g_shader_ = Shader::create(VS, FS, GS);
 
 	VS.clear(); VS.emplace_back("./Shader/directional_depthmap_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/directional_depthmap_fragment.glsl"sv);
 	GS.clear();
 	directional_depthmap_shader_ = Shader::create(VS, FS, GS);
+
+	VS.clear();  VS.emplace_back("./Shader/H_grass_vertex.glsl"sv); VS.emplace_back("./Shader/directional_grass_depthmap_vertex.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/directional_grass_depthmap_fragment.glsl"sv);
+	GS.clear();
+	directional_grass_depthmap_shader_ = Shader::create(VS, FS, GS);
 
 	VS.clear(); VS.emplace_back("./Shader/point_depthmap_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/point_depthmap_fragment.glsl"sv);
@@ -94,7 +99,7 @@ void Renderer::init_resources()
 	testing_point_light_ = PointLight::create();
 	testing_spot_light_ = SpotLight::create();
 
-	ubo_vp_mat.bind(billboard_g_shader_, "VP_MAT");
+	ubo_vp_mat.bind(grass_g_shader_, "VP_MAT");
 	ubo_vp_mat.bind(default_g_shader_, "VP_MAT");
 	ubo_lightspace_mat.bind(gbuffer_renderer_->lightpass_shader, "LIGHTSPACE_MAT");
 
@@ -159,6 +164,10 @@ void Renderer::load_model()
 	main_camera_->set_ownner(player_.get());
 	main_camera_->set_diff(glm::vec3{ -12.f, 5.f, 0.f });
 
+
+	/// /
+	grasses_ = make_shared<InstancingObj>();
+
 	vector<Vertex> grassvertices;
 	for (auto& v : cross_billboard_3)
 	{
@@ -168,8 +177,8 @@ void Renderer::load_model()
 	const auto grass_count = 62000;
 	const auto grass_range = 200;
 
-	grasses_.set_num_inst(grass_count);
-	grasses_.setup_mesh(grassvertices);
+	grasses_->set_num_inst(grass_count); 
+	grasses_->setup_mesh(grassvertices);
 
 	vector<float> scales; scales.reserve(grass_count);
 	vector<float> yaw; yaw.reserve(grass_count);
@@ -186,15 +195,20 @@ void Renderer::load_model()
 		yaw.push_back(glm::radians(static_cast<float>(rand() % 360)));
 	}
 
-	auto texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass0.png"); grasses_.add_texture(texture);
-	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass1.png");		grasses_.add_texture(texture);
-	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/blueflower.png");	grasses_.add_texture(texture);
-	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/redflower.png");	grasses_.add_texture(texture);
+	auto texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass0.png"); grasses_->add_texture(texture);
+	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/grass1.png");		grasses_->add_texture(texture);
+	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/blueflower.png"); grasses_->add_texture(texture);
+	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/redflower.png");	grasses_->add_texture(texture);
 
-	grasses_.setup_instance_attribute(billboard_g_shader_, "a_scale", scales.data());
-	grasses_.setup_instance_attribute(billboard_g_shader_, "a_yaw", yaw.data());
-	grasses_.setup_instance_attribute(billboard_g_shader_, "a_translate", translate.data());
-	grasses_.setup_instance_attribute(billboard_g_shader_, "a_shearseed", shearseed.data());
+	grasses_->add_instancing_attribute("a_scale", 10);
+	grasses_->add_instancing_attribute("a_yaw", 11);
+	grasses_->add_instancing_attribute("a_shearseed", 12);
+	grasses_->add_instancing_attribute("a_translate", 13);
+
+	grasses_->setup_instance_attribute("a_scale", scales.data());
+	grasses_->setup_instance_attribute("a_yaw", yaw.data());
+	grasses_->setup_instance_attribute("a_translate", translate.data());
+	grasses_->setup_instance_attribute("a_shearseed", shearseed.data());
 
 
 	auto no_model = Model::create("");
@@ -224,10 +238,13 @@ void Renderer::draw()
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
 	// 1. first render to depth map 
-	depth_renderer_->bind_directional_depthmap_fbo(directional_depthmap_shader_, 0);
-	glCullFace(GL_FRONT);
+	depth_renderer_->bind_directional_depthmap_fbo();
+	glCullFace(GL_FRONT); // 깊이맵에서 피터패닝을 해결하는 법중하나. 속이 보이지 않는 물체는 이것으로 해결가능.
 
 	{
+		
+		depth_renderer_->set_directional_depthmap_shader(directional_depthmap_shader_, 0);
+
 		glDisable(GL_CULL_FACE);
 		default_map->update_uniform_vars(directional_depthmap_shader_);
 		default_map->draw(directional_depthmap_shader_);
@@ -238,13 +255,25 @@ void Renderer::draw()
 			car->update_uniform_vars(directional_depthmap_shader_);
 			car->draw(directional_depthmap_shader_);
 		}
+		/**/
 
+		// grass
+		depth_renderer_->set_directional_depthmap_shader(directional_grass_depthmap_shader_, 0);
+		
+
+		//glDisable(GL_CULL_FACE);
+		grasses_->update_uniform_vars(directional_grass_depthmap_shader_);
+		grasses_->draw(directional_grass_depthmap_shader_);
+	//	glEnable(GL_CULL_FACE);
 	}
+	
 
 	glCullFace(GL_BACK);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
 
-	/// // draw_gbuffers
+
+	/// // 2. draw_gbuffers
 	gbuffer_renderer_->bind_gbuffer_fbo();
 	
 	{
@@ -259,24 +288,19 @@ void Renderer::draw()
 			car->draw(default_g_shader_);
 		}
 	
-		// billoards
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		// grass
 		glDisable(GL_CULL_FACE);
-		billboard_g_shader_->use();
-		billboard_g_shader_->set("u_point_light", testing_point_light_);
-		billboard_g_shader_->set("u_directinal_light", testing_directional_light_);
-		billboard_g_shader_->set("u_spot_light", testing_spot_light_);
-		billboard_g_shader_->set("u_shadowmap", depth_renderer_->directional_depthmap_tbo);
-		billboard_g_shader_->set("u_time", gametime);
-		billboard_g_shader_->set("u_tex_sampler", grasses_.get_textures());
-		grasses_.draw();
+		grasses_->update_uniform_vars(grass_g_shader_);
+		grasses_->draw(grass_g_shader_);
 		glEnable(GL_CULL_FACE);
-		glUseProgram(0);
+
 	}
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
 
 	
+	/// // 3. do_lights_pass
 
 	gbuffer_renderer_->bind_lightpass_fbo();
 	auto& light_shader = gbuffer_renderer_->lightpass_shader;
@@ -295,79 +319,10 @@ void Renderer::draw()
 	//skybox->draw();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	
-	/*
-	depth_renderer_->bind_point_depthmap_fbo(point_depthmap_shader_, testing_point_light_, 0);
+	glUseProgram(0);
 
-	glCullFace(GL_FRONT);
 
-	{
-		glDisable(GL_CULL_FACE);
-		default_map->update_uniform_vars(point_depthmap_shader_);
-		default_map->draw(point_depthmap_shader_);
-		glEnable(GL_CULL_FACE);
-
-		for (auto& car : cars_)
-		{
-			car->update_uniform_vars(point_depthmap_shader_);
-			car->draw(point_depthmap_shader_);
-		}
-	}
-
-	glCullFace(GL_BACK);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	*/
-	
-
-	// 2. predraw with depthmap 
-
-	/*
-	screen_renderer_->bind_predraw_fbo();
-
-	{
-		testing_shader_->use();
-		auto shaket = main_camera_->get_shaking_time();
-		testing_shader_->set("time", abs(1.f - shaket * 5.f));
-		testing_shader_->set("explosion", main_camera_->get_shaking());
-		auto view_pos = main_camera_->get_position();
-		testing_shader_->set("u_view_pos", view_pos);
-		testing_spot_light_->direction = main_camera_->get_look_dir();
-		testing_spot_light_->position = main_camera_->get_position();
-		testing_shader_->set("u_point_light", testing_point_light_);
-		testing_shader_->set("u_directinal_light", testing_directional_light_);
-		testing_shader_->set("u_spot_light", testing_spot_light_);
-		testing_shader_->set("u_shadowmap", depth_renderer_->directional_depthmap_tbo);
-
-		glDisable(GL_CULL_FACE);
-		default_map->update_uniform_vars(testing_shader_);
-		default_map->draw(testing_shader_);
-		glEnable(GL_CULL_FACE);
-
-		for (auto& car : cars_)
-		{
-			car->update_uniform_vars(testing_shader_);
-			car->draw(testing_shader_);
-		}
-
-		skybox->draw();
-
-		// billoards
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDisable(GL_CULL_FACE);
-		billboard_shader_->use();
-		billboard_shader_->set("u_point_light", testing_point_light_);
-		billboard_shader_->set("u_directinal_light", testing_directional_light_);
-		billboard_shader_->set("u_spot_light", testing_spot_light_);
-		billboard_shader_->set("u_shadowmap", depth_renderer_->directional_depthmap_tbo);
-		billboard_shader_->set("u_time", gametime);
-		billboard_shader_->set("u_tex_sampler", grasses_.get_textures());
-		//grasses_.draw();
-		glEnable(GL_CULL_FACE);
-		glUseProgram(0);
-	}
-	*/
-
-	// 3. render
+	// fianl. render screen pass
 	screen_renderer_->blit_fbo(gbuffer_renderer_->lightpass_fbo);
 	screen_renderer_->draw_screen();
 
@@ -378,31 +333,6 @@ void Renderer::draw()
 
 void ScreenRenderer::init()
 {
-
-	glGenFramebuffers(1, &predraw_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, predraw_fbo);
-
-	predraw_tbo = Texture::create();
-	glGenTextures(1, &predraw_tbo->id);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, predraw_tbo->id);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB,
-		screen.width, screen.height, GL_TRUE);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0
-		, GL_TEXTURE_2D_MULTISAMPLE, predraw_tbo->id, 0);
-
-	glGenRenderbuffers(1, &predraw_rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, predraw_rbo);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, screen.width, screen.height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, predraw_rbo);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		cerr << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-	//
-
 	glGenFramebuffers(1, &screen_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, screen_fbo);
 
@@ -422,6 +352,8 @@ void ScreenRenderer::init()
 	vector<string> GS;
 	screen_shader = Shader::create(VS, FS, GS);
 }
+
+/////////////////////////////////////////////////////////////////////
 
 void gBufferRenderer::init()
 {
@@ -507,7 +439,7 @@ void gBufferRenderer::init()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	vector<string> VS; VS.emplace_back("./Shader/quad_vertex.glsl"sv);
-	vector<string> FS; FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/lightpass_fragment.glsl"sv);
+	vector<string> FS; FS.emplace_back("./Shader/H_light.glsl"sv); FS.emplace_back("./Shader/lightpass_fragment.glsl"sv);
 	vector<string> GS;
 	lightpass_shader = Shader::create(VS, FS, GS);
 }

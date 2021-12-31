@@ -288,9 +288,6 @@
     <None Include="Shader\test_vertex.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\IN_light.glsl">
-      <Filter>Render\Shader\glsl</Filter>
-    </None>
     <None Include="Shader\screen_fragment.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
@@ -337,6 +334,18 @@
       <Filter>Render\Shader\glsl</Filter>
     </None>
     <None Include="Shader\quad_vertex.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\directional_grass_depthmap_vertex.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\H_grass_vertex.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\H_light.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\directional_grass_depthmap_fragment.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
   </ItemGroup>

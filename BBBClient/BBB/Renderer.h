@@ -187,12 +187,16 @@ public:
 		return point_lightspace_mat.size() - 1;
 	}
 
-	void bind_directional_depthmap_fbo(const ShaderPtr& depthmap_shader, int lightmat_index)
+	void bind_directional_depthmap_fbo()
 	{
 		glViewport(0, 0, SHADOW_WIDTH_H, SHADOW_HEIGHT_H);
 		glBindFramebuffer(GL_FRAMEBUFFER, directional_depthmap_fbo);
+		glEnable(GL_DEPTH_TEST);
 		glClear(GL_DEPTH_BUFFER_BIT);
+	}
 
+	void set_directional_depthmap_shader(const ShaderPtr& depthmap_shader, int lightmat_index)
+	{
 		depthmap_shader->use();
 		depthmap_shader->set("u_lightpos_mat", directional_lightspace_mat[lightmat_index]);
 	}
@@ -215,25 +219,12 @@ class ScreenRenderer
 public:
 	friend class Renderer;
 
-	GLuint predraw_fbo;
-	GLuint predraw_rbo;
-	TexturePtr predraw_tbo;
-
 	GLuint screen_fbo;
 	TexturePtr screen_tbo;
 
 	ShaderPtr screen_shader;
-	void init();
 
-	void bind_predraw_fbo()
-	{
-		glViewport(0, 0, screen.width, screen.height);
-		glBindFramebuffer(GL_FRAMEBUFFER, predraw_fbo);
-		glClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
-	}
+	void init();
 
 	void blit_fbo(GLuint read_fbo)
 	{
@@ -315,7 +306,8 @@ private:
 	unique_ptr<ScreenRenderer> screen_renderer_;
 	unique_ptr<DepthRenderer> depth_renderer_;
 	ShaderPtr directional_depthmap_shader_;
-	ShaderPtr point_depthmap_shader_;
+	ShaderPtr directional_grass_depthmap_shader_;
+	ShaderPtr point_depthmap_shader_; 
 
 	unique_ptr<gBufferRenderer> gbuffer_renderer_;
 
@@ -332,8 +324,8 @@ private:
 	ObjPtr ghost_;
 	//
 
-	ShaderPtr billboard_g_shader_;
-	InstancingObj grasses_;
+	ShaderPtr grass_g_shader_;
+	InstancingObjPtr grasses_;
 
 
 };
