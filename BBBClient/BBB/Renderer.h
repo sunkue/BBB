@@ -23,104 +23,76 @@ extern SCREEN screen;
 
 //////////////////////////////////////////////////////
 
+// [-1, 1] pos // [0,1] tex // screen covered quad.
+class ScreenQuad
+{
+	SINGLE_TON(ScreenQuad);
+
+public:
+
+	// set using shader and uniforms first.
+	void draw_quad();
+
+private:
+	GLuint quad_vao;
+};
+
+//////////////////////////////////////////////////////
 class gBufferRenderer
 {
 public:
 	friend class Renderer;
 
 	GLuint gbuffer_fbo;
-
-	TexturePtr position_tbo;
+	TexturePtr worldpos_tbo;
 	TexturePtr normal_tbo;
 	TexturePtr albedospec_tbo;
-	
 
-	
-	void init()
-	{
-		glGenFramebuffers(1, &gbuffer_fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer_fbo);
+	GLuint lightpass_fbo;
+	TexturePtr lightpass_tbo;
 
-		//position
-		position_tbo = Texture::create();
-		glGenTextures(1, &position_tbo->id);
-		glBindTexture(GL_TEXTURE_2D, position_tbo->id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	ShaderPtr lightpass_shader;
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, position_tbo->id, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		//normal
-		normal_tbo = Texture::create();
-		glGenTextures(1, &normal_tbo->id);
-		glBindTexture(GL_TEXTURE_2D, normal_tbo->id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normal_tbo->id, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		// color spec
-		albedospec_tbo = Texture::create();
-		glGenTextures(1, &albedospec_tbo->id);
-		glBindTexture(GL_TEXTURE_2D, albedospec_tbo->id);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen.width, screen.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, albedospec_tbo->id, 0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
-		GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 }; 
-		glDrawBuffers(3, attachments);
-
-		// add depth bufer,, etc..
-		GLuint rboDepth;
-		glGenRenderbuffers(1, &rboDepth);
-		glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen.width, screen.height);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-		// finally check if framebuffer is complete
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "Framebuffer not complete!" << std::endl;
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
+	void init();
 
 	void bind_gbuffer_fbo()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer_fbo);
 		glViewport(0, 0, screen.width, screen.height);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.2f, 0.1f, 0.6f, 1.0f); // background color
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
-		
+
+		// draw objs
 	}
 
-	void draw_screen()
+	void bind_lightpass_fbo()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(screen.viewport_.x, screen.viewport_.y, screen.viewport_.z, screen.viewport_.w);
-		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
+		glBindFramebuffer(GL_FRAMEBUFFER, lightpass_fbo);
+		glViewport(0, 0, screen.width, screen.height);
+		glClear(GL_COLOR_BUFFER_BIT); // | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
 
-		//screen_shader->use();
-	//	screen_shader->set("screen_texture", screen_tbo);
-		//glBindVertexArray(quad_vao);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
-	//	glEnable(GL_DEPTH_TEST);
+		lightpass_shader->use();
+		lightpass_shader->set("g_world_pos", worldpos_tbo);
+		lightpass_shader->set("g_normal", normal_tbo);
+		lightpass_shader->set("g_albedospec", albedospec_tbo);
+
+		// set light uniforms..
 	}
+
+	void draw_quad()
+	{
+		ScreenQuad::get().draw_quad();
+	}
+
 };
 
 class DepthRenderer
 {
-// 미리계산가능한 섀도우맵은 미리 계산해두자,
+	// 미리계산가능한 섀도우맵은 미리 계산해두자,
 public:
 	friend class Renderer;
 	static const GLuint SHADOW_WIDTH_H = 1024 * 20, SHADOW_HEIGHT_H = 1024 * 20;
@@ -199,8 +171,8 @@ public:
 
 	int add_lightspace_mat(const PointLightPtr& light)
 	{
-		float aspect = (float)SHADOW_WIDTH_L / (float)SHADOW_HEIGHT_L; 
-		float n = screen.n; float f = screen.f; 
+		float aspect = (float)SHADOW_WIDTH_L / (float)SHADOW_HEIGHT_L;
+		float n = screen.n; float f = screen.f;
 		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspect, n, f);
 		auto lightpos = light->position;
 
@@ -250,7 +222,6 @@ public:
 	GLuint screen_fbo;
 	TexturePtr screen_tbo;
 
-	GLuint quad_vao;
 	ShaderPtr screen_shader;
 	void init();
 
@@ -264,9 +235,9 @@ public:
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	void blit_fbo()
+	void blit_fbo(GLuint read_fbo)
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, predraw_fbo);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, read_fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screen_fbo);
 		glBlitFramebuffer(0, 0, screen.width, screen.height, 0, 0, screen.width, screen.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
@@ -281,8 +252,9 @@ public:
 
 		screen_shader->use();
 		screen_shader->set("screen_texture", screen_tbo);
-		glBindVertexArray(quad_vao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		ScreenQuad::get().draw_quad();
+
 		glEnable(GL_DEPTH_TEST);
 	}
 };
@@ -339,7 +311,7 @@ private:
 
 	CubeMapPtr skybox;
 	ObjPtr default_map;
-	
+
 	//
 
 	unique_ptr<ScreenRenderer> screen_renderer_;

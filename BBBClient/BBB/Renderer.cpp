@@ -42,12 +42,12 @@ void Renderer::init_shader()
 	VS.clear(); VS.emplace_back("./Shader/test_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/test_fragment.glsl"sv);
 	GS.clear(); GS.emplace_back("./Shader/test_geometry.glsl"sv);
-	testing_shader_ = Shader::create(VS, FS, GS);
+//	testing_shader_ = Shader::create(VS, FS, GS);
 
 	VS.clear(); VS.emplace_back("./Shader/grass_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/png_fragment.glsl"sv);
 	GS.clear();
-	billboard_shader_ = Shader::create(VS, FS, GS);
+//	billboard_shader_ = Shader::create(VS, FS, GS);
 
 	VS.clear(); VS.emplace_back("./Shader/directional_depthmap_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/directional_depthmap_fragment.glsl"sv);
@@ -98,11 +98,12 @@ void Renderer::init_resources()
 	testing_point_light_ = PointLight::create();
 	testing_spot_light_ = SpotLight::create();
 
-	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
-	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
+//	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
+//	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
 	ubo_vp_mat.bind(gbuffer_shader_, "VP_MAT");
-	ubo_lightspace_mat.bind(testing_shader_, "LIGHTSPACE_MAT");
-	ubo_lightspace_mat.bind(billboard_shader_, "LIGHTSPACE_MAT");
+	ubo_lightspace_mat.bind(gbuffer_renderer_->lightpass_shader, "LIGHTSPACE_MAT");
+//	ubo_lightspace_mat.bind(testing_shader_, "LIGHTSPACE_MAT");
+//	ubo_lightspace_mat.bind(billboard_shader_, "LIGHTSPACE_MAT");
 
 	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
 	ubo_lightspace_mat.update(glm::value_ptr(depth_renderer_->directional_lightspace_mat[index]));
@@ -197,10 +198,10 @@ void Renderer::load_model()
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/blueflower.png");	grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/redflower.png");	grasses_.add_texture(texture);
 
-	grasses_.setup_instance_attribute(billboard_shader_, "a_scale", scales.data());
-	grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw.data());
-	grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate.data());
-	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed.data());
+	//grasses_.setup_instance_attribute(billboard_shader_, "a_scale", scales.data());
+//	grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw.data());
+//	grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate.data());
+//	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed.data());
 
 
 	auto no_model = Model::create("");
@@ -250,7 +251,7 @@ void Renderer::draw()
 	glCullFace(GL_BACK);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	/// //
+	/// // draw_gbuffers
 	gbuffer_renderer_->bind_gbuffer_fbo();
 	
 	{
@@ -264,11 +265,31 @@ void Renderer::draw()
 			car->update_uniform_vars(gbuffer_shader_);
 			car->draw(gbuffer_shader_);
 		}
+	
 	}
 	
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	
+
+	gbuffer_renderer_->bind_lightpass_fbo();
+	auto& light_shader = gbuffer_renderer_->lightpass_shader;
+
+	auto view_pos = main_camera_->get_position();
+	light_shader->set("u_view_pos", view_pos);
+	testing_spot_light_->direction = main_camera_->get_look_dir();
+	testing_spot_light_->position = main_camera_->get_position();
+	light_shader->set("u_point_light", testing_point_light_);
+	light_shader->set("u_directinal_light", testing_directional_light_);
+	light_shader->set("u_spot_light", testing_spot_light_);
+	light_shader->set("u_shadowmap", depth_renderer_->directional_depthmap_tbo);
+
+	gbuffer_renderer_->draw_quad();
+
+	//skybox->draw();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 	/*
 	depth_renderer_->bind_point_depthmap_fbo(point_depthmap_shader_, testing_point_light_, 0);
 
@@ -293,6 +314,8 @@ void Renderer::draw()
 	
 
 	// 2. predraw with depthmap 
+
+	/*
 	screen_renderer_->bind_predraw_fbo();
 
 	{
@@ -336,11 +359,11 @@ void Renderer::draw()
 		glEnable(GL_CULL_FACE);
 		glUseProgram(0);
 	}
+	*/
 
 	// 3. render
-	screen_renderer_->blit_fbo();
+	screen_renderer_->blit_fbo(gbuffer_renderer_->lightpass_fbo);
 	screen_renderer_->draw_screen();
-
 
 	glUseProgram(0);
 }
@@ -349,37 +372,6 @@ void Renderer::draw()
 
 void ScreenRenderer::init()
 {
-	glGenVertexArrays(1, &quad_vao);
-	GLuint vbo, ebo;
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-	struct QUAD
-	{
-		glm::vec2 pos;
-		glm::vec2 tex;
-	};
-	QUAD quadv[] =
-	{
-		{{-1,-1},{0,0}},
-		{{ 1, 1},{1,1}},
-		{{-1, 1},{0,1}},
-		{{-1,-1},{0,0}},
-		{{ 1,-1},{1,0}},
-		{{ 1, 1},{1,1}}
-	};
-
-	glBindVertexArray(quad_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadv), quadv, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, pos));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
-
-	glBindVertexArray(0);
-
-	/// /
 
 	glGenFramebuffers(1, &predraw_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, predraw_fbo);
@@ -424,3 +416,135 @@ void ScreenRenderer::init()
 	vector<string> GS;
 	screen_shader = Shader::create(VS, FS, GS);
 }
+
+void gBufferRenderer::init()
+{
+	glGenFramebuffers(1, &gbuffer_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer_fbo);
+
+	//position
+	worldpos_tbo = Texture::create();
+	glGenTextures(1, &worldpos_tbo->id);
+	glBindTexture(GL_TEXTURE_2D, worldpos_tbo->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, worldpos_tbo->id, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//normal
+	normal_tbo = Texture::create();
+	glGenTextures(1, &normal_tbo->id);
+	glBindTexture(GL_TEXTURE_2D, normal_tbo->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normal_tbo->id, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// color spec
+	albedospec_tbo = Texture::create();
+	glGenTextures(1, &albedospec_tbo->id);
+	glBindTexture(GL_TEXTURE_2D, albedospec_tbo->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen.width, screen.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, albedospec_tbo->id, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+	GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
+
+	// add depth bufer,, etc..
+	GLuint rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen.width, screen.height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+	// finally check if framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "Framebuffer not complete!" << std::endl;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+	////
+	glGenFramebuffers(1, &lightpass_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, lightpass_fbo);
+
+	lightpass_tbo = Texture::create();
+	glGenTextures(1, &lightpass_tbo->id);
+	glBindTexture(GL_TEXTURE_2D, lightpass_tbo->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lightpass_tbo->id, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	/*
+	rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen.width, screen.height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+	*/
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cerr << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	vector<string> VS; VS.emplace_back("./Shader/quad_vertex.glsl"sv);
+	vector<string> FS; FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/lightpass_fragment.glsl"sv);
+	vector<string> GS;
+	lightpass_shader = Shader::create(VS, FS, GS);
+}
+
+///////////////////////////////////////////////
+
+ScreenQuad::ScreenQuad()
+{
+	glGenVertexArrays(1, &quad_vao);
+	GLuint vbo, ebo;
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
+	struct QUAD
+	{
+		glm::vec2 pos;
+		glm::vec2 tex;
+	};
+	QUAD quadv[] =
+	{
+		{{-1,-1},{0,0}},
+		{{ 1, 1},{1,1}},
+		{{-1, 1},{0,1}},
+		{{-1,-1},{0,0}},
+		{{ 1,-1},{1,0}},
+		{{ 1, 1},{1,1}}
+	};
+
+	glBindVertexArray(quad_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadv), quadv, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, pos));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
+
+	glBindVertexArray(0);
+}
+
+void ScreenQuad::draw_quad()
+{
+	glBindVertexArray(quad_vao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+///////////////////////////////////////////////
