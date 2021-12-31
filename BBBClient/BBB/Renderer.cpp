@@ -39,15 +39,11 @@ void Renderer::init_shader()
 	vector<string> VS;
 	vector<string> FS;
 	vector<string> GS;
-	VS.clear(); VS.emplace_back("./Shader/test_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/test_fragment.glsl"sv);
-	GS.clear(); GS.emplace_back("./Shader/test_geometry.glsl"sv);
-//	testing_shader_ = Shader::create(VS, FS, GS);
 
 	VS.clear(); VS.emplace_back("./Shader/grass_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/IN_light.glsl"sv); FS.emplace_back("./Shader/png_fragment.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/png_fragment.glsl"sv);
 	GS.clear();
-//	billboard_shader_ = Shader::create(VS, FS, GS);
+	billboard_g_shader_ = Shader::create(VS, FS, GS);
 
 	VS.clear(); VS.emplace_back("./Shader/directional_depthmap_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/directional_depthmap_fragment.glsl"sv);
@@ -62,7 +58,7 @@ void Renderer::init_shader()
 	VS.clear(); VS.emplace_back("./Shader/gbuffer_vertex.glsl"sv);
 	FS.clear(); FS.emplace_back("./Shader/gbuffer_fragment.glsl"sv);
 	GS.clear(); //GS.emplace_back("./Shader/gbuffer_geomatry.glsl"sv);
-	gbuffer_shader_ = Shader::create(VS, FS, GS);
+	default_g_shader_ = Shader::create(VS, FS, GS);
 	 
 	{
 		vector<string_view> textures
@@ -98,12 +94,9 @@ void Renderer::init_resources()
 	testing_point_light_ = PointLight::create();
 	testing_spot_light_ = SpotLight::create();
 
-//	ubo_vp_mat.bind(testing_shader_, "VP_MAT");
-//	ubo_vp_mat.bind(billboard_shader_, "VP_MAT");
-	ubo_vp_mat.bind(gbuffer_shader_, "VP_MAT");
+	ubo_vp_mat.bind(billboard_g_shader_, "VP_MAT");
+	ubo_vp_mat.bind(default_g_shader_, "VP_MAT");
 	ubo_lightspace_mat.bind(gbuffer_renderer_->lightpass_shader, "LIGHTSPACE_MAT");
-//	ubo_lightspace_mat.bind(testing_shader_, "LIGHTSPACE_MAT");
-//	ubo_lightspace_mat.bind(billboard_shader_, "LIGHTSPACE_MAT");
 
 	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
 	ubo_lightspace_mat.update(glm::value_ptr(depth_renderer_->directional_lightspace_mat[index]));
@@ -198,10 +191,10 @@ void Renderer::load_model()
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/blueflower.png");	grasses_.add_texture(texture);
 	texture = Texture::create(); texture->id = CreatePngTexture("./Resource/Texture/grass/redflower.png");	grasses_.add_texture(texture);
 
-	//grasses_.setup_instance_attribute(billboard_shader_, "a_scale", scales.data());
-//	grasses_.setup_instance_attribute(billboard_shader_, "a_yaw", yaw.data());
-//	grasses_.setup_instance_attribute(billboard_shader_, "a_translate", translate.data());
-//	grasses_.setup_instance_attribute(billboard_shader_, "a_shearseed", shearseed.data());
+	grasses_.setup_instance_attribute(billboard_g_shader_, "a_scale", scales.data());
+	grasses_.setup_instance_attribute(billboard_g_shader_, "a_yaw", yaw.data());
+	grasses_.setup_instance_attribute(billboard_g_shader_, "a_translate", translate.data());
+	grasses_.setup_instance_attribute(billboard_g_shader_, "a_shearseed", shearseed.data());
 
 
 	auto no_model = Model::create("");
@@ -256,16 +249,29 @@ void Renderer::draw()
 	
 	{
 		glDisable(GL_CULL_FACE);
-		default_map->update_uniform_vars(gbuffer_shader_);
-		default_map->draw(gbuffer_shader_);
+		default_map->update_uniform_vars(default_g_shader_);
+		default_map->draw(default_g_shader_);
 		glEnable(GL_CULL_FACE);
 
 		for (auto& car : cars_)
 		{
-			car->update_uniform_vars(gbuffer_shader_);
-			car->draw(gbuffer_shader_);
+			car->update_uniform_vars(default_g_shader_);
+			car->draw(default_g_shader_);
 		}
 	
+		// billoards
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDisable(GL_CULL_FACE);
+		billboard_g_shader_->use();
+		billboard_g_shader_->set("u_point_light", testing_point_light_);
+		billboard_g_shader_->set("u_directinal_light", testing_directional_light_);
+		billboard_g_shader_->set("u_spot_light", testing_spot_light_);
+		billboard_g_shader_->set("u_shadowmap", depth_renderer_->directional_depthmap_tbo);
+		billboard_g_shader_->set("u_time", gametime);
+		billboard_g_shader_->set("u_tex_sampler", grasses_.get_textures());
+		grasses_.draw();
+		glEnable(GL_CULL_FACE);
+		glUseProgram(0);
 	}
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

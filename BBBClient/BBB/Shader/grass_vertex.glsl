@@ -1,32 +1,6 @@
 #version 450
 
-
-layout (std140, binding = 0) uniform VP_MAT
-{
-	mat4 u_vp_mat;
-};
-
-uniform float u_time;
-
-layout (location = 0) in vec3 a_position;
-layout (location = 1) in vec3 a_normal;
-layout (location = 2) in vec2 a_texcoord;
-
-// instance values
-in float a_scale;
-in float a_yaw;
-in float a_shearseed;
-in vec3 a_translate;
-
-out FS_IN
-{
-	vec4 lightspacefragpos;
-	vec3 world_pos;
-	vec3 normal;
-	vec2 texcoord;
-} vs_out;
-
-flat out int texture_index;
+//
 
 vec2 rotate(vec2 v, float radian)
 {
@@ -43,6 +17,34 @@ vec4 shear(vec4 v, float x)
 	m[1][2] = x;
 	return m * v;
 }
+
+//
+
+layout(std140, binding = 0) uniform VP_MAT
+{
+	mat4 u_vp_mat;
+};
+
+uniform float u_time;
+
+layout(location = 0) in vec3 a_position;
+layout(location = 1) in vec3 a_normal;
+layout(location = 2) in vec2 a_texcoord;
+
+// instance values
+in float a_scale;
+in float a_yaw;
+in float a_shearseed;
+in vec3 a_translate;
+
+out VS_OUT
+{
+	vec3 world_pos;
+	vec3 normal;
+	vec2 texcoord;
+} vs_out;
+
+flat out int texture_index;
 
 void main()
 {	
@@ -61,9 +63,13 @@ void main()
 	//translate
 	pos = vec4(pos.xyz + a_translate, 1.f);
 
-	gl_Position = u_vp_mat * pos;
+
+	// outs
 	texture_index = gl_InstanceID % 4;
-	vs_out.normal = a_normal;	
-	vs_out.world_pos = a_translate;	
+
+	vs_out.world_pos = pos.xyz;
+	vs_out.normal = a_normal;
 	vs_out.texcoord = a_texcoord;
+
+	gl_Position = u_vp_mat * pos;
 }

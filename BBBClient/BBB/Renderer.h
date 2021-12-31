@@ -303,8 +303,6 @@ private:
 	CameraPtr main_camera_;
 	SCREEN& screen_ = screen;
 
-	ShaderPtr testing_shader_;
-
 	DirectionalLightPtr testing_directional_light_;
 	PointLightPtr testing_point_light_;
 	SpotLightPtr testing_spot_light_;
@@ -320,13 +318,13 @@ private:
 	ShaderPtr point_depthmap_shader_;
 
 	unique_ptr<gBufferRenderer> gbuffer_renderer_;
-	ShaderPtr gbuffer_shader_;
 
 	//
 	UBO<glm::mat4> ubo_vp_mat{ 0 };
 	UBO<glm::mat4> ubo_lightspace_mat{ 1 };
 	//
 
+	ShaderPtr default_g_shader_;
 	vector<ObjPtr> cars_;
 
 	//
@@ -334,7 +332,7 @@ private:
 	ObjPtr ghost_;
 	//
 
-	ShaderPtr billboard_shader_;
+	ShaderPtr billboard_g_shader_;
 	InstancingObj grasses_;
 
 
