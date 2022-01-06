@@ -30,6 +30,9 @@ void DoNextFrame()
 	float y = MOUSE_EVENT_MANAGER::get().get_prev_y();
 	gui::InputFloat("x", &x);
 	gui::InputFloat("y", &y);
+
+	auto ray = Ray::create(x, y);
+	gui::InputFloat3("mouse_ray", &ray.dir.x);
 	gui::End();
 
 	Renderer::get().draw();
@@ -54,6 +57,11 @@ void DoNextFrame()
 	auto depthbuffer = Renderer::get().get_depth_renderer()->directional_depthmap_tbo->id;
 	gui::Begin("directinal_depthbuffer(shadow)");
 	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	auto sunbuffer = Renderer::get().get_sun_renderer()->sunpass_tbo->id;
+	gui::Begin("sun_buffer(light_shaft)");
+	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
 	gui::End();
 
 	auto gbuffer = Renderer::get().get_gbuffer_renderer()->worldpos_tbo->id;

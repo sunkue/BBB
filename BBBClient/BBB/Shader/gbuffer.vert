@@ -2,7 +2,7 @@
 
 // 역행렬은 비싼연산, cpu에서 계산해서 유니폼으로 한번에 넘길 필요가 잇다.
 
-layout(std140, binding = 0) uniform VP_MAT
+layout(std140) uniform VP_MAT
 {
 	mat4 u_vp_mat;
 };

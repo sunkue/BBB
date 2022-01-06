@@ -229,6 +229,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Sun.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Obj.cpp" />
   </ItemGroup>
@@ -268,32 +269,34 @@
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Sun.h" />
     <ClInclude Include="sunkue_glm.hpp" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Obj.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\cubemap_fragment.glsl" />
-    <None Include="Shader\cubemap_vertex.glsl" />
+    <None Include="Shader\cubemap.frag" />
+    <None Include="Shader\cubemap.vert" />
     <None Include="Shader\default_fragment.glsl" />
-    <None Include="Shader\directional_depthmap_fragment.glsl" />
-    <None Include="Shader\directional_depthmap_vertex.glsl" />
-    <None Include="Shader\directional_grass_depthmap_fragment.glsl" />
-    <None Include="Shader\directional_grass_depthmap_vertex.glsl" />
-    <None Include="Shader\gbuffer_fragment.glsl" />
+    <None Include="Shader\directional_depthmap.frag" />
+    <None Include="Shader\directional_depthmap.vert" />
+    <None Include="Shader\directional_grass_depthmap.frag" />
+    <None Include="Shader\directional_grass_depthmap_vert.glsl" />
+    <None Include="Shader\gbuffer.frag" />
     <None Include="Shader\gbuffer_geometry.glsl" />
-    <None Include="Shader\gbuffer_vertex.glsl" />
-    <None Include="Shader\grass_vertex.glsl" />
-    <None Include="Shader\H_grass_vertex.glsl" />
+    <None Include="Shader\gbuffer.vert" />
+    <None Include="Shader\grass_vert.glsl" />
+    <None Include="Shader\H_grass_vert.glsl" />
     <None Include="Shader\H_light.glsl" />
-    <None Include="Shader\lightpass_fragment.glsl" />
-    <None Include="Shader\png_fragment.glsl" />
-    <None Include="Shader\point_depthmap_geomatry.glsl" />
-    <None Include="Shader\point_depthmap_fragment.glsl" />
-    <None Include="Shader\point_depthmap_vertex.glsl" />
-    <None Include="Shader\quad_vertex.glsl" />
-    <None Include="Shader\screen_fragment.glsl" />
-    <None Include="Shader\screen_vertex.glsl" />
+    <None Include="Shader\lightpass_frag.glsl" />
+    <None Include="Shader\png.frag" />
+    <None Include="Shader\point_depthmap.geom" />
+    <None Include="Shader\point_depthmap.frag" />
+    <None Include="Shader\point_depthmap.vert" />
+    <None Include="Shader\quad.vert" />
+    <None Include="Shader\screen.frag" />
+    <None Include="Shader\sky.frag" />
+    <None Include="Shader\sun_w_fragment.glsl" />
     <None Include="Shader\test_fragment.glsl" />
     <None Include="Shader\test_geometry.glsl" />
     <None Include="Shader\test_vertex.glsl" />

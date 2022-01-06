@@ -17,9 +17,13 @@ struct LightBasic
 using DirectionalLightPtr = shared_ptr<struct DirectionalLight>;
 struct DirectionalLight : LightBasic
 {
-	glm::vec3 direction{ glm::normalize(glm::vec3(-15.f,-27.f,14.f)) };
+	//glm::vec3 direction{ glm::normalize(glm::vec3(-15.f,-27.f,14.f)) };
+
+	glm::vec3 direction{ glm::normalize(glm::vec3(-0.14,-0.2,1.f)) };
+	//glm::vec3 direction{ glm::normalize(glm::vec3(1,0,0)) };
 
 	CREATE_SHARED(DirectionalLightPtr, DirectionalLight);
+
 private:
 	explicit DirectionalLight() noexcept = default;
 };

@@ -157,20 +157,34 @@ void VehicleObj::update_camera(Camera* camera, float time_elpased) const
 
 void GhostObj::update(float time_elapsed)
 {
+	auto& camera = Game::get().renderer.get_main_camera();
+	auto right = camera->get_right();
+	auto up = camera->get_up();
+	auto front =  camera->get_look_dir();
+
 	float speed = speed_ * time_elapsed;
-	if (up_on_) { move(get_up_dir() * speed); };
-	if (down_on_) { move(-get_up_dir() * speed); };
-	if (front_on_) { move(get_head_dir() * speed); };
-	if (back_on_) { move(-get_head_dir() * speed); };
-	if (right_on_) { move(get_right_dir() * speed); };
-	if (left_on_) { move(-get_right_dir() * speed); };
+	if (up_on_) { move(up * speed); };
+	if (down_on_) { move(-up * speed); };
+	if (front_on_) { move(front * speed); };
+	if (back_on_) { move(-front * speed); };
+	if (right_on_) { move(right * speed); };
+	if (left_on_) { move(-right * speed); };
 }
 
 void GhostObj::update_camera(Camera* camera, float time_elpased) const
 {
+	auto ryaw = glm::radians(rotator_.yaw);
+	auto rpitch = glm::radians(rotator_.pitch);
+
+	glm::vec3 front;
+	front.x = cos(ryaw) * cos(rpitch);
+	front.y = sin(rpitch);
+	front.z = sin(ryaw) * cos(rpitch);
+	front = glm::normalize(front);
+
 	auto position = get_position();
 	camera->set_position(position);
-	camera->set_target(position + get_head_dir());
+	camera->set_target(position + front);
 }
 void GhostObj::draw_gui()
 {
@@ -209,8 +223,11 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 	}
 
 	{
+		auto& camera = Game::get().renderer.get_main_camera();
+		auto front = camera->get_look_dir();
+
 		auto speed = clamp(scroll.yoffset * speed_, -100., 100.);
-		move(get_head_dir() * speed);
+		move(front * speed);
 		return true;
 	}
 	return true;
@@ -265,12 +282,19 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::pos_event& pos)
 			// È¸Àü
 			float xoffset = pos.xpos - mm.get_prev_x(); xoffset /= 10;
 			float yoffset = pos.ypos - mm.get_prev_y(); yoffset /= 10;
-			auto& camera = Renderer::get().get_main_camera();
-			auto xm = glm::rotate(glm::radians(-xoffset), camera->get_up());
-			//auto ym = glm::rotate(glm::radians(-yoffset), camera->get_right());
-			auto ym = glm::rotate(glm::radians(-yoffset), camera->get_right());
+			yoffset = -yoffset;
 
-			rotate({ xm * ym });
+			rotator_.yaw += xoffset;
+			rotator_.pitch += yoffset;
+
+			if (bool constrainPitch = true)
+			{
+				if (rotator_.pitch > 89.0f)
+					rotator_.pitch = 89.0f;
+				if (rotator_.pitch < -89.0f)
+					rotator_.pitch = -89.0f;
+			}
+
 			return true;
 		}
 

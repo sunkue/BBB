@@ -72,9 +72,9 @@ struct Boundings
 
 	ShaderPtr bounding_shader{ Shader::basic() };
 
-	void rotate(glm::quat q) { L2.orientation *= q; }
-	void move(glm::vec3 dif) { L1.center += dif; L2.center += dif; }
-	void scaling(glm::vec3 ratio) { L2.extents *= ratio; L1.radius *= glm::compMax(ratio); }
+	void rotate(const glm::quat& q) { L2.orientation *= q; }
+	void move(const glm::vec3& dif) { L1.center += dif; L2.center += dif; }
+	void scaling(const glm::vec3& ratio) { L2.extents *= ratio; L1.radius *= glm::compMax(ratio); }
 
 	bool intersects(const Ray& ray, float& dist) const
 	{

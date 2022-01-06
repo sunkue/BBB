@@ -63,6 +63,7 @@ public:
 
 private:
 	ObjPtr selected_obj_;
+	rotator rotator_;
 
 private:
 	float speed_ = 5.0f;

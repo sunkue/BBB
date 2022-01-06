@@ -1,9 +1,14 @@
 
 
-layout(std140, binding = 1) uniform LIGHTSPACE_MAT
+layout(std140) uniform LIGHTSPACE_MAT
 {
-	mat4 u_lightspace_mat;
+	uniform mat4 u_lightspace_mat;
 };
+
+//layout(std140) uniform SUN
+//{
+	//DirectionalLight u_directinal_light;
+//};
 
 uniform sampler2D g_world_pos;
 uniform sampler2D g_normal;
@@ -40,5 +45,7 @@ void main()
 	result = result + caculate_light(u_directinal_light, view_dir, normal, world_pos, albedo, specular_color, shininess, shadow);
 
 	o_flagcolor = vec4(result, 1);
+
+
 } 
 

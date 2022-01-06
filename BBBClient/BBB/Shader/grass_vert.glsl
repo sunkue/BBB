@@ -1,5 +1,5 @@
 
-layout(std140, binding = 0) uniform VP_MAT
+layout(std140) uniform VP_MAT
 {
 	mat4 u_vp_mat;
 };

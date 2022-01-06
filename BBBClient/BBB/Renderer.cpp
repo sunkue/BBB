@@ -40,31 +40,43 @@ void Renderer::init_shader()
 	vector<string> FS;
 	vector<string> GS;
 
-	VS.clear(); VS.emplace_back("./Shader/H_grass_vertex.glsl"sv); VS.emplace_back("./Shader/grass_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/png_fragment.glsl"sv);
+	VS.clear(); VS.emplace_back("./Shader/H_grass_vert.glsl"sv); VS.emplace_back("./Shader/grass_vert.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/png.frag"sv);
 	GS.clear();
 	grass_g_shader_ = Shader::create(VS, FS, GS);
 
-	VS.clear(); VS.emplace_back("./Shader/directional_depthmap_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/directional_depthmap_fragment.glsl"sv);
+	VS.clear(); VS.emplace_back("./Shader/directional_depthmap.vert"sv);
+	FS.clear(); FS.emplace_back("./Shader/directional_depthmap.frag"sv);
 	GS.clear();
 	directional_depthmap_shader_ = Shader::create(VS, FS, GS);
 
-	VS.clear();  VS.emplace_back("./Shader/H_grass_vertex.glsl"sv); VS.emplace_back("./Shader/directional_grass_depthmap_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/directional_grass_depthmap_fragment.glsl"sv);
+	VS.clear(); VS.emplace_back("./Shader/H_grass_vert.glsl"sv); VS.emplace_back("./Shader/directional_grass_depthmap_vert.glsl"sv);
+	FS.clear(); FS.emplace_back("./Shader/directional_grass_depthmap.frag"sv);
 	GS.clear();
 	directional_grass_depthmap_shader_ = Shader::create(VS, FS, GS);
 
-	VS.clear(); VS.emplace_back("./Shader/point_depthmap_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/point_depthmap_fragment.glsl"sv);
-	GS.clear(); GS.emplace_back("./Shader/point_depthmap_geomatry.glsl"sv);
+	VS.clear(); VS.emplace_back("./Shader/point_depthmap.vert"sv);
+	FS.clear(); FS.emplace_back("./Shader/point_depthmap.frag"sv);
+	GS.clear(); GS.emplace_back("./Shader/point_depthmap.geom"sv);
 	point_depthmap_shader_ = Shader::create(VS, FS, GS);
 
-	VS.clear(); VS.emplace_back("./Shader/gbuffer_vertex.glsl"sv);
-	FS.clear(); FS.emplace_back("./Shader/gbuffer_fragment.glsl"sv);
+	VS.clear(); VS.emplace_back("./Shader/gbuffer.vert"sv);
+	FS.clear(); FS.emplace_back("./Shader/gbuffer.frag"sv);
 	GS.clear(); //GS.emplace_back("./Shader/gbuffer_geomatry.glsl"sv);
 	default_g_shader_ = Shader::create(VS, FS, GS);
-	 
+
+	VS.clear(); VS.emplace_back("./Shader/quad.vert"sv);
+	FS.clear(); FS.emplace_back("./Shader/sun_w_fragment.glsl"sv);
+	GS.clear(); //GS.emplace_back("./Shader/gbuffer_geomatry.glsl"sv);
+	sun_w_shader_ = Shader::create(VS, FS, GS);
+
+//	sun_b_shader_ = Shader::create(VS, FS, GS);//
+
+	VS.clear(); VS.emplace_back("./Shader/quad.vert"sv);
+	FS.clear(); FS.emplace_back("./Shader/sky.frag"sv);
+	GS.clear(); //GS.emplace_back("./Shader/gbuffer_geomatry.glsl"sv);
+	skybox_shader_ = Shader::create(VS, FS, GS);
+
 	{
 		vector<string_view> textures
 		{
@@ -76,9 +88,9 @@ void Renderer::init_shader()
 			"back.jpg"
 		};
 		string_view dir{ "./Resource/Model/skybox" };
-		VS.clear(); VS.emplace_back("./Shader/cubemap_vertex.glsl"sv);
-		FS.clear(); FS.emplace_back("./Shader/cubemap_fragment.glsl"sv);
-		GS.clear(); 
+		VS.clear(); VS.emplace_back("./Shader/cubemap.vert"sv);
+		FS.clear(); FS.emplace_back("./Shader/cubemap.frag"sv);
+		GS.clear();
 		auto cubeshader = Shader::create(VS, FS, GS);
 		skybox = CubeMap::create(cubeshader, textures, dir);
 	}
@@ -89,6 +101,8 @@ void Renderer::init_shader()
 	depth_renderer_->init();
 	gbuffer_renderer_ = make_unique<gBufferRenderer>();
 	gbuffer_renderer_->init();
+	sun_renderer_ = make_unique<SunRenderer>();
+	sun_renderer_->init();
 }
 
 void Renderer::init_resources()
@@ -101,11 +115,19 @@ void Renderer::init_resources()
 
 	ubo_vp_mat.bind(grass_g_shader_, "VP_MAT");
 	ubo_vp_mat.bind(default_g_shader_, "VP_MAT");
-	ubo_lightspace_mat.bind(gbuffer_renderer_->lightpass_shader, "LIGHTSPACE_MAT");
 
+	ubo_inv_v_mat.bind(skybox_shader_, "INV_V_MAT");
+	ubo_inv_p_mat.bind(skybox_shader_, "INV_P_MAT");
+
+	ubo_resolution.bind(skybox_shader_, "RESOLUTION");
+
+	ubo_lightspace_mat.bind(gbuffer_renderer_->lightpass_shader, "LIGHTSPACE_MAT");
 	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
 	ubo_lightspace_mat.update(glm::value_ptr(depth_renderer_->directional_lightspace_mat[index]));
-	index = depth_renderer_->add_lightspace_mat(testing_point_light_);
+	// index = depth_renderer_->add_lightspace_mat(testing_point_light_);
+
+//	ubo_sun.update(testing_directional_light_.get());
+
 }
 
 void Renderer::load_model()
@@ -177,7 +199,7 @@ void Renderer::load_model()
 	const auto grass_count = 62000;
 	const auto grass_range = 200;
 
-	grasses_->set_num_inst(grass_count); 
+	grasses_->set_num_inst(grass_count);
 	grasses_->setup_mesh(grassvertices);
 
 	vector<float> scales; scales.reserve(grass_count);
@@ -225,8 +247,23 @@ void Renderer::load_texture()
 
 void Renderer::ready_draw()
 {
-	auto vp_mat = proj_mat() * main_camera_->view_mat();
-	ubo_vp_mat.update(glm::value_ptr(vp_mat));
+	//main_camera_->set_target(main_camera_->get_position() - glm::vec3(-0.14, -0.2, 1.f));
+	
+	auto p = proj_mat();
+	auto v = main_camera_->view_mat();
+	auto inv_p = glm::inverse(p);
+	auto inv_v = glm::inverse(v);
+	auto vp = p * v;
+
+	ubo_vp_mat.update(glm::value_ptr(vp));
+
+	ubo_inv_p_mat.update(glm::value_ptr(inv_p));
+	ubo_inv_v_mat.update(glm::value_ptr(inv_v));
+
+	glm::vec2 resolution = { screen.viewport_.z, screen.viewport_.w };
+	
+	ubo_resolution.update(glm::value_ptr(resolution));
+
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -242,7 +279,7 @@ void Renderer::draw()
 	glCullFace(GL_FRONT); // 깊이맵에서 피터패닝을 해결하는 법중하나. 속이 보이지 않는 물체는 이것으로 해결가능.
 
 	{
-		
+
 		depth_renderer_->set_directional_depthmap_shader(directional_depthmap_shader_, 0);
 
 		glDisable(GL_CULL_FACE);
@@ -259,23 +296,37 @@ void Renderer::draw()
 
 		// grass
 		depth_renderer_->set_directional_depthmap_shader(directional_grass_depthmap_shader_, 0);
-		
+
 
 		//glDisable(GL_CULL_FACE);
 		grasses_->update_uniform_vars(directional_grass_depthmap_shader_);
 		grasses_->draw(directional_grass_depthmap_shader_);
-	//	glEnable(GL_CULL_FACE);
+		//	glEnable(GL_CULL_FACE);
 	}
-	
+
 
 	glCullFace(GL_BACK);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
+
+	/// // sun_____
+	sun_renderer_->bind_sun_fbo();
+
+#include "Sun.h"
+	Sun::get().update_uniform_vars(skybox_shader_);
+
+	skybox_shader_->use();
+	ScreenQuad::get().draw_quad();
+
+	/**/
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(0);
 
 
 	/// // 2. draw_gbuffers
 	gbuffer_renderer_->bind_gbuffer_fbo();
-	
+
 	{
 		glDisable(GL_CULL_FACE);
 		default_map->update_uniform_vars(default_g_shader_);
@@ -287,7 +338,7 @@ void Renderer::draw()
 			car->update_uniform_vars(default_g_shader_);
 			car->draw(default_g_shader_);
 		}
-	
+
 		// grass
 		glDisable(GL_CULL_FACE);
 		grasses_->update_uniform_vars(grass_g_shader_);
@@ -295,11 +346,11 @@ void Renderer::draw()
 		glEnable(GL_CULL_FACE);
 
 	}
-	
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(0);
 
-	
+
 	/// // 3. do_lights_pass
 
 	gbuffer_renderer_->bind_lightpass_fbo();
@@ -316,6 +367,8 @@ void Renderer::draw()
 
 	gbuffer_renderer_->draw_quad();
 
+
+
 	//skybox->draw();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -329,6 +382,12 @@ void Renderer::draw()
 	glUseProgram(0);
 }
 
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 
 void ScreenRenderer::init()
@@ -347,8 +406,8 @@ void ScreenRenderer::init()
 		cerr << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	vector<string> VS; VS.emplace_back("./Shader/screen_vertex.glsl"sv);
-	vector<string> FS; FS.emplace_back("./Shader/screen_fragment.glsl"sv);
+	vector<string> VS; VS.emplace_back("./Shader/quad.vert"sv);
+	vector<string> FS; FS.emplace_back("./Shader/screen.frag"sv);
 	vector<string> GS;
 	screen_shader = Shader::create(VS, FS, GS);
 }
@@ -438,8 +497,8 @@ void gBufferRenderer::init()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	vector<string> VS; VS.emplace_back("./Shader/quad_vertex.glsl"sv);
-	vector<string> FS; FS.emplace_back("./Shader/H_light.glsl"sv); FS.emplace_back("./Shader/lightpass_fragment.glsl"sv);
+	vector<string> VS; VS.emplace_back("./Shader/quad.vert"sv);
+	vector<string> FS; FS.emplace_back("./Shader/H_light.glsl"sv); FS.emplace_back("./Shader/lightpass_frag.glsl"sv);
 	vector<string> GS;
 	lightpass_shader = Shader::create(VS, FS, GS);
 }
@@ -449,22 +508,22 @@ void gBufferRenderer::init()
 ScreenQuad::ScreenQuad()
 {
 	glGenVertexArrays(1, &quad_vao);
-	GLuint vbo, ebo;
+	GLuint vbo;
 	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
 	struct QUAD
 	{
 		glm::vec2 pos;
-		glm::vec2 tex;
+		//		glm::vec2 tex;  // gl_Position.y / 2 + 0.5f
 	};
+
 	QUAD quadv[] =
 	{
-		{{-1,-1},{0,0}},
-		{{ 1, 1},{1,1}},
-		{{-1, 1},{0,1}},
-		{{-1,-1},{0,0}},
-		{{ 1,-1},{1,0}},
-		{{ 1, 1},{1,1}}
+		{ {-1,-1}}//,{0,0} }
+		,{{ 1, 1}}//,{1,1} }
+		,{{-1, 1}}//,{0,1} }
+		,{{-1,-1}}//,{0,0} }
+		,{{ 1,-1}}//,{1,0} }
+		,{{ 1, 1}}//,{1,1} }
 	};
 
 	glBindVertexArray(quad_vao);
@@ -473,8 +532,8 @@ ScreenQuad::ScreenQuad()
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, pos));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(QUAD), (const GLvoid*)offsetof(QUAD, tex));
 
 	glBindVertexArray(0);
 }
@@ -486,3 +545,32 @@ void ScreenQuad::draw_quad()
 }
 
 ///////////////////////////////////////////////
+
+void SunRenderer::init()
+{
+	glGenFramebuffers(1, &sun_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, sun_fbo);
+
+	sunpass_tbo = Texture::create();
+	glGenTextures(1, &sunpass_tbo->id);
+	glBindTexture(GL_TEXTURE_2D, sunpass_tbo->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sunpass_tbo->id, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+
+	GLuint rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen.width, screen.height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cerr << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}

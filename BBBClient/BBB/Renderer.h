@@ -38,6 +38,33 @@ private:
 };
 
 //////////////////////////////////////////////////////
+class SunRenderer
+{
+public:
+	friend class Renderer;
+
+	GLuint sun_fbo;
+	TexturePtr sunpass_tbo;
+
+	void init();
+
+	void bind_sun_fbo()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, sun_fbo);
+		glViewport(0, 0, screen.width, screen.height);
+		glClearColor(0.2f, 0.1f, 0.625f, 1.0f); // background color
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+		
+		// draw quad color = in_sun ? w : clear color.
+		// sun shader
+
+		// black shader
+		// draw objs => black
+	}
+};
+
 class gBufferRenderer
 {
 public:
@@ -59,7 +86,7 @@ public:
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer_fbo);
 		glViewport(0, 0, screen.width, screen.height);
-		glClearColor(0.2f, 0.1f, 0.6f, 1.0f); // background color
+		glClearColor(0.2f, 0.1f, 0.6f, 0.0f); // background color =>alpha°ª Ã¼Å·
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
@@ -280,6 +307,7 @@ public:
 	GET_REF(depth_renderer);
 	GET_REF(screen_renderer);
 	GET_REF(gbuffer_renderer);
+	GET_REF(sun_renderer);
 
 	void swap_player_ghost();
 
@@ -304,6 +332,7 @@ private:
 	//
 
 	unique_ptr<ScreenRenderer> screen_renderer_;
+
 	unique_ptr<DepthRenderer> depth_renderer_;
 	ShaderPtr directional_depthmap_shader_;
 	ShaderPtr directional_grass_depthmap_shader_;
@@ -311,13 +340,27 @@ private:
 
 	unique_ptr<gBufferRenderer> gbuffer_renderer_;
 
+	unique_ptr<SunRenderer> sun_renderer_;
+	ObjPtr sun_;
+	ShaderPtr sun_w_shader_;
+	ShaderPtr sun_b_shader_;
+
 	//
-	UBO<glm::mat4> ubo_vp_mat{ 0 };
-	UBO<glm::mat4> ubo_lightspace_mat{ 1 };
+	ShaderPtr skybox_shader_;
+
+	//
+	UBO<glm::mat4> ubo_vp_mat;
+	UBO<glm::mat4> ubo_inv_v_mat;
+	UBO<glm::mat4> ubo_inv_p_mat;
+	UBO<glm::mat4> ubo_lightspace_mat;
+	UBO<DirectionalLight> ubo_sun;
+	UBO<glm::vec2> ubo_resolution;
 	//
 
 	ShaderPtr default_g_shader_;
 	vector<ObjPtr> cars_;
+	//
+
 
 	//
 	ObjPtr player_;
