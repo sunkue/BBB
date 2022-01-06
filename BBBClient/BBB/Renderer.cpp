@@ -249,6 +249,7 @@ void Renderer::ready_draw()
 {
 	//main_camera_->set_target(main_camera_->get_position() - glm::vec3(-0.14, -0.2, 1.f));
 	
+
 	auto p = proj_mat();
 	auto v = main_camera_->view_mat();
 	auto inv_p = glm::inverse(p);
@@ -377,7 +378,7 @@ void Renderer::draw()
 
 	// fianl. render screen pass
 	screen_renderer_->blit_fbo(gbuffer_renderer_->lightpass_fbo);
-	screen_renderer_->draw_screen();
+	screen_renderer_->draw_screen(sun_renderer_->sunpass_tbo, gbuffer_renderer_->normal_tbo);
 
 	glUseProgram(0);
 }
@@ -423,7 +424,7 @@ void gBufferRenderer::init()
 	worldpos_tbo = Texture::create();
 	glGenTextures(1, &worldpos_tbo->id);
 	glBindTexture(GL_TEXTURE_2D, worldpos_tbo->id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screen.width, screen.height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -434,7 +435,7 @@ void gBufferRenderer::init()
 	normal_tbo = Texture::create();
 	glGenTextures(1, &normal_tbo->id);
 	glBindTexture(GL_TEXTURE_2D, normal_tbo->id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screen.width, screen.height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -445,7 +446,7 @@ void gBufferRenderer::init()
 	albedospec_tbo = Texture::create();
 	glGenTextures(1, &albedospec_tbo->id);
 	glBindTexture(GL_TEXTURE_2D, albedospec_tbo->id);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen.width, screen.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screen.width, screen.height, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -469,7 +470,6 @@ void gBufferRenderer::init()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-
 	////
 	glGenFramebuffers(1, &lightpass_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, lightpass_fbo);
@@ -483,6 +483,7 @@ void gBufferRenderer::init()
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lightpass_tbo->id, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	
 
 	/*
 	rboDepth;
@@ -491,6 +492,7 @@ void gBufferRenderer::init()
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen.width, screen.height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 	*/
+
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		cerr << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;

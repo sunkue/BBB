@@ -86,7 +86,7 @@ public:
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer_fbo);
 		glViewport(0, 0, screen.width, screen.height);
-		glClearColor(0.2f, 0.1f, 0.6f, 0.0f); // background color =>alpha값 체킹
+		glClearColor(0.2f, 0.1f, 0.6f, 1.0f); // background color =>alpha값 체킹
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
@@ -98,7 +98,7 @@ public:
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, lightpass_fbo);
 		glViewport(0, 0, screen.width, screen.height);
-		glClear(GL_COLOR_BUFFER_BIT); // | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 
@@ -260,16 +260,18 @@ public:
 		glBlitFramebuffer(0, 0, screen.width, screen.height, 0, 0, screen.width, screen.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 
-	void draw_screen()
+	void draw_screen(TexturePtr& bg, TexturePtr& normal)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(screen.viewport_.x, screen.viewport_.y, screen.viewport_.z, screen.viewport_.w);
-		glClearColor(0.4f, 0.2f, 0.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 
 		screen_shader->use();
 		screen_shader->set("screen_texture", screen_tbo);
+		screen_shader->set("bg_texture", bg);
+		screen_shader->set("n_texture", normal);
 
 		ScreenQuad::get().draw_quad();
 

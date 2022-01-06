@@ -1,6 +1,8 @@
 #version 450
 
 uniform sampler2D screen_texture; 
+uniform sampler2D bg_texture; 
+uniform sampler2D n_texture;
 
 in vec2 texcoord; 
 
@@ -9,7 +11,9 @@ out vec4 o_flagcolor;
 
 vec4 origin()
 {
-	return texture(screen_texture, texcoord);
+    vec4 bg = texture(bg_texture,texcoord) * texture(n_texture,texcoord).a;
+
+	return texture(screen_texture, texcoord) + bg;
 }
 
 vec4 inversion()

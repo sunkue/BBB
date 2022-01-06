@@ -38,19 +38,19 @@ vec2 computeScreenPos(vec2 ndc)
 
 vec3 computeSun(vec3 d, float powExp)
 {
-	float is_sun = clamp( dot(-u_sun_dir, d), 0.0, 1.0 );
-	vec3 col = 0.8 * u_sun_color * pow( is_sun, powExp );
+	float sun = clamp( dot(-u_sun_dir, d), 0.0, 1.0 );
+	vec3 col = 0.8 * u_sun_color * pow( sun, powExp );
 	return col;
 }
 
 vec4 colorCubeMap(vec3 d)
 {
 	vec3 col = mix(u_skycolor_bottom, u_skycolor_top, 
-	clamp(1 - exp(8.5-17.*clamp(normalize(d).y * 0.5 + 0.5,0.0,1.0)),0.0,1.0));
+	clamp(1 - exp(8.5-17.*clamp(normalize(d).y * 0.5 + 0.6,0.0,1.0)),0.0,1.0));
 	
 	//vec3 col = vec3(0.6,0.71,0.85) - 0.2*vec3(1.0,0.5,1.0) + 0.15*0.5;
-	
-	col += computeSun(d, 350.0);
+
+	col +=  computeSun(d, 350.0);
 
 	return vec4(col, 1.0);
 }
