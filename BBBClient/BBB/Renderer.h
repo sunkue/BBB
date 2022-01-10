@@ -11,8 +11,8 @@
 struct SCREEN
 {
 	GLfloat fovy{ 45.0f }; //glm::Radians(fovy)
-	GLsizei width{ g_WindowSizeX };	//W/H
-	GLsizei height{ g_WindowSizeY };	//W/H
+	const GLsizei width{ g_WindowSizeX };	//W/H
+	const GLsizei height{ g_WindowSizeY };	//W/H
 	GLfloat n{ 0.1f };
 	GLfloat f{ 20000.f };
 	glm::vec4 viewport_{};
@@ -418,7 +418,7 @@ private:
 	UBO<glm::mat4> ubo_inv_p_mat;
 	UBO<glm::mat4> ubo_lightspace_mat;
 	UBO<DirectionalLight> ubo_sun;
-	UBO<glm::vec2> ubo_resolution;
+	UBO<glm::vec2> ubo_default_buffer_resolution;
 	//
 
 	ShaderPtr default_g_shader_;

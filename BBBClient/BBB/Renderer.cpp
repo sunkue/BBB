@@ -119,7 +119,7 @@ void Renderer::init_resources()
 	ubo_inv_v_mat.bind(skypass_shader_, "INV_V_MAT");
 	ubo_inv_p_mat.bind(skypass_shader_, "INV_P_MAT");
 
-	ubo_resolution.bind(skypass_shader_, "RESOLUTION");
+	ubo_default_buffer_resolution.bind(skypass_shader_, "RESOLUTION");
 
 	ubo_lightspace_mat.bind(gbuffer_renderer_->lightpass_shader, "LIGHTSPACE_MAT");
 	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
@@ -261,10 +261,9 @@ void Renderer::ready_draw()
 	ubo_inv_p_mat.update(glm::value_ptr(inv_p));
 	ubo_inv_v_mat.update(glm::value_ptr(inv_v));
 
-	glm::vec2 resolution = { screen.viewport_.z, screen.viewport_.w };
-
-	ubo_resolution.update(glm::value_ptr(resolution));
-
+	glm::vec2 default_buffer_resolution = { screen.width, screen.height };
+	
+	ubo_default_buffer_resolution.update(glm::value_ptr(default_buffer_resolution));
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -631,7 +630,6 @@ void GodRayParam::update_uniform_vars(const ShaderPtr& shader)
 
 	glm::vec2 texcoord_lightpos = pos;
 
-	//cout << texcoord_lightpos.x <<"::" << texcoord_lightpos.y << endl;
 	shader->use();
 	
 	shader->set("u_texcoord_lightpos", texcoord_lightpos);

@@ -12,17 +12,17 @@ vec4 origin()
 {
 	return
       texture(screen_texture, texcoord)
-    + mix(texture(bg_texture,texcoord), texture(godray_texture,texcoord) ,0.5f) * 1.4;
+    + mix(texture(bg_texture,texcoord), texture(godray_texture,texcoord) ,0.4f) * 1.4;
 }
 
 vec4 inversion()
 {
-	return vec4(vec3(vec4(1) - texture(screen_texture, texcoord)), 1);
+	return vec4(vec3(1) - texture(screen_texture, texcoord).rgb, 1);
 }
 
 vec4 gray_scale()
 {
-	vec4 color = texture(screen_texture, texcoord);
+	vec3 color = texture(screen_texture, texcoord).rgb;
     float average = (color.r + color.g + color.b) / 3.0;
     return vec4(average, average, average, 1.0);
 }
@@ -104,6 +104,6 @@ void main()
 { 
     float gamma = 1.6f;
     o_flagcolor = vec4(pow(origin().rgb, vec3(1.0 / gamma)), 1.0f);
-   // o_flagcolor = vec4(pow(kerneling(edge).rgb, vec3(1.0 / gamma)), 1.0f);
+    // o_flagcolor = vec4(pow(kerneling(edge).rgb, vec3(1.0 / gamma)), 1.0f);
 } 
 

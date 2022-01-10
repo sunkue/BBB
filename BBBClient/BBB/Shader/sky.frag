@@ -29,7 +29,7 @@ out vec4 o_flagcolor;
 
 vec3 computeClipSpaceCoord(ivec2 fragCoord)
 {
-	vec2 ray_nds = 2.0*vec2(fragCoord.xy)/u_resolution.xy - 1.0;
+	vec2 ray_nds = 2.0 * vec2(fragCoord.xy)/u_resolution.xy - 1.0;
 	return vec3(ray_nds, 1.0);
 }
 

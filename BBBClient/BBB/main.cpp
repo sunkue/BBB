@@ -52,7 +52,7 @@ void DrawGui()
 	gui::End();
 
 	sunbuffer = Renderer::get().get_sun_renderer()->godraypass_tbo->id;
-	gui::Begin("sun_buffer(godray)");
+	gui::Begin("godray_buffer");
 	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
 	Renderer::get().get_sun_renderer()->godray_param.draw_gui();
 	gui::End();
@@ -103,8 +103,6 @@ void DoNextFrame()
 	Renderer::get().draw();
 
 	DrawGui();
-
-	
 
 	glfwPollEvents();
 	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
