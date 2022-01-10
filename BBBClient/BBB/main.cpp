@@ -9,16 +9,14 @@
 
 ;
 
-void DoNextFrame()
+void DrawGui()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	gui::NewFrame();
 
-	KEY_BOARD_EVENT_MANAGER::get().ProcessInput();
-	MOUSE_EVENT_MANAGER::get().ProcessInput();
-
-	Game::get().update();
+	Renderer::get().get_player()->draw_gui();
+	Renderer::get().get_main_camera()->draw_gui();
 
 	gui::Begin("SUNKUE_ENGINE");
 	gui::Text("MOUSE_BUTTON_CHECK");
@@ -35,12 +33,6 @@ void DoNextFrame()
 	gui::InputFloat3("mouse_ray", &ray.dir.x);
 	gui::End();
 
-	Renderer::get().draw();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	Renderer::get().get_player()->draw_gui();
-	Renderer::get().get_main_camera()->draw_gui();
-
 	if (gui::GetIO().WantCaptureMouse)
 	{
 		//cout << "!" << endl;
@@ -54,14 +46,20 @@ void DoNextFrame()
 	const float gui_tex_buffer_ratio = 0.1f;
 	auto gui_texture_size = ImVec2(screen.width * gui_tex_buffer_ratio, screen.height * gui_tex_buffer_ratio);
 
+	auto sunbuffer = Renderer::get().get_sun_renderer()->skypass_tbo->id;
+	gui::Begin("sky_buffer");
+	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	sunbuffer = Renderer::get().get_sun_renderer()->godraypass_tbo->id;
+	gui::Begin("sun_buffer(godray)");
+	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	Renderer::get().get_sun_renderer()->godray_param.draw_gui();
+	gui::End();
+	
 	auto depthbuffer = Renderer::get().get_depth_renderer()->directional_depthmap_tbo->id;
 	gui::Begin("directinal_depthbuffer(shadow)");
 	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
-	gui::End();
-
-	auto sunbuffer = Renderer::get().get_sun_renderer()->sunpass_tbo->id;
-	gui::Begin("sun_buffer(light_shaft)");
-	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
 	gui::End();
 
 	auto gbuffer = Renderer::get().get_gbuffer_renderer()->worldpos_tbo->id;
@@ -93,6 +91,20 @@ void DoNextFrame()
 
 	gui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(gui::GetDrawData());
+}
+
+void DoNextFrame()
+{
+	KEY_BOARD_EVENT_MANAGER::get().ProcessInput();
+	MOUSE_EVENT_MANAGER::get().ProcessInput();
+
+	Game::get().update();
+
+	Renderer::get().draw();
+
+	DrawGui();
+
+	
 
 	glfwPollEvents();
 	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
@@ -101,9 +113,6 @@ void DoNextFrame()
 
 	glfwSwapBuffers(Game::get().window);
 }
-
-
-
 
 void MouseWheel(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 {

@@ -21,6 +21,8 @@ private:
 	glm::vec3 color{ 1.0,.6,0.1 };
 
 public:
+	GET_REF(sun_light);
+
 	void draw_gui()
 	{
 		gui::Begin("Sun");

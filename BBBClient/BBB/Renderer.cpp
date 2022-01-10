@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Renderer.h"
-
+#include "Sun.h"
 ////////////////////////////
 
 SCREEN screen;
@@ -70,12 +70,12 @@ void Renderer::init_shader()
 	GS.clear(); //GS.emplace_back("./Shader/gbuffer_geomatry.glsl"sv);
 	sun_w_shader_ = Shader::create(VS, FS, GS);
 
-//	sun_b_shader_ = Shader::create(VS, FS, GS);//
+	//	sun_b_shader_ = Shader::create(VS, FS, GS);//
 
 	VS.clear(); VS.emplace_back("./Shader/quad.vert"sv);
 	FS.clear(); FS.emplace_back("./Shader/sky.frag"sv);
 	GS.clear(); //GS.emplace_back("./Shader/gbuffer_geomatry.glsl"sv);
-	skybox_shader_ = Shader::create(VS, FS, GS);
+	skypass_shader_ = Shader::create(VS, FS, GS);
 
 	{
 		vector<string_view> textures
@@ -116,10 +116,10 @@ void Renderer::init_resources()
 	ubo_vp_mat.bind(grass_g_shader_, "VP_MAT");
 	ubo_vp_mat.bind(default_g_shader_, "VP_MAT");
 
-	ubo_inv_v_mat.bind(skybox_shader_, "INV_V_MAT");
-	ubo_inv_p_mat.bind(skybox_shader_, "INV_P_MAT");
+	ubo_inv_v_mat.bind(skypass_shader_, "INV_V_MAT");
+	ubo_inv_p_mat.bind(skypass_shader_, "INV_P_MAT");
 
-	ubo_resolution.bind(skybox_shader_, "RESOLUTION");
+	ubo_resolution.bind(skypass_shader_, "RESOLUTION");
 
 	ubo_lightspace_mat.bind(gbuffer_renderer_->lightpass_shader, "LIGHTSPACE_MAT");
 	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
@@ -248,7 +248,7 @@ void Renderer::load_texture()
 void Renderer::ready_draw()
 {
 	//main_camera_->set_target(main_camera_->get_position() - glm::vec3(-0.14, -0.2, 1.f));
-	
+
 
 	auto p = proj_mat();
 	auto v = main_camera_->view_mat();
@@ -262,7 +262,7 @@ void Renderer::ready_draw()
 	ubo_inv_v_mat.update(glm::value_ptr(inv_v));
 
 	glm::vec2 resolution = { screen.viewport_.z, screen.viewport_.w };
-	
+
 	ubo_resolution.update(glm::value_ptr(resolution));
 
 }
@@ -276,10 +276,10 @@ void Renderer::draw()
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
 
 	// 1. first render to depth map 
-	depth_renderer_->bind_directional_depthmap_fbo();
-	glCullFace(GL_FRONT); // 깊이맵에서 피터패닝을 해결하는 법중하나. 속이 보이지 않는 물체는 이것으로 해결가능.
 
 	{
+		depth_renderer_->bind_directional_depthmap_fbo();
+		glCullFace(GL_FRONT); // 깊이맵에서 피터패닝을 해결하는 법중하나. 속이 보이지 않는 물체는 이것으로 해결가능.
 
 		depth_renderer_->set_directional_depthmap_shader(directional_depthmap_shader_, 0);
 
@@ -305,30 +305,16 @@ void Renderer::draw()
 		//	glEnable(GL_CULL_FACE);
 	}
 
-
 	glCullFace(GL_BACK);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glUseProgram(0);
-
-	/// // sun_____
-	sun_renderer_->bind_sun_fbo();
-
-#include "Sun.h"
-	Sun::get().update_uniform_vars(skybox_shader_);
-
-	skybox_shader_->use();
-	ScreenQuad::get().draw_quad();
-
-	/**/
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(0);
 
 
 	/// // 2. draw_gbuffers
-	gbuffer_renderer_->bind_gbuffer_fbo();
 
 	{
+		gbuffer_renderer_->bind_gbuffer_fbo();
+
 		glDisable(GL_CULL_FACE);
 		default_map->update_uniform_vars(default_g_shader_);
 		default_map->draw(default_g_shader_);
@@ -346,6 +332,27 @@ void Renderer::draw()
 		grasses_->draw(grass_g_shader_);
 		glEnable(GL_CULL_FACE);
 
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
+
+	//
+
+	/// // sky_god_ray_____
+	{
+		sun_renderer_->bind_sky_fbo();
+
+
+		Sun::get().update_uniform_vars(skypass_shader_);
+
+		skypass_shader_->use();
+		skypass_shader_->set("obj_texture", gbuffer_renderer_->normal_tbo); // normal_tbo
+
+		sun_renderer_->draw_quad();
+		/**/
+
+		sun_renderer_->draw_godray();
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -378,8 +385,10 @@ void Renderer::draw()
 
 	// fianl. render screen pass
 	screen_renderer_->blit_fbo(gbuffer_renderer_->lightpass_fbo);
-	screen_renderer_->draw_screen(sun_renderer_->sunpass_tbo, gbuffer_renderer_->normal_tbo);
 
+	screen_renderer_->draw_screen(sun_renderer_->skypass_tbo, sun_renderer_->godraypass_tbo);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(0);
 }
 
@@ -483,7 +492,7 @@ void gBufferRenderer::init()
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lightpass_tbo->id, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
+
 
 	/*
 	rboDepth;
@@ -550,29 +559,87 @@ void ScreenQuad::draw_quad()
 
 void SunRenderer::init()
 {
-	glGenFramebuffers(1, &sun_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, sun_fbo);
+	glGenFramebuffers(1, &sky_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, sky_fbo);
 
-	sunpass_tbo = Texture::create();
-	glGenTextures(1, &sunpass_tbo->id);
-	glBindTexture(GL_TEXTURE_2D, sunpass_tbo->id);
+	skypass_tbo = Texture::create();
+	glGenTextures(1, &skypass_tbo->id);
+	glBindTexture(GL_TEXTURE_2D, skypass_tbo->id);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sunpass_tbo->id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, skypass_tbo->id, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-
+	/*
 	GLuint rboDepth;
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screen.width, screen.height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-
+	*/
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		cerr << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	/// /
+	glGenFramebuffers(1, &godray_fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, godray_fbo);
+
+	godraypass_tbo = Texture::create();
+	glGenTextures(1, &godraypass_tbo->id);
+	glBindTexture(GL_TEXTURE_2D, godraypass_tbo->id);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen.width, screen.height, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, godraypass_tbo->id, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		cerr << "ERROR::FRAMEBUFFER:: Intermediate framebuffer is not complete!" << endl;
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	/// / 
+	vector<string> VS;
+	vector<string> FS;
+	vector<string> GS;
+
+	VS.clear(); VS.emplace_back("./Shader/quad.vert"sv);
+	FS.clear(); FS.emplace_back("./Shader/godray.frag"sv);
+	GS.clear();
+	godraypass_shader = Shader::create(VS, FS, GS);
+}
+
+/////////////////////////
+
+void GodRayParam::update_uniform_vars(const ShaderPtr& shader)
+{
+	auto vp = Renderer::get().vp_mat();
+	glm::vec3 lightdir = Sun::get().get_sun_light()->direction;
+	glm::vec3 camerapos = Renderer::get().get_main_camera()->get_position();
+	glm::vec3 cameralook = Renderer::get().get_main_camera()->get_look_dir();
+	glm::vec3 lightpos = camerapos - lightdir * 1e6f;
+
+	glm::vec4 pos = vp * glm::translate(lightpos) * glm::vec4(0.0, 60.0, 0.0, 1.0);
+	pos = pos / pos.w;
+	pos = pos * 0.5f + 0.5f;
+
+	glm::vec2 texcoord_lightpos = pos;
+
+	//cout << texcoord_lightpos.x <<"::" << texcoord_lightpos.y << endl;
+	shader->use();
+	
+	shader->set("u_texcoord_lightpos", texcoord_lightpos);
+	shader->set("u_light_dot_camera", glm::dot( -lightdir, cameralook));
+
+	shader->set("u_samples", u_samples);
+	shader->set("u_density", u_density);
+	shader->set("u_decay", u_decay);
+	shader->set("u_weight", u_weight);
+	shader->set("u_exposure", u_exposure);
 }

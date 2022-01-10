@@ -357,6 +357,9 @@
     <None Include="Shader\sky.frag">
       <Filter>Render\Shader\glsl</Filter>
     </None>
+    <None Include="Shader\godray.frag">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\Texture\blueflower.png">

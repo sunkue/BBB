@@ -21,7 +21,9 @@ uniform vec3 u_skycolor_top;
 uniform vec3 u_sun_dir;
 uniform vec3 u_sun_color;
 
-in vec3 texcoord;
+uniform sampler2D obj_texture;
+
+in vec2 texcoord;
 
 out vec4 o_flagcolor;
 
@@ -55,6 +57,11 @@ vec4 colorCubeMap(vec3 d)
 	return vec4(col, 1.0);
 }
 
+float IsBg()
+{
+	return texture(obj_texture, texcoord).a;
+}
+
 void main()
 {    
 	ivec2 fragCoord = ivec2(gl_FragCoord.xy);
@@ -67,5 +74,6 @@ void main()
 
 	vec4 bg = colorCubeMap(world_dir);
 
-	o_flagcolor = vec4(bg.rgb,1.0);
+
+	o_flagcolor = vec4(bg.rgb*IsBg(),1.0);
 }

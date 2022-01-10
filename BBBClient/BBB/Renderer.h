@@ -38,30 +38,84 @@ private:
 };
 
 //////////////////////////////////////////////////////
+struct GodRayParam
+{
+	bool enable_godray = true;
+
+	float u_samples = 128;		// »ùÇÃ¸µ¼ö
+	float u_decay = 0.98;		// °¨¼è(»ùÇÃ¸µ ´©Àû°¨¼è)
+	float u_density = 0.9;		// »ùÇÃ¸µ¹Ðµµ
+	float u_weight = 0.07;		// °¡ÁßÄ¡(»ùÇÃ¸µ °¡ÁßÄ¡)
+	float u_exposure = 0.15;	// ÃÖÁ¾³ëÃâµµ
+
+	void draw_gui()
+	{
+		//gui::Begin("GodRay");
+		gui::Text("Godray");
+		gui::Checkbox("Enable", &enable_godray);
+		gui::DragFloat("samples", &u_samples, 0.1f, 0, 512, "%.f", 1);
+		gui::DragFloat("decay", &u_decay, 0.001f, 0.9, 1, "%.3f", 1);
+		gui::DragFloat("density", &u_density, 0.01f, 0, 1, "%.2f", 1);
+		gui::DragFloat("weight", &u_weight, 0.001f, 0, 0.1, "%.3f", 1);
+		gui::DragFloat("exposure", &u_exposure, 0.01f, 0, 1, "%.2f", 1);
+		//gui::End();
+
+	}
+
+	void update_uniform_vars(const ShaderPtr& shader);
+};
+
 class SunRenderer
 {
 public:
 	friend class Renderer;
 
-	GLuint sun_fbo;
-	TexturePtr sunpass_tbo;
+	GLuint sky_fbo;
+	TexturePtr skypass_tbo;
+	//	ShaderPtr skypass_shader;
+
+		// /*
+	GLuint godray_fbo;
+	TexturePtr godraypass_tbo;
+	ShaderPtr godraypass_shader;
+
+	GodRayParam godray_param;
+	/**/
 
 	void init();
 
-	void bind_sun_fbo()
+	void bind_sky_fbo()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, sun_fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, sky_fbo);
 		glViewport(0, 0, screen.width, screen.height);
-		glClearColor(0.2f, 0.1f, 0.625f, 1.0f); // background color
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
-		
-		// draw quad color = in_sun ? w : clear color.
-		// sun shader
 
-		// black shader
-		// draw objs => black
+	}
+
+	void draw_quad()
+	{
+		ScreenQuad::get().draw_quad();
+	}
+
+	void draw_godray()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, godray_fbo);
+		glViewport(0, 0, screen.width, screen.height);
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		if (false == godray_param.enable_godray)
+		{
+			return;
+		}
+
+		godraypass_shader->use();
+		godraypass_shader->set("skypass_texture", skypass_tbo);
+		godray_param.update_uniform_vars(godraypass_shader);
+
+		draw_quad();
 	}
 };
 
@@ -112,6 +166,7 @@ public:
 
 	void draw_quad()
 	{
+		lightpass_shader->use();
 		ScreenQuad::get().draw_quad();
 	}
 
@@ -260,7 +315,7 @@ public:
 		glBlitFramebuffer(0, 0, screen.width, screen.height, 0, 0, screen.width, screen.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 
-	void draw_screen(TexturePtr& bg, TexturePtr& normal)
+	void draw_screen(TexturePtr& bg, TexturePtr& godray)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(screen.viewport_.x, screen.viewport_.y, screen.viewport_.z, screen.viewport_.w);
@@ -271,7 +326,7 @@ public:
 		screen_shader->use();
 		screen_shader->set("screen_texture", screen_tbo);
 		screen_shader->set("bg_texture", bg);
-		screen_shader->set("n_texture", normal);
+		screen_shader->set("godray_texture", godray);
 
 		ScreenQuad::get().draw_quad();
 
@@ -300,6 +355,13 @@ public:
 	void reshape(int w, int h);
 
 	glm::mat4 proj_mat()const { return screen_.proj_mat(); }
+
+	glm::mat4 vp_mat()const
+	{
+		auto p = proj_mat();
+		auto v = main_camera_->view_mat();
+		return p * v;
+	}
 
 	GET_REF(main_camera);
 	GET_REF(player);
@@ -338,7 +400,7 @@ private:
 	unique_ptr<DepthRenderer> depth_renderer_;
 	ShaderPtr directional_depthmap_shader_;
 	ShaderPtr directional_grass_depthmap_shader_;
-	ShaderPtr point_depthmap_shader_; 
+	ShaderPtr point_depthmap_shader_;
 
 	unique_ptr<gBufferRenderer> gbuffer_renderer_;
 
@@ -348,7 +410,7 @@ private:
 	ShaderPtr sun_b_shader_;
 
 	//
-	ShaderPtr skybox_shader_;
+	ShaderPtr skypass_shader_;
 
 	//
 	UBO<glm::mat4> ubo_vp_mat;
