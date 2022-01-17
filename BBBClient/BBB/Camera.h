@@ -11,27 +11,12 @@ class Obj;
 using CameraPtr = shared_ptr<class Camera>;
 class Camera
 {
+	INIT_FILE();
+
 public:
-	void init_file(string_view filename)
-	{
-		ifstream file{ filename.data(), ios::in };
-		LOAD_FILE(file, diff_);
-	}
-
-	void save_file(string_view filename)
-	{
-		ofstream file{ filename.data(), ios::out };
-		SAVE_FILE(file, diff_);
-	}
-
-	Camera()
-	{
-		init_file(initpath("main_camera.txt"));
-	}
-
 	~Camera()
 	{
-		save_file(initpath("main_camera.txt"));
+		save();
 	}
 
 public:

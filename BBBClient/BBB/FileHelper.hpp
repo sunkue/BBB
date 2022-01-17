@@ -33,3 +33,38 @@ TEMPLATE_SAVE_FILE(glm::vec3)
 {
 	file << var.x << " " << var.y << " " << var.z << endl;
 }
+
+/////////////////////////////////////////////////////
+
+#define INIT_FILE() \
+public:\
+void load(string_view filename)\
+{\
+	filename_ = filename;\
+	load_file(initpath(filename_));\
+}\
+\
+void save()\
+{\
+	save_file(initpath(filename_));\
+}\
+\
+private:\
+	string_view filename_;\
+\
+private:\
+	void load_file(string_view filename)\
+	{\
+		ifstream file{ filename.data(), ios::in };\
+		load_file_impl(file);\
+	}\
+\
+	void save_file(string_view filename)\
+	{\
+		ofstream file{ filename.data(), ios::out };\
+		save_file_impl(file);\
+	}\
+\
+private:\
+	void load_file_impl(ifstream& file);\
+	void save_file_impl(ofstream& file);\

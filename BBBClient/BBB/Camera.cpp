@@ -2,6 +2,23 @@
 #include "Camera.h"
 #include "DynamicObj.h"
 
+/// //////////////////////
+
+void Camera::load_file_impl(ifstream& file)
+{
+	LOAD_FILE(file, diff_);
+}
+
+void Camera::save_file_impl(ofstream& file)
+{
+	SAVE_FILE(file, diff_);
+}
+
+#define FILE_VAR(...)
+FILE_VAR(file, var1, var2, ... )
+
+/// //////////////////////
+
 void Camera::update(float time_elpased)
 {
 	if (ownner_)

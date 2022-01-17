@@ -185,7 +185,9 @@ void Renderer::load_model()
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
-//	main_camera_->set_diff(glm::vec3{ -12.f, 5.f, 0.f });
+
+	main_camera_->load("main_camera.txt");
+	//main_camera_->set_diff(glm::vec3{ -12.f, 5.f, 0.f });
 
 
 	/// /
