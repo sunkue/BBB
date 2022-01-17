@@ -131,8 +131,8 @@ void MouseWheel(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 
 void BindDefaultInputFuncs()
 {
-	KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_LEFT_SHIFT,
-		[](auto&) { Game::get().renderer.get_main_camera()->camera_shake(0.2f); });
+	//KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_LEFT_SHIFT,
+	//	[](auto&) { Game::get().renderer.get_main_camera()->camera_shake(0.2f); });
 
 	KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_ESCAPE,
 		[](const auto& key) { if (key.action != GLFW_RELEASE) Game::get().renderer.swap_player_ghost(); });

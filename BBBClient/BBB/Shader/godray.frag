@@ -29,7 +29,7 @@ void main()
 	vec3 result = texture(skypass_texture ,tc).rgb * 0.4f;
 
 	//if( lightpos.x > 0 && lightpos.x < 1 && lightpos.y > 0 && lightpos.y < 1) z 검사도 필요.
-	if( 0.00001 < u_light_dot_camera )
+	if( 0 < u_light_dot_camera )
 	{
 		for( int i = 0; i < NUM_SAMPLES; i++)
 		{

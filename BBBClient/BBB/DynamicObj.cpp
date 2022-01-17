@@ -30,6 +30,11 @@ bool VehicleObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 	{
 		brake_on_ = pressed;
 	}
+	CASE GLFW_KEY_LEFT_SHIFT :
+	{
+		draft_on_ = pressed;
+		// brake_on_ = pressed;
+	}
 	break; default: return false;
 	}
 
@@ -50,8 +55,19 @@ void VehicleObj::update_speed(float time_elapsed)
 	auto fric = -1 * prev_dir * friction_ * time_elapsed;
 
 	/* accel */
-	auto accel = head_dir * acceleration_ * time_elapsed;
+	if (true == draft_on_)
+	{
+		head_dir = glm::normalize(get_linear_speed());
+		draft_time_ = std::min(draft_time_ + time_elapsed, 15.f);
+	}
+	else
+	{
+		head_dir *= draft_time_;
+		draft_time_ = std::max(draft_time_ - time_elapsed, 1.f);
+	}
 
+	auto accel = head_dir * acceleration_ * time_elapsed;
+	
 	///* accumulate */
 	auto new_linear_speed = linear_speed_ + accel + fric;
 
@@ -89,6 +105,7 @@ void VehicleObj::draw_gui()
 	gui::Checkbox("right_on", &right_on_);
 	gui::Checkbox("left_on", &left_on_);
 	gui::Checkbox("brake_on", &brake_on_);
+	gui::Checkbox("draft_on", &draft_on_);
 	gui::Checkbox("use_item", &use_item_);
 	gui::End();
 
@@ -109,6 +126,10 @@ void VehicleObj::update_state()
 
 	friction_ = _friction_power;
 	// [B] if(_brake_on)_friction += _friction_power;
+	friction_ += _friction_power * draft_on_;
+	friction_ += _friction_power * draft_on_;
+	friction_ += _friction_power * draft_on_;
+
 	friction_ += _friction_power * brake_on_;
 	friction_ += _friction_power * brake_on_;
 

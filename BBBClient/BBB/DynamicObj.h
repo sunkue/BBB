@@ -119,6 +119,8 @@ private:
 	bool left_on_ = false;
 
 	bool brake_on_ = false;
+	bool draft_on_ = false;
+	float draft_time_ = 1;
 	bool use_item_ = false;
 
 	size_t id_;
