@@ -19,6 +19,7 @@ void Renderer::init()
 	init_shader();
 	init_resources();
 
+
 	KEY_BOARD_EVENT_MANAGER::get().BindMainKeyFunc(
 		[this](const KEY_BOARD_EVENT_MANAGER::key_event& key)->bool
 		{ return get_player()->process_input(key); });
@@ -184,7 +185,7 @@ void Renderer::load_model()
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
-	main_camera_->set_diff(glm::vec3{ -12.f, 5.f, 0.f });
+//	main_camera_->set_diff(glm::vec3{ -12.f, 5.f, 0.f });
 
 
 	/// /
@@ -236,7 +237,6 @@ void Renderer::load_model()
 	auto no_model = Model::create("");
 	ghost_ = make_unique<GhostObj>(no_model);
 }
-
 
 void Renderer::load_texture()
 {

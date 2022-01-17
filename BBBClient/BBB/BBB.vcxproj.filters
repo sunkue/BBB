@@ -280,6 +280,12 @@
     <ClInclude Include="Sun.h">
       <Filter>Render\Obj</Filter>
     </ClInclude>
+    <ClInclude Include="FileHelper.h">
+      <Filter>helper</Filter>
+    </ClInclude>
+    <ClInclude Include="FileHelper.hpp">
+      <Filter>helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\grass_vert.glsl">

@@ -253,6 +253,8 @@
     <ClInclude Include="Dependencies\imgui\imstb_rectpack.h" />
     <ClInclude Include="Dependencies\imgui\imstb_textedit.h" />
     <ClInclude Include="Dependencies\imgui\imstb_truetype.h" />
+    <ClInclude Include="FileHelper.h" />
+    <ClInclude Include="FileHelper.hpp" />
     <ClInclude Include="gl_defines.h" />
     <ClInclude Include="DynamicObj.h" />
     <ClInclude Include="Game.h" />

@@ -61,6 +61,8 @@ using clk = std::chrono::high_resolution_clock;
 #define gui ImGui
 
 
+#define initpath(x) "Resource/init/"s.append(x)
+
 
 #include "../../Share/includes.h"
 #include "gl_defines.h"

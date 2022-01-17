@@ -383,6 +383,8 @@ private:
 	void load_model();
 
 private:
+
+private:
 	CameraPtr main_camera_;
 	SCREEN& screen_ = screen;
 
