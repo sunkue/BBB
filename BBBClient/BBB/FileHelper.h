@@ -1,6 +1,51 @@
 #pragma once
 
 /////////////////////////////////
+/// 선언부 :: 
+/// virtual void save_file_impl(ofstream& file) final;
+/// virtual void load_file_impl(ifstream& file) final;
+/// 정의부 :: 
+/// LOAD_FILE(file, var1); SAVE_FILE(file, var1); ...
+/// 두 함수에서 로드와 세이브 순서 같게 해주야 함.
+class IDataOnFile
+{
+public:
+	void load(string_view filename)
+	{
+		datafilename_ = filename;
+		load_file(initpath(datafilename_));
+	}
+
+	void save(string_view filename = "")
+	{
+		string_view datafilename;
+		datafilename = (filename == "") ? (datafilename_) : (filename);
+		save_file(initpath(datafilename));
+	}
+
+private:
+	string_view datafilename_;
+
+private:
+	void load_file(string_view filename)
+	{
+		ifstream file{ filename.data(), ios::in };
+		load_file_impl(file);
+	}
+
+	void save_file(string_view filename)
+	{
+		ofstream file{ filename.data(), ios::out };
+		save_file_impl(file);
+	}
+
+private:
+	virtual void load_file_impl(ifstream& file) = 0;
+	virtual void save_file_impl(ofstream& file) = 0;
+};
+
+/////////////////////////////////
+
 namespace FILE_HELPER
 {
 	template<class T> void load_file(ifstream& file, T& var);

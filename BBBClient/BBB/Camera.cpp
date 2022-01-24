@@ -14,9 +14,6 @@ void Camera::save_file_impl(ofstream& file)
 	SAVE_FILE(file, diff_);
 }
 
-#define FILE_VAR(...)
-FILE_VAR(file, var1, var2, ... )
-
 /// //////////////////////
 
 void Camera::update(float time_elpased)

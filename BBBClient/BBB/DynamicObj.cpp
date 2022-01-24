@@ -95,7 +95,9 @@ void VehicleObj::draw_gui()
 	gui::DragInt("ID", (int*)&id_);
 	gui::Text("speed");
 	gui::DragFloat3("linear_speed", const_cast<float*>(glm::value_ptr(linear_speed_)));
-	gui::DragFloat3("angular_speed", const_cast<float*>(glm::value_ptr(angular_speed_)));
+	auto speed = glm::length(linear_speed_);
+	gui::DragFloat("speed", &speed);
+	gui::DragFloat("angular_speed(y)", &angular_speed_.y);
 	gui::SliderFloat("max_speed", &max_speed_, 10.0f, 100.0f);
 	gui::SliderFloat("acceleration", &acceleration_, 0.0f, 100.0f);
 	gui::SliderFloat("friction", &friction_, 0.0f, 100.0f);

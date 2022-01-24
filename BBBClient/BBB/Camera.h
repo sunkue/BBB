@@ -9,15 +9,17 @@ class Obj;
 
 /* 소유된 (붙은) 카메라 */
 using CameraPtr = shared_ptr<class Camera>;
-class Camera
+class Camera : public IDataOnFile
 {
-	INIT_FILE();
-
 public:
 	~Camera()
 	{
 		save();
 	}
+	
+private:
+	virtual void save_file_impl(ofstream& file) final;
+	virtual void load_file_impl(ifstream& file) final;
 
 public:
 	void update(float time_elapsed);

@@ -235,6 +235,7 @@ void Renderer::load_model()
 	grasses_->setup_instance_attribute("a_translate", translate.data());
 	grasses_->setup_instance_attribute("a_shearseed", shearseed.data());
 
+	/// ///////
 
 	auto no_model = Model::create("");
 	ghost_ = make_unique<GhostObj>(no_model);
