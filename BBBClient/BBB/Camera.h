@@ -11,12 +11,7 @@ class Obj;
 using CameraPtr = shared_ptr<class Camera>;
 class Camera : public IDataOnFile
 {
-public:
-	~Camera()
-	{
-		save();
-	}
-	
+
 private:
 	virtual void save_file_impl(ofstream& file) final;
 	virtual void load_file_impl(ifstream& file) final;
@@ -32,6 +27,10 @@ public:
 	void draw_gui()
 	{
 		gui::Begin("Camera");
+		
+		GUISAVE();
+		GUILOAD();
+
 		auto look = get_look_dir();
 		auto right = get_right();
 

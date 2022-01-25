@@ -10,7 +10,7 @@
 class IDataOnFile
 {
 public:
-	void load(string_view filename)
+	void load(string_view filename = "")
 	{
 		datafilename_ = filename;
 		load_file(initpath(datafilename_));
@@ -22,6 +22,8 @@ public:
 		datafilename = (filename == "") ? (datafilename_) : (filename);
 		save_file(initpath(datafilename));
 	}
+
+	GET(datafilename);
 
 private:
 	string_view datafilename_;
@@ -61,6 +63,16 @@ namespace FILE_HELPER
 		file << #var << " ";\
 		FILE_HELPER::save_file( file, var );\
 	}
+
+/////////////////////////////////
+
+#define GUISAVE() \
+auto savebutton = gui::Button("[SAVE]"); \
+if (savebutton) { save(); }
+
+#define GUILOAD() \
+auto loadbutton = gui::Button("[LOAD]"); \
+if (loadbutton) { load(get_datafilename()); }
 
 /////////////////////////////////
 
