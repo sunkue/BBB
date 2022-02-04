@@ -1,9 +1,10 @@
 #include "includes.h"
 #include "SocketUtil.h"
 
+
 ////////////////////////////////////////////////////////////////////////////
 
-void SocketUtil::err_display(int err, std::wostream& wos)
+void SocketUtil::DisplayError(int err, std::wostream& wos)
 {
 	TCHAR* w_msg = nullptr;
 	FormatMessage(
@@ -19,7 +20,7 @@ void SocketUtil::err_display(int err, std::wostream& wos)
 
 void SocketUtil::terminate()
 {
-	err_display(WSAGetLastError());
+	DisplayError(WSAGetLastError());
 	exit(-1);
 }
 
@@ -35,13 +36,5 @@ void SocketUtil::CheckError(const SOCKET& socket)
 
 ////////////////////////////////////////////////////////////////////////////
 
-uint32 SocketUtil::caculate_bytes_form_WSABUFs(LPWSABUF buf, uint32 count_of_bufs)
-{
-	uint32 ret{ 0 };
-	for (uint32 i = 0; i < count_of_bufs; i++) {
-		ret += buf[i].len;
-	};
-	return ret;
-}
 
 ////////////////////////////////////////////////////////////////////////////

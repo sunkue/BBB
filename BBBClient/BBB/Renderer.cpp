@@ -144,16 +144,16 @@ void Renderer::load_model()
 	cout << "model_load_done" << endl;
 	default_map = make_shared<Obj>(map);
 	default_map->scaling(glm::vec3{ 50.f });
+
+
 	size_t id = 0;
+	cars_.emplace_back(make_shared<VehicleObj>(id++, pinkcar));
+	//player_->move({ 200.f,-1.1f,0.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
-	player_ = make_shared<VehicleObj>(id++, bluecar);
-	player_->scaling(glm::vec3{ 4.0f });
-	player_->move({ 200.f,-1.1f,0.f });
-
-	cars_.push_back(player_);
-
-	cars_.emplace_back(make_shared<VehicleObj>(id++, model));
-	cars_.back()->move({ 10.f,5.f,2.f });
+	cars_.emplace_back(make_shared<VehicleObj>(id++, pinkcar));
+	cars_.back()->move({ 10.f,0.f,2.f });
+	cars_.back()->scaling(glm::vec3{ 4.0f });
 
 	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
 	cars_.back()->move({ 2.f,0.f,6.f });
@@ -182,6 +182,8 @@ void Renderer::load_model()
 	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
 	cars_.back()->move({ 0.f,8.f,7.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+
+	player_ = cars_.at(0);
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());

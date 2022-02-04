@@ -37,7 +37,7 @@ public:
 
 	glm::mat4 model_mat()const { return glm::translate(translate_) * glm::toMat4(quaternion_) * glm::scale(scale_); }
 
-	glm::vec3 get_position()const { return glm::vec3{ translate_ }; }
+	glm::vec3 get_position()const { return translate_; }
 	glm::quat get_rotation()const { return quaternion_; }
 	glm::vec3 get_scale()const { return scale_; }
 

@@ -6,6 +6,13 @@
 #include "Game.h"
 #include "KeyboardEvent.h"
 #include "MouseEvent.h"
+#include "Networker.h"
+
+
+// #define gui as //
+
+#define GUI
+
 
 ;
 
@@ -56,7 +63,7 @@ void DrawGui()
 	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
 	Renderer::get().get_sun_renderer()->godray_param.draw_gui();
 	gui::End();
-	
+
 	auto depthbuffer = Renderer::get().get_depth_renderer()->directional_depthmap_tbo->id;
 	gui::Begin("directinal_depthbuffer(shadow)");
 	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
@@ -102,7 +109,9 @@ void DoNextFrame()
 
 	Renderer::get().draw();
 
+#ifdef GUI
 	DrawGui();
+#endif // GUI
 
 	glfwPollEvents();
 	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
@@ -143,8 +152,6 @@ void BindDefaultInputFuncs()
 }
 
 
-
-
 int main()
 {
 	GLFWwindow* window;
@@ -154,6 +161,8 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
+	
+	
 
 	window = glfwCreateWindow(screen.width, screen.height, "SUNKUE", NULL, NULL);
 	if (window == nullptr)
@@ -186,7 +195,8 @@ int main()
 	glfwSetKeyCallback(window,
 		[](GLFWwindow* window, int key, int code, int action, int modifiers)
 		{ KEY_BOARD_EVENT_MANAGER::get().KeyBoard(window, key, code, action, modifiers);  });
-
+	
+#ifdef GUI
 	IMGUI_CHECKVERSION();
 	gui::CreateContext();
 
@@ -195,11 +205,15 @@ int main()
 	gui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
+#endif // GUI
 
 	Game::get().window = window;
 	Renderer::get().reshape(screen.width, screen.height);
 
 	BindDefaultInputFuncs();
+
+	Networker::get().connect("127.0.0.1");
+	thread networker{ &Networker::do_recv, &Networker::get() };
 
 	// MAIN LOOP
 	while (!glfwWindowShouldClose(window))
@@ -207,10 +221,15 @@ int main()
 		DoNextFrame();
 	}
 
+	networker.join();
+
+#ifdef GUI
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	gui::DestroyContext();
+#endif // GUI
 
 	glfwTerminate();
+
 }
 

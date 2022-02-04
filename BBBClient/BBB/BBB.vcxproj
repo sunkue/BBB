@@ -220,6 +220,7 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="MouseEvent.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="Networker.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Renderer_static.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="MouseEvent.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="Networker.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Shader.hpp" />

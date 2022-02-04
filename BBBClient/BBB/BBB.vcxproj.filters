@@ -74,6 +74,9 @@
     <Filter Include="Render\Collision">
       <UniqueIdentifier>{262789bf-8636-4157-8f8c-cd3896e2320e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{91c6881b-988a-461b-ad0b-ce2bc8adf7c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -160,6 +163,9 @@
     </ClCompile>
     <ClCompile Include="Sun.cpp">
       <Filter>Render\Obj</Filter>
+    </ClCompile>
+    <ClCompile Include="Networker.cpp">
+      <Filter>Network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -285,6 +291,9 @@
     </ClInclude>
     <ClInclude Include="FileHelper.hpp">
       <Filter>helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Networker.h">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
