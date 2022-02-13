@@ -8,6 +8,8 @@ void Obj::load_file_impl(ifstream& file)
 	LOAD_FILE(file, translate_);
 	LOAD_FILE(file, quaternion_);
 	LOAD_FILE(file, scale_);
+
+	trans_debug();
 }
 
 void Obj::save_file_impl(ofstream& file)

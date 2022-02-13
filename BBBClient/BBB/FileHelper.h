@@ -50,7 +50,7 @@ private:
 		if (file.fail())
 		{
 			cerr << "[ERR]::no file::generate::" << filename << endl;
-			// ofstream ofile{ filename.data(), ios::out };
+			ofstream ofile{ filename.data(), ios::out };
 			return;
 		}
 		load_file_impl(file);
