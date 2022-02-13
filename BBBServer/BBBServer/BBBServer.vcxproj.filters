@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Share">
+      <UniqueIdentifier>{c8092f10-1f73-4bbf-bfb1-6b99cd110ff6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Share\defineds">
+      <UniqueIdentifier>{02db599d-7c0f-4901-82cb-95a763e3dafa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Share\helper">
+      <UniqueIdentifier>{0117af71-32f0-4bfd-a159-83e68468ad2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Share\NetworkHelper">
+      <UniqueIdentifier>{c274f4cb-eb73-4e7e-baaa-58ebd95fb1a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Session">
+      <UniqueIdentifier>{b70135bd-237b-4f67-93bd-fce45ef3d2be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ExpOver">
+      <UniqueIdentifier>{4f1b90dd-d9f0-42bf-b3ed-584fcab0d120}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="helper">
+      <UniqueIdentifier>{1946bea5-464d-41df-b393-9893b130d6ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IOCP">
+      <UniqueIdentifier>{7c084a73-555b-4232-adf2-17130f4b8c5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ListenSocket">
+      <UniqueIdentifier>{26810d7e-9802-4740-b66a-3f723747daab}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Share\includes.h">
+      <Filter>Share</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Share\enum.h">
+      <Filter>Share\defineds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Share\Protocol.h">
+      <Filter>Share\defineds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Share\types.h">
+      <Filter>Share\defineds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Share\FastSpinlock.h">
+      <Filter>Share\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Share\SUNKUE.h">
+      <Filter>Share\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Share\Thread_Pool.h">
+      <Filter>Share\helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Share\SocketUtil.h">
+      <Filter>Share\NetworkHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpHelper.h">
+      <Filter>ExpOver</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Session</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCP.h">
+      <Filter>IOCP</Filter>
+    </ClInclude>
+    <ClInclude Include="ListenSocket.h">
+      <Filter>ListenSocket</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Share\SocketUtil.cpp">
+      <Filter>Share\NetworkHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>helper</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Session.cpp">
+      <Filter>Session</Filter>
+    </ClCompile>
+    <ClCompile Include="IOCP.cpp">
+      <Filter>IOCP</Filter>
+    </ClCompile>
+    <ClCompile Include="ListenSocket.cpp">
+      <Filter>ListenSocket</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

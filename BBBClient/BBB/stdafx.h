@@ -61,6 +61,8 @@ using clk = std::chrono::high_resolution_clock;
 #define gui ImGui
 
 
+#define initpath(x) "Resource/init/"s.append(x)
+
 
 #include "../../Share/includes.h"
 #include "gl_defines.h"
@@ -70,7 +72,7 @@ using clk = std::chrono::high_resolution_clock;
 #include "Light.h"
 #include "Shader.h"
 #include "Model.h"
-#include "VAO_OBJ.h"
+#include "Obj.h"
 
 
 #pragma warning(pop)

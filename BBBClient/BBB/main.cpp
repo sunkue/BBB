@@ -1,24 +1,29 @@
 
 #include "stdafx.h"
 #include "Renderer.h"
-#include "VAO_OBJ.h"
+#include "Obj.h"
 #include "Camera.h"
 #include "Game.h"
 #include "KeyboardEvent.h"
 #include "MouseEvent.h"
+#include "Networker.h"
+
+
+// #define gui as //
+
+#define GUI
+
 
 ;
 
-void DoNextFrame()
+void DrawGui()
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	gui::NewFrame();
 
-	KEY_BOARD_EVENT_MANAGER::get().ProcessInput();
-	MOUSE_EVENT_MANAGER::get().ProcessInput();
-
-	Game::get().update();
+	Renderer::get().get_player()->draw_gui();
+	Renderer::get().get_main_camera()->draw_gui();
 
 	gui::Begin("SUNKUE_ENGINE");
 	gui::Text("MOUSE_BUTTON_CHECK");
@@ -26,16 +31,14 @@ void DoNextFrame()
 	gui::Checkbox("R", &MOUSE_EVENT_MANAGER::get().get_R_click());
 	gui::Checkbox("Wheel", &MOUSE_EVENT_MANAGER::get().get_Wheel_click());
 	gui::Text("MOUSE_POS_CHECK");
-	float y = MOUSE_EVENT_MANAGER::get().get_prev_y();
 	float x = MOUSE_EVENT_MANAGER::get().get_prev_x();
+	float y = MOUSE_EVENT_MANAGER::get().get_prev_y();
 	gui::InputFloat("x", &x);
 	gui::InputFloat("y", &y);
+
+	auto ray = Ray::create(x, y);
+	gui::InputFloat3("mouse_ray", &ray.dir.x);
 	gui::End();
-
-	Renderer::get().draw();
-
-	Renderer::get().get_player()->draw_gui();
-	Renderer::get().get_main_camera()->draw_gui();
 
 	if (gui::GetIO().WantCaptureMouse)
 	{
@@ -46,9 +49,70 @@ void DoNextFrame()
 		//cout << "?" << endl;
 	}
 
+	// gui texture buffers
+	const float gui_tex_buffer_ratio = 0.1f;
+	auto gui_texture_size = ImVec2(screen.width * gui_tex_buffer_ratio, screen.height * gui_tex_buffer_ratio);
+
+	auto sunbuffer = Renderer::get().get_sun_renderer()->skypass_tbo->id;
+	gui::Begin("sky_buffer");
+	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	Sky::get().draw_gui();
+	gui::End();
+
+	sunbuffer = Renderer::get().get_sun_renderer()->godraypass_tbo->id;
+	gui::Begin("godray_buffer");
+	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	Renderer::get().get_sun_renderer()->godray_param.draw_gui();
+	gui::End();
+
+	auto depthbuffer = Renderer::get().get_depth_renderer()->directional_depthmap_tbo->id;
+	gui::Begin("directinal_depthbuffer(shadow)");
+	gui::Image((void*)depthbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	auto gbuffer = Renderer::get().get_gbuffer_renderer()->worldpos_tbo->id;
+	gui::Begin("g_position");
+	gui::Image((void*)gbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	gbuffer = Renderer::get().get_gbuffer_renderer()->normal_tbo->id;
+	gui::Begin("g_normal");
+	gui::Image((void*)gbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	gbuffer = Renderer::get().get_gbuffer_renderer()->albedospec_tbo->id;
+	gui::Begin("g_albedospec");
+	gui::Image((void*)gbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	gbuffer = Renderer::get().get_gbuffer_renderer()->lightpass_tbo->id;
+	gui::Begin("lightpass_tbo");
+	gui::Image((void*)gbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	auto renderbuffer = Renderer::get().get_screen_renderer()->screen_tbo->id;
+	gui::Begin("renderbuffer(predraw)");
+	gui::Image((void*)renderbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	gui::End();
+
+	// gui::ShowMetricsWindow();
 
 	gui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(gui::GetDrawData());
+}
+
+void DoNextFrame()
+{
+	KEY_BOARD_EVENT_MANAGER::get().ProcessInput();
+	MOUSE_EVENT_MANAGER::get().ProcessInput();
+
+	Game::get().update();
+
+	Renderer::get().draw();
+
+#ifdef GUI
+	DrawGui();
+#endif // GUI
 
 	glfwPollEvents();
 	auto fps = 1000 / (GAME_SYSTEM::get().tick_time().count() + 1);
@@ -58,12 +122,9 @@ void DoNextFrame()
 	glfwSwapBuffers(Game::get().window);
 }
 
-
-
-
 void MouseWheel(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 {
-	auto camera = Renderer::get().get_main_camera();
+	auto& camera = Renderer::get().get_main_camera();
 	if (scroll.yoffset > 0)
 	{
 		auto diff = camera->get_diff();
@@ -80,8 +141,8 @@ void MouseWheel(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 
 void BindDefaultInputFuncs()
 {
-	KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_LEFT_SHIFT,
-		[](auto&) { Game::get().renderer.get_main_camera()->camera_shake(0.2f); });
+	//KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_LEFT_SHIFT,
+	//	[](auto&) { Game::get().renderer.get_main_camera()->camera_shake(0.2f); });
 
 	KEY_BOARD_EVENT_MANAGER::get().BindKeyFunc(GLFW_KEY_ESCAPE,
 		[](const auto& key) { if (key.action != GLFW_RELEASE) Game::get().renderer.swap_player_ghost(); });
@@ -92,8 +153,6 @@ void BindDefaultInputFuncs()
 }
 
 
-
-
 int main()
 {
 	GLFWwindow* window;
@@ -102,9 +161,12 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
+
 
 	window = glfwCreateWindow(screen.width, screen.height, "SUNKUE", NULL, NULL);
-	if (window == NULL)
+	if (window == nullptr)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
@@ -125,16 +187,17 @@ int main()
 	glfwSetScrollCallback(window,
 		[](GLFWwindow* window, double xoffset, double yoffset)
 		{ MOUSE_EVENT_MANAGER::get().Scroll(window, xoffset, yoffset);  });
-	glfwSetMouseButtonCallback(window, 
+	glfwSetMouseButtonCallback(window,
 		[](GLFWwindow* window, int key, int action, int modifiers)
 		{ MOUSE_EVENT_MANAGER::get().MouseButton(window, key, action, modifiers);  });
-	glfwSetCursorPosCallback(window, 
+	glfwSetCursorPosCallback(window,
 		[](GLFWwindow* window, double xpos, double ypos)
 		{ MOUSE_EVENT_MANAGER::get().CursorPosition(window, xpos, ypos);  });
 	glfwSetKeyCallback(window,
 		[](GLFWwindow* window, int key, int code, int action, int modifiers)
 		{ KEY_BOARD_EVENT_MANAGER::get().KeyBoard(window, key, code, action, modifiers);  });
 
+#ifdef GUI
 	IMGUI_CHECKVERSION();
 	gui::CreateContext();
 
@@ -143,11 +206,17 @@ int main()
 	gui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 450");
+#endif // GUI
 
 	Game::get().window = window;
 	Renderer::get().reshape(screen.width, screen.height);
 
 	BindDefaultInputFuncs();
+
+
+
+	Networker::get().connect("127.0.0.1");
+	thread networker{ &Networker::do_recv, &Networker::get() };
 
 	// MAIN LOOP
 	while (!glfwWindowShouldClose(window))
@@ -155,10 +224,18 @@ int main()
 		DoNextFrame();
 	}
 
+	networker.join();
+
+
+
+
+#ifdef GUI
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	gui::DestroyContext();
+#endif // GUI
 
 	glfwTerminate();
+
 }
 

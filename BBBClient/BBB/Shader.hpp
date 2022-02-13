@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Shader.h"
-
+#include <array>
 
 /////////////////////////////////////////
 
@@ -39,6 +39,12 @@ TEMPLATE_SHADER_SET(glm::mat4)
 	glUniformMatrix4fv(UNIFORM_LOCATION, 1, GL_FALSE, glm::value_ptr(value));
 }
 
+using v6mat4 = std::array<glm::mat4, 6>;
+TEMPLATE_SHADER_SET(v6mat4)
+{
+	glUniformMatrix4fv(UNIFORM_LOCATION, 6, GL_FALSE, glm::value_ptr(value.front()));
+}
+
 TEMPLATE_SHADER_SET(glm::vec2)
 {
 	glUniform2fv(UNIFORM_LOCATION, 1, glm::value_ptr(value));
@@ -63,7 +69,7 @@ TEMPLATE_SHADER_SET(TexturePtr)
 
 TEMPLATE_SHADER_SET(vector<TexturePtr>)
 {
-	vector<GLsizei> ids;
+	vector<GLsizei> ids; ids.reserve(value.size());
 	for (auto& t : value)
 	{
 		ids.push_back(t->id);

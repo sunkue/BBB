@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "FileHelper.h"
 
 
 /// /////////////////////////////////////////////////////////////////////////
@@ -9,22 +9,30 @@ class Obj;
 
 /* 소유된 (붙은) 카메라 */
 using CameraPtr = shared_ptr<class Camera>;
-class Camera
+class Camera : public IDataOnFile
 {
+protected:
+	virtual void save_file_impl(ofstream& file) final;
+	virtual void load_file_impl(ifstream& file) final;
+
 public:
 	void update(float time_elapsed);
 
 	glm::mat4 view_mat()const { return glm::lookAt(position_, target_, up_); };
 
 	glm::vec3 get_look_dir()const { return glm::normalize(target_ - position_); };
-	glm::vec3 get_right()const { return glm::normalize(glm::cross(up_, - get_look_dir())); };
+	glm::vec3 get_right()const { return glm::normalize(glm::cross(up_, -get_look_dir())); };
 
 	void draw_gui()
 	{
 		gui::Begin("Camera");
+		
+		GUISAVE();
+		GUILOAD();
+
 		auto look = get_look_dir();
 		auto right = get_right();
-		
+
 		gui::DragFloat3("look", glm::value_ptr(look));
 		gui::DragFloat3("right", glm::value_ptr(right));
 		gui::DragFloat3("Up", glm::value_ptr(up_));
@@ -33,7 +41,7 @@ public:
 
 	SET(ownner);
 	GET(ownner);
-	
+
 	SET(diff);
 	GET(diff);
 
@@ -56,7 +64,7 @@ private:
 
 private:
 	Obj* ownner_ = nullptr;
-	
+
 	glm::vec3 diff_{};
 
 	glm::vec3 position_{ V_ZERO };

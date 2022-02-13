@@ -5,12 +5,14 @@ layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
 in VS_OUT {
-	vec3 world_pos;
+    vec4 lightspacefragpos;
+    vec3 world_pos;
 	vec3 normal;
     vec2 texcoord;
 } vs_in[];
 
 out FS_IN {
+    vec4 lightspacefragpos;
     vec3 world_pos;
 	vec3 normal;
     vec2 texcoord;
@@ -41,16 +43,19 @@ void main() {
     gs_out.world_pos = vs_in[0].world_pos;
     gs_out.normal = vs_in[0].normal;
     gs_out.texcoord = vs_in[0].texcoord;
+    gs_out.lightspacefragpos = vs_in[0].lightspacefragpos;
     EmitVertex();
     gl_Position = explode(gl_in[1].gl_Position, normal);
     gs_out.world_pos = vs_in[1].world_pos;
     gs_out.normal = vs_in[1].normal;
     gs_out.texcoord = vs_in[1].texcoord;
+    gs_out.lightspacefragpos = vs_in[1].lightspacefragpos;
     EmitVertex();
     gl_Position = explode(gl_in[2].gl_Position, normal);
     gs_out.world_pos = vs_in[2].world_pos;
     gs_out.normal = vs_in[2].normal;
     gs_out.texcoord = vs_in[2].texcoord;
+    gs_out.lightspacefragpos = vs_in[2].lightspacefragpos;
     EmitVertex();
     EndPrimitive();
 }  

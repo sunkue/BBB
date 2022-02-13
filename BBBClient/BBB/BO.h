@@ -1,13 +1,19 @@
 #pragma once
 
+namespace BO_HELPER
+{
+	GLuint get_next_binding_point();
+}
+
 template<class T>
 struct UBO
 {
-	UBO(GLuint binding) :binding{ binding }
+	UBO()
 	{
+		binding = BO_HELPER::get_next_binding_point();
 		glGenBuffers(1, &ubo_id);
 		glBindBuffer(GL_UNIFORM_BUFFER, ubo_id);
-		glBufferData(GL_UNIFORM_BUFFER, 64, NULL, GL_STATIC_DRAW);
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(T), NULL, GL_STATIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, binding, ubo_id);
 	}
 

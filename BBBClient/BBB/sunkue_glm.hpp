@@ -20,3 +20,11 @@ inline glm::quat quat_from2vectors(glm::vec3 u, glm::vec3 v)
 
 	return glm::normalize(glm::quat(real_part, w.x, w.y, w.z));
 }
+
+
+struct rotator
+{
+	float yaw{ 0 };
+	float pitch{ 0 };
+	float roll{ 0 };
+};

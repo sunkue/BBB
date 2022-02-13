@@ -3,22 +3,30 @@
 
 #include "types.h"
 #include "enum.h"
+//====================================
+
+using NetID = uint8;
+using packet_size_t = uint8;
 
 //====================================
 
-using packet_size_t = int8;
-
-//====================================
 const uint16_t SERVER_PORT = 8282;
-const auto SERVER_IP = "127.0.0.1";
 
 //====================================
 
 const int MAX_NAME_SIZE = 10;
-const int MAX_PLAYER = 20;
+const int MAX_PLAYER = 8;
 const int MAX_ENEMY = 30;
 const int MAX_OBJECT = MAX_PLAYER + MAX_ENEMY;
-const int MAX_PACKET_SIZE = 256;
+const int MAX_PACKET_SIZE = std::numeric_limits<packet_size_t>::max() + 1;
+const int MAX_BUFFER_SIZE = MAX_PACKET_SIZE + 1;
+static_assert(MAX_PACKET_SIZE <= MAX_BUFFER_SIZE);
+
+//====================================
+
+constexpr int MAX_HP = 7;
+constexpr float DEFAULT_X = 840.f;
+constexpr float DEFAULT_Y = 639.5f;
 
 //====================================
 
@@ -27,29 +35,23 @@ const int MAX_PACKET_SIZE = 256;
 
 BETTER_ENUM
 (
-	PAKCET_TYPE, int8
+	PACKET_TYPE, int8
 
 	, NONE = 0
-	
+
 	/* Client 2 Server */
-	
-	, CS_NONE			= 10
-	, CS_TRY_LOGIN
-	, CS_LOGIN_PACKET
-	, CS_MAKE_MAP_DONE
-	, CS_NEW_CHARATOR
 
-
-
+	, CS_NONE = 10
+	, CS_HI
+	, CS_INFO
 
 	/* Server 2 Client */
 
-	, SC_NONE			= 100
-
-
-
-
-
+	, SC_NONE = 100
+	, SC_HI_OK
+	, SC_NEW_CHARACTOR
+	, SC_INFO
+	, SC_TEST_HEART_BIT
 );
 
 #pragma warning(pop)
@@ -63,7 +65,7 @@ template<class T>
 struct packet_base
 {
 	packet_size_t size = sizeof(T);
-	PAKCET_TYPE packet_type = +PAKCET_TYPE::_from_string_nocase(typeid(T).name() + 7);
+	PACKET_TYPE packet_type = +PACKET_TYPE::_from_string_nocase(typeid(T).name() + 7);
 };
 #define PACKET(name) struct name : packet_base<name>											
 
@@ -71,146 +73,57 @@ PACKET(none)
 {
 };
 
-//=============== LOG_IN =================
+//=============== new connection =================
 
-// => 이 이름으로 로그인 할래
-PACKET(cs_try_login)
+PACKET(cs_hi)
 {
-	char name[MAX_NAME_SIZE];
 };
 
-
-// => ok 너의 id는 이거야
-
-PACKET(sc_ok_login)
+PACKET(sc_hi_ok)
 {
-	int8 login_id;
+	NetID your_netid;
 };
 
-// 맵에 누구누구가 어디어디에 있는지 알려주어야 함
-// PACKET(sc_new_charator) * numofchractor; to new player
-
-PACKET(sc_new_charator)
+PACKET(sc_new_charactor)
 {
-	int8 login_id;
-	char name[MAX_NAME_SIZE];
+	NetID netid;
 	float x;
-	float y;
+	float z;
+	float headx;
+	float headz;
 };
 
-PACKET(cs_make_map_done)
+//=============== info =================
+
+PACKET(cs_info)
 {
-
+	float x;
+	float z;
+	float headx;
+	float headz;
 };
 
-// 다른 클라이언트들 한테 새 캐릭터 로그인알림
-// PACKET(sc_new_charator); to old players
-
-//============= LOG_OUT ===========
-
-// => logout (esc 누름)
-
-PACKET(sc_logout)
+PACKET(sc_info)
 {
-	int8 logout_id;
+	NetID netid;
+	float x;
+	float z;
+	float headx;
+	float headz;
 };
 
-// => recv 의 리턴값이 0 인 경우 또는 PACKET(sc_logout) 패킷이 왔을 경우.
+//=============== reapeat =================
 
-PACKET(cs_logout)
+PACKET(sc_test_heart_bit)
 {
-	int8 logout_id;
+	std::chrono::milliseconds time_after_send;
 };
 
-// => 맵에서 플레이어 제거.
-
-//=============== MOVE_INPUT =================
-
-// 이동연잔자들, 비트연산으로 press,unpress 설정
-enum class MOVE_DIR : int8
-{
-	FORWARD = 1 << 0,
-	BACK = 1 << 1,
-	LEFT = 1 << 2,
-	RIGHT = 1 << 3
-};
-
-// => input 이 변화했
-
-PACKET(cs_moved)
-{
-	MOVE_DIR arrow_key;
-};
-
-// => 다른플레이어들한테 전송
-
-PACKET(sc_moved)
-{
-	int8 mover_id;
-	MOVE_DIR arrow_key;
-};
-
-//=============== CHATTING =================
-
-// => 채팅 enter
-
-PACKET(cs_chat)
-{
-	char chat[30];
-	char padding = '\0';
-};
-
-// => 다른 플레이어들한테 전송
-
-PACKET(sc_chat)
-{
-	int8 chatter_id;
-	char chat[30];
-	char padding = '\0';
-};
-
-//============= 타격 ===========
-
-// => 플레이어의 타격시도
-
-PACKET(sc_try_attack)
-{
-	int8 defender_id;
-};
-
-// => 서버에서 위치와 접속여부를 토대로 검증
-
-PACKET(cs_attacked)
-{
-	int8 attacker_id;
-	int8 defender_id;
-};
-
-// => attacket 의 공격 이펙트 발동
-// => defender 의 피격 이펙트 발동
 
 
 
-//==================== MODEL_CHANGE ==========================
 
-// => 변경할래
 
-PACKET(cs_model_change)
-{
-	int8 model_id;
-};
-
-// => ok, 모든 플레이어들한테 전송
-
-PACKET(sc_model_change)
-{
-	int8 id;
-	int8 model_id;
-};
-
-// => 적용.
-
-//================================================
 
 
 #pragma pack(pop)

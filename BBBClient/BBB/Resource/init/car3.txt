@@ -1,0 +1,7 @@
+translate_ 5 -1.1 10
+quaternion_ 0 0 0 1
+scale_ 4 4 4
+angular_power_ 1.5
+acceleration_power_ 16
+friction_power_ 2
+max_speed_ 35

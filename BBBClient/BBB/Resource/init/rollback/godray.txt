@@ -1,0 +1,6 @@
+enable_godray 1
+u_samples 128
+u_decay 0.98
+u_density 0.9
+u_weight 0.07
+u_exposure 0.15

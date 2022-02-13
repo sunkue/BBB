@@ -5,6 +5,24 @@
 #include "Game.h"
 
 
+void VehicleObj::load_file_impl(ifstream& file)
+{
+	Obj::load_file_impl(file);
+	LOAD_FILE(file, angular_power_);
+	LOAD_FILE(file, acceleration_power_);
+	LOAD_FILE(file, friction_power_);
+	LOAD_FILE(file, max_speed_);
+}
+
+void VehicleObj::save_file_impl(ofstream& file)
+{
+	Obj::save_file_impl(file);
+	SAVE_FILE(file, angular_power_);
+	SAVE_FILE(file, acceleration_power_);
+	SAVE_FILE(file, friction_power_);
+	SAVE_FILE(file, max_speed_);
+}
+
 bool VehicleObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 {
 	bool pressed = (key.action != GLFW_RELEASE);
@@ -30,6 +48,11 @@ bool VehicleObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 	{
 		brake_on_ = pressed;
 	}
+	CASE GLFW_KEY_LEFT_SHIFT :
+	{
+		draft_on_ = pressed;
+		// brake_on_ = pressed;
+	}
 	break; default: return false;
 	}
 
@@ -50,8 +73,19 @@ void VehicleObj::update_speed(float time_elapsed)
 	auto fric = -1 * prev_dir * friction_ * time_elapsed;
 
 	/* accel */
-	auto accel = head_dir * acceleration_ * time_elapsed;
+	if (true == draft_on_)
+	{
+		head_dir = glm::normalize(get_linear_speed());
+		draft_time_ = std::min(draft_time_ + time_elapsed, 15.f);
+	}
+	else
+	{
+		head_dir *= draft_time_;
+		draft_time_ = std::max(draft_time_ - time_elapsed, 1.f);
+	}
 
+	auto accel = head_dir * acceleration_ * time_elapsed;
+	
 	///* accumulate */
 	auto new_linear_speed = linear_speed_ + accel + fric;
 
@@ -77,18 +111,23 @@ void VehicleObj::draw_gui()
 	gui::Begin("Vehicle");
 	gui::Text("This is Vehicle in real game.");
 	gui::DragInt("ID", (int*)&id_);
-	gui::Text("speed");
-	gui::DragFloat3("linear_speed", const_cast<float*>(glm::value_ptr(linear_speed_)));
-	gui::DragFloat3("angular_speed", const_cast<float*>(glm::value_ptr(angular_speed_)));
-	gui::SliderFloat("max_speed", &max_speed_, 10.0f, 100.0f);
-	gui::SliderFloat("acceleration", &acceleration_, 0.0f, 100.0f);
-	gui::SliderFloat("friction", &friction_, 0.0f, 100.0f);
+	gui::DragFloat3("linear_speed", glm::value_ptr(linear_speed_));
+	auto speed = glm::length(linear_speed_);
+	gui::DragFloat("setting", &speed);
+	GUISAVE(); GUILOAD();
+	gui::SliderFloat("max_speed", &max_speed_, 1.0f, 100.0f);
+	gui::DragFloat("angular_power", &angular_power_, 0.125, 0.5, 5);
+	gui::DragFloat("acceleration_power", &acceleration_power_, 1, 10, 50);
+	gui::DragFloat("friction_power", &friction_power_, 0.125, 0.125, 15);
 	gui::Text("state");
+	gui::SliderFloat("acceleration", &acceleration_, -max_speed_, max_speed_);
+	gui::SliderFloat("friction", &friction_, 0, max_speed_);
 	gui::Checkbox("front_on", &front_on_);
 	gui::Checkbox("back_on", &back_on_);
 	gui::Checkbox("right_on", &right_on_);
 	gui::Checkbox("left_on", &left_on_);
 	gui::Checkbox("brake_on", &brake_on_);
+	gui::Checkbox("draft_on", &draft_on_);
 	gui::Checkbox("use_item", &use_item_);
 	gui::End();
 
@@ -97,9 +136,9 @@ void VehicleObj::draw_gui()
 
 void VehicleObj::update_state()
 {
-	const glm::vec3 _angular_power = Y_DEFAULT * 1.5f;
-	constexpr float _acceleration_power = 16.f;
-	constexpr float _friction_power = 2.0f;
+	const glm::vec3 _angular_power = Y_DEFAULT * angular_power_;
+	const float _acceleration_power = acceleration_power_;
+	const float _friction_power = friction_power_;
 
 	angular_speed_ = _angular_power * static_cast<int>(angular_control_);
 	acceleration_ = _acceleration_power * static_cast<int>(accel_control_);
@@ -109,6 +148,10 @@ void VehicleObj::update_state()
 
 	friction_ = _friction_power;
 	// [B] if(_brake_on)_friction += _friction_power;
+	friction_ += _friction_power * draft_on_;
+	friction_ += _friction_power * draft_on_;
+	friction_ += _friction_power * draft_on_;
+
 	friction_ += _friction_power * brake_on_;
 	friction_ += _friction_power * brake_on_;
 
@@ -137,7 +180,7 @@ void VehicleObj::update_camera(Camera* camera, float time_elpased) const
 			moving_dir = head_dir;
 		}
 		target_dir = glm::lerp(head_dir, moving_dir, clamp(0.2f * moving_len, 0.00f, 0.4f));
-		camera->set_target(get_position() + target_dir * 10.0f);
+		camera->set_target(get_position() + target_dir * 8.0f + Y_DEFAULT * 2.f);
 	}
 
 	/* position */
@@ -157,20 +200,34 @@ void VehicleObj::update_camera(Camera* camera, float time_elpased) const
 
 void GhostObj::update(float time_elapsed)
 {
+	auto& camera = Game::get().renderer.get_main_camera();
+	auto right = camera->get_right();
+	auto up = camera->get_up();
+	auto front =  camera->get_look_dir();
+
 	float speed = speed_ * time_elapsed;
-	if (up_on_) { move(get_up_dir() * speed); };
-	if (down_on_) { move(-get_up_dir() * speed); };
-	if (front_on_) { move(get_head_dir() * speed); };
-	if (back_on_) { move(-get_head_dir() * speed); };
-	if (right_on_) { move(get_right_dir() * speed); };
-	if (left_on_) { move(-get_right_dir() * speed); };
+	if (up_on_) { move(up * speed); };
+	if (down_on_) { move(-up * speed); };
+	if (front_on_) { move(front * speed); };
+	if (back_on_) { move(-front * speed); };
+	if (right_on_) { move(right * speed); };
+	if (left_on_) { move(-right * speed); };
 }
 
 void GhostObj::update_camera(Camera* camera, float time_elpased) const
 {
+	auto ryaw = glm::radians(rotator_.yaw);
+	auto rpitch = glm::radians(rotator_.pitch);
+
+	glm::vec3 front;
+	front.x = cos(ryaw) * cos(rpitch);
+	front.y = sin(rpitch);
+	front.z = sin(ryaw) * cos(rpitch);
+	front = glm::normalize(front);
+
 	auto position = get_position();
 	camera->set_position(position);
-	camera->set_target(position + get_head_dir());
+	camera->set_target(position + front);
 }
 void GhostObj::draw_gui()
 {
@@ -209,8 +266,11 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 	}
 
 	{
+		auto& camera = Game::get().renderer.get_main_camera();
+		auto front = camera->get_look_dir();
+
 		auto speed = clamp(scroll.yoffset * speed_, -100., 100.);
-		move(get_head_dir() * speed);
+		move(front * speed);
 		return true;
 	}
 	return true;
@@ -226,6 +286,26 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::button_event& button)
 			rotate(glm::inverse(get_rotation()));
 		}
 	}
+
+	if (GLFW_MOUSE_BUTTON_LEFT == button.button)
+	{
+		if (GLFW_PRESS == button.action)
+		{
+			auto& renderer = Renderer::get();
+			auto mouse_ray = Ray::create(mm.get_prev_x(), mm.get_prev_y());
+			for (const auto& car : renderer.get_cars())
+			{
+				float dist;
+				if (car->get_boundings().intersects(mouse_ray, dist))
+				{
+					renderer.set_ghost(car);
+					renderer.swap_player_ghost();
+					break;
+				}
+			}
+		}
+	}
+
 	// 오브젝트 선택. 클릭시 선택 (ray_collision)
 	return false;
 }
@@ -245,12 +325,19 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::pos_event& pos)
 			// 회전
 			float xoffset = pos.xpos - mm.get_prev_x(); xoffset /= 10;
 			float yoffset = pos.ypos - mm.get_prev_y(); yoffset /= 10;
-			auto& camera = Renderer::get().get_main_camera();
-			auto xm = glm::rotate(glm::radians(-xoffset), camera->get_up());
-			//auto ym = glm::rotate(glm::radians(-yoffset), camera->get_right());
-			auto ym = glm::rotate(glm::radians(-yoffset), camera->get_right());
-			
-			rotate({ xm * ym });
+			yoffset = -yoffset;
+
+			rotator_.yaw += xoffset;
+			rotator_.pitch += yoffset;
+
+			if (bool constrainPitch = true)
+			{
+				if (rotator_.pitch > 89.0f)
+					rotator_.pitch = 89.0f;
+				if (rotator_.pitch < -89.0f)
+					rotator_.pitch = -89.0f;
+			}
+
 			return true;
 		}
 

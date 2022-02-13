@@ -74,6 +74,9 @@
     <Filter Include="Render\Collision">
       <UniqueIdentifier>{262789bf-8636-4157-8f8c-cd3896e2320e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{91c6881b-988a-461b-ad0b-ce2bc8adf7c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -88,7 +91,7 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Render\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="VAO_OBJ.cpp">
+    <ClCompile Include="Obj.cpp">
       <Filter>Render\Obj</Filter>
     </ClCompile>
     <ClCompile Include="DynamicObj.cpp">
@@ -158,6 +161,12 @@
     <ClCompile Include="MouseEvent.cpp">
       <Filter>Render\Event</Filter>
     </ClCompile>
+    <ClCompile Include="Sun.cpp">
+      <Filter>Render\Obj</Filter>
+    </ClCompile>
+    <ClCompile Include="Networker.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -175,7 +184,7 @@
     <ClInclude Include="Renderer.h">
       <Filter>Render\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="VAO_OBJ.h">
+    <ClInclude Include="Obj.h">
       <Filter>Render\Obj</Filter>
     </ClInclude>
     <ClInclude Include="DynamicObj.h">
@@ -274,12 +283,24 @@
     <ClInclude Include="MouseEvent.h">
       <Filter>Render\Event</Filter>
     </ClInclude>
+    <ClInclude Include="Sun.h">
+      <Filter>Render\Obj</Filter>
+    </ClInclude>
+    <ClInclude Include="FileHelper.h">
+      <Filter>helper</Filter>
+    </ClInclude>
+    <ClInclude Include="FileHelper.hpp">
+      <Filter>helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Networker.h">
+      <Filter>Network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader\grass_vertex.glsl">
+    <None Include="Shader\grass_vert.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\png_fragment.glsl">
+    <None Include="Shader\png.frag">
       <Filter>Render\Shader\glsl</Filter>
     </None>
     <None Include="Shader\test_fragment.glsl">
@@ -288,25 +309,70 @@
     <None Include="Shader\test_vertex.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\IN_light.glsl">
+    <None Include="Shader\screen.frag">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\screen_fragment.glsl">
+    <None Include="Shader\cubemap.frag">
       <Filter>Render\Shader\glsl</Filter>
     </None>
-    <None Include="Shader\screen_vertex.glsl">
-      <Filter>Render\Shader\glsl</Filter>
-    </None>
-    <None Include="Shader\cubemap_fragment.glsl">
-      <Filter>Render\Shader\glsl</Filter>
-    </None>
-    <None Include="Shader\cubemap_vertex.glsl">
+    <None Include="Shader\cubemap.vert">
       <Filter>Render\Shader\glsl</Filter>
     </None>
     <None Include="Shader\test_geometry.glsl">
       <Filter>Render\Shader\glsl</Filter>
     </None>
     <None Include="Shader\default_fragment.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\directional_depthmap.vert">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\directional_depthmap.frag">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\point_depthmap.geom">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\point_depthmap.frag">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\point_depthmap.vert">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\gbuffer.frag">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\gbuffer_geometry.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\gbuffer.vert">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\lightpass_frag.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\quad.vert">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\directional_grass_depthmap_vert.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\H_grass_vert.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\H_light.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\directional_grass_depthmap.frag">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\sun_w_fragment.glsl">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\sky.frag">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\godray.frag">
       <Filter>Render\Shader\glsl</Filter>
     </None>
   </ItemGroup>
