@@ -6,8 +6,8 @@
 
 struct Ray
 {
-	glm::vec3 origin;
-	glm::vec3 dir;
+	glm::vec3 origin{};
+	glm::vec3 dir{};
 
 	static Ray create(int wx, int wy);
 };
@@ -44,8 +44,8 @@ private:
 
 struct BoundingFrustum
 {
-	glm::vec3 origin;
-	glm::quat orientation;
+	glm::vec3 origin{};
+	glm::quat orientation{};
 
 	float right_slope;
 	float left_slope;
@@ -65,16 +65,22 @@ struct BoundingFrustum
 
 class Boundings : public IDataOnFile
 {
-private:
+protected:
 	virtual void save_file_impl(ofstream& file) final;
 	virtual void load_file_impl(ifstream& file) final;
+
+	// for gui
+private:
+	BoundingSphere L1_current;
+	BoundingSphere L1_prev;
+	BoundingBox L2_current;
+	BoundingBox L2_prev;
 
 public:
 	// L1 should contain L2.
 	BoundingSphere L1;
 	BoundingBox L2;
 
-	
 
 	ModelPtr sphere{ Model::sphere() };
 	ModelPtr box{ Model::box() };
@@ -100,31 +106,41 @@ public:
 		return false;
 	}
 
-	// for gui
 private:
-	BoundingSphere L1_current;
-	BoundingSphere L1_prev;
-	BoundingBox L2_current;
-	BoundingBox L2_prev;
 	bool L1_on = false;
 	bool L2_on = false;
 public:
+	void trans_debug()
+	{
+		L1.center += L1_current.center - L1_prev.center;
+		L1_prev.center = L1_current.center;
+		L1.radius *= L1_current.radius / L1_prev.radius;
+		L1_prev.radius = L1_current.radius;
+
+		L2.center += L2_current.center - L2_prev.center;
+		L2_prev.center = L2_current.center;
+		L2.extents *= L2_current.extents / L2_prev.extents;
+		L2_prev.extents = L2_current.extents;
+		L2.orientation *= glm::inverse(L2_prev.orientation);
+		L2.orientation *= L2_current.orientation;
+		L2_prev.orientation = L2_current.orientation;
+	}
+
 	void draw_gui()
 	{
 		gui::Begin("Boundings");
 		gui::Text("This is Boundings in real game.");
 
-		GUISAVE();
-		GUILOAD();
+		GUISAVE(); GUILOAD();
 
 		gui::Text("L1, Shpere");
 		gui::Checkbox("L1 show", &L1_on);
-		if (gui::DragFloat3("L1 center", const_cast<float*>(glm::value_ptr(L1_current.center))))
+		if (gui::DragFloat3("L1 center", glm::value_ptr(L1_current.center), 0.0625, 0.1, 20, NULL, 1))
 		{
 			L1.center += L1_current.center - L1_prev.center;
 			L1_prev.center = L1_current.center;
 		}
-		if (gui::SliderFloat("L1 radius", &L1_current.radius, 0.1f, 10.0f))
+		if (gui::SliderFloat("L1 radius", &L1_current.radius, 0.0625, 10.0f))
 		{
 			L1.radius *= L1_current.radius / L1_prev.radius;
 			L1_prev.radius = L1_current.radius;
@@ -132,18 +148,17 @@ public:
 
 		gui::Text("L2, Box");
 		gui::Checkbox("L2 show", &L2_on);
-		if (gui::DragFloat3("L2 center", const_cast<float*>(glm::value_ptr(L2.center))))
+		if (gui::DragFloat3("L2 center", glm::value_ptr(L2_current.center), 0.0625, 0.1, 20, NULL, 1))
 		{
 			L2.center += L2_current.center - L2_prev.center;
 			L2_prev.center = L2_current.center;
 		}
-		if (gui::DragFloat3("L2 extents", const_cast<float*>(glm::value_ptr(L2_current.extents)), 0.2, 0.1, 20, NULL, 1))
+		if (gui::DragFloat3("L2 extents", glm::value_ptr(L2_current.extents), 0.0625, 0.1, 20, NULL, 1))
 		{
-			L2.extents /= L2_prev.extents;
-			L2.extents *= L2_current.extents;
+			L2.extents *= L2_current.extents / L2_prev.extents;
 			L2_prev.extents = L2_current.extents;
 		}
-		if (gui::DragFloat4("L2 orientation", const_cast<float*>(glm::value_ptr(L2_current.orientation)), 0.2, 0, 20, NULL, 1))
+		if (gui::DragFloat4("L2 orientation", glm::value_ptr(L2_current.orientation), 0.0625, 0, 20, NULL, 1))
 		{
 			L2.orientation *= glm::inverse(L2_prev.orientation);
 			L2.orientation *= L2_current.orientation;

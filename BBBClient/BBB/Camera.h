@@ -11,7 +11,7 @@ class Obj;
 using CameraPtr = shared_ptr<class Camera>;
 class Camera : public IDataOnFile
 {
-private:
+protected:
 	virtual void save_file_impl(ofstream& file) final;
 	virtual void load_file_impl(ifstream& file) final;
 

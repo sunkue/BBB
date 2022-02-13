@@ -78,13 +78,20 @@ private:
 /* controllable obj */
 class VehicleObj : public DynamicObj
 {
+private:
+	virtual void save_file_impl(ofstream& file) final;
+	virtual void load_file_impl(ifstream& file) final;
+
 public:
 	enum class CONTROLL { negative = -1, none = 0, positive = 1 };
 
 public:
 	explicit VehicleObj(size_t id, const ModelPtr& model)
 		: DynamicObj{ model }, id_{ id }
-	{}
+	{
+		load("car" + to_string(id));
+		get_boundings().load("carbounding");
+	}
 
 public:
 	virtual void update(float time_elapsed) override
@@ -105,6 +112,9 @@ public:
 	virtual bool process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key) override;
 
 private:
+	float angular_power_ = 1.5f;
+	float acceleration_power_ = 16.f;
+	float friction_power_ = 2.0f;
 	float max_speed_ = 35.0f;
 
 	float acceleration_ = 0.f;

@@ -150,49 +150,14 @@ void Renderer::load_model()
 
 	size_t id = -1;
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
-	cars_.back()->move({ 200.f,-1.1f,0.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
-
 	cars_.emplace_back(make_shared<VehicleObj>(++id, pinkcar));
-	cars_.back()->move({ 10.f,-1.1f,2.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
-
 	cars_.emplace_back(make_shared<VehicleObj>(++id, greencar));
-	cars_.back()->move({ 2.f,-1.1f,6.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
-
 	cars_.emplace_back(make_shared<VehicleObj>(++id, pinkcar));
-	cars_.back()->move({ 5.f,-1.1f,10.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
-
 	cars_.emplace_back(make_shared<VehicleObj>(++id, greencar));
-	cars_.back()->move({ 8.f,-1.1f,14.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
-
 	cars_.emplace_back(make_shared<VehicleObj>(++id, greencar));
-	cars_.back()->move({ 0.f,-1.1f,0.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
-
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
-	cars_.back()->move({ 0.f,15.f,1.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
-
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
-	cars_.back()->move({ 4.f,8.f,3.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
-
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
-	cars_.back()->move({ 0.f,8.f,7.f });
-	cars_.back()->scaling(glm::vec3{ 4.0f });
-	cars_.back()->get_boundings().load("cars" + to_string(id));
 
 	player_ = cars_.at(0);
 
@@ -580,6 +545,8 @@ void ScreenQuad::draw_quad()
 
 void SunRenderer::init()
 {
+	godray_param.load("godray");
+
 	glGenFramebuffers(1, &sky_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, sky_fbo);
 
@@ -663,3 +630,25 @@ void GodRayParam::update_uniform_vars(const ShaderPtr& shader)
 	shader->set("u_weight", u_weight);
 	shader->set("u_exposure", u_exposure);
 }
+
+void GodRayParam::load_file_impl(ifstream& file)
+{
+	LOAD_FILE(file, enable_godray);
+	LOAD_FILE(file, u_samples);
+	LOAD_FILE(file, u_decay);
+	LOAD_FILE(file, u_density);
+	LOAD_FILE(file, u_weight);
+	LOAD_FILE(file, u_exposure);
+}
+
+void GodRayParam::save_file_impl(ofstream& file)
+{
+	SAVE_FILE(file, enable_godray);
+	SAVE_FILE(file, u_samples);
+	SAVE_FILE(file, u_decay);
+	SAVE_FILE(file, u_density);
+	SAVE_FILE(file, u_weight);
+	SAVE_FILE(file, u_exposure);
+}
+
+/////////////////////////////////////

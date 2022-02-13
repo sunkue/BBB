@@ -28,8 +28,12 @@ __interface IObj
 };
 
 /* 그려지는 모든 물체 */
-class Obj : public IObj
+class Obj : public IObj, public IDataOnFile
 {
+protected:
+	virtual void save_file_impl(ofstream& file);
+	virtual void load_file_impl(ifstream& file);
+
 public:
 	
 	explicit Obj(const ModelPtr& model) : model_{ model } {}
@@ -45,17 +49,21 @@ public:
 	glm::vec3 get_up_dir()const { return get_rotation() * UP_DEFAULT; }
 	glm::vec3 get_right_dir()const { return get_rotation() * RIGHT_DEFAULT; }
 
-	void rotate(const glm::quat& q) { quaternion_ *= q; }
-	void move(const glm::vec3& dif) { translate_ += dif; }
-	void scaling(const glm::vec3& ratio) { scale_ *= ratio; }
+	void rotate(const glm::quat& q) { quaternion_ *= q; boundings_.rotate(q); }
+	void move(const glm::vec3& dif) { translate_ += dif; boundings_.move(dif); }
+	void scaling(const glm::vec3& ratio) { scale_ *= ratio; boundings_.scaling(ratio); }
+
+	void trans_debug()
+	{
+		boundings_.move(translate_);
+		boundings_.rotate(quaternion_);
+		boundings_.scaling(scale_);
+	}
 
 public:
 	virtual void update_uniform_vars(const ShaderPtr& shader)const;
 
-	virtual void update(float time_elapsed) 
-	{
-
-	}
+	virtual void update(float time_elapsed) {}
 
 	virtual void draw(const ShaderPtr& shader)const
 	{
@@ -64,6 +72,13 @@ public:
 	}
 	virtual void draw_gui() 
 	{
+		gui::Begin("Obj");
+		GUISAVE(); GUILOAD();
+		gui::DragFloat3("translate", glm::value_ptr(translate_));
+		gui::DragFloat3("quaternion", glm::value_ptr(quaternion_));
+		gui::DragFloat3("scale", glm::value_ptr(scale_));
+		gui::End();
+
 		boundings_.draw_gui();
 	};
 

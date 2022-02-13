@@ -23,27 +23,18 @@ inline void FILE_HELPER::save_file(ofstream& file, T& var)
 
 /////////////////////////////////////////////////////
 
-TEMPLATE_LOAD_FILE(glm::vec3)
+TEMPLATE_LOAD_FILE(bool)
 {
 	string tmp;
-	file >> tmp >> var.x >> var.y >> var.z;
+	file >> tmp >> var;
 }
 
-TEMPLATE_SAVE_FILE(glm::vec3)
+TEMPLATE_SAVE_FILE(bool)
 {
-	file << var.x << " " << var.y << " " << var.z << endl;
+	file << var << endl;
 }
 
-TEMPLATE_LOAD_FILE(glm::quat)
-{
-	string tmp;
-	file >> tmp >> var.x >> var.y >> var.z >> var.w;
-}
-
-TEMPLATE_SAVE_FILE(glm::quat)
-{
-	file << var.x << " " << var.y << " " << var.z << "" << var.z << endl;
-}
+////////////////////////////////////////////////
 
 TEMPLATE_LOAD_FILE(float)
 {
@@ -56,6 +47,31 @@ TEMPLATE_SAVE_FILE(float)
 	file << var << endl;
 }
 
+////////////////////////////////////////////////
+
+TEMPLATE_LOAD_FILE(glm::vec3)
+{
+	string tmp;
+	file >> tmp >> var.x >> var.y >> var.z;
+}
+
+TEMPLATE_SAVE_FILE(glm::vec3)
+{
+	file << var.x << " " << var.y << " " << var.z << endl;
+}
+
+////////////////////////////////////////////////
+
+TEMPLATE_LOAD_FILE(glm::quat)
+{
+	string tmp;
+	file >> tmp >> var.x >> var.y >> var.z >> var.w;
+}
+
+TEMPLATE_SAVE_FILE(glm::quat)
+{
+	file << var.x << " " << var.y << " " << var.z << " " << var.w << endl;
+}
 
 /////////////////////////////////////////////////////
 

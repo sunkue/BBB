@@ -280,20 +280,22 @@ void BoundingFrustum::CreateFromMatrix(glm::mat4 projection)
 
 void Boundings::load_file_impl(ifstream& file)
 {
-	LOAD_FILE(file, L1.center);
-	LOAD_FILE(file, L1.radius);
+	LOAD_FILE(file, L1_current.center);
+	LOAD_FILE(file, L1_current.radius);
 
-	LOAD_FILE(file, L2.center);
-	LOAD_FILE(file, L2.extents);
-	LOAD_FILE(file, L2.orientation);
+	LOAD_FILE(file, L2_current.center);
+	LOAD_FILE(file, L2_current.extents);
+	LOAD_FILE(file, L2_current.orientation);
+
+	trans_debug();
 }
 
 void Boundings::save_file_impl(ofstream& file)
 {
-	SAVE_FILE(file, L1.center);
-	SAVE_FILE(file, L1.radius);
+	SAVE_FILE(file, L1_current.center);
+	SAVE_FILE(file, L1_current.radius);
 
-	SAVE_FILE(file, L2.center);
-	SAVE_FILE(file, L2.extents);
-	SAVE_FILE(file, L2.orientation);
+	SAVE_FILE(file, L2_current.center);
+	SAVE_FILE(file, L2_current.extents);
+	SAVE_FILE(file, L2_current.orientation);
 }

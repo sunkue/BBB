@@ -5,6 +5,24 @@
 #include "Game.h"
 
 
+void VehicleObj::load_file_impl(ifstream& file)
+{
+	Obj::load_file_impl(file);
+	LOAD_FILE(file, angular_power_);
+	LOAD_FILE(file, acceleration_power_);
+	LOAD_FILE(file, friction_power_);
+	LOAD_FILE(file, max_speed_);
+}
+
+void VehicleObj::save_file_impl(ofstream& file)
+{
+	Obj::save_file_impl(file);
+	SAVE_FILE(file, angular_power_);
+	SAVE_FILE(file, acceleration_power_);
+	SAVE_FILE(file, friction_power_);
+	SAVE_FILE(file, max_speed_);
+}
+
 bool VehicleObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 {
 	bool pressed = (key.action != GLFW_RELEASE);
@@ -93,15 +111,17 @@ void VehicleObj::draw_gui()
 	gui::Begin("Vehicle");
 	gui::Text("This is Vehicle in real game.");
 	gui::DragInt("ID", (int*)&id_);
-	gui::Text("speed");
-	gui::DragFloat3("linear_speed", const_cast<float*>(glm::value_ptr(linear_speed_)));
+	gui::DragFloat3("linear_speed", glm::value_ptr(linear_speed_));
 	auto speed = glm::length(linear_speed_);
-	gui::DragFloat("speed", &speed);
-	gui::DragFloat("angular_speed(y)", &angular_speed_.y);
-	gui::SliderFloat("max_speed", &max_speed_, 10.0f, 100.0f);
-	gui::SliderFloat("acceleration", &acceleration_, 0.0f, 100.0f);
-	gui::SliderFloat("friction", &friction_, 0.0f, 100.0f);
+	gui::DragFloat("setting", &speed);
+	GUISAVE(); GUILOAD();
+	gui::SliderFloat("max_speed", &max_speed_, 1.0f, 100.0f);
+	gui::DragFloat("angular_power", &angular_power_, 0.125, 0.5, 5);
+	gui::DragFloat("acceleration_power", &acceleration_power_, 1, 10, 50);
+	gui::DragFloat("friction_power", &friction_power_, 0.125, 0.125, 15);
 	gui::Text("state");
+	gui::SliderFloat("acceleration", &acceleration_, -max_speed_, max_speed_);
+	gui::SliderFloat("friction", &friction_, 0, max_speed_);
 	gui::Checkbox("front_on", &front_on_);
 	gui::Checkbox("back_on", &back_on_);
 	gui::Checkbox("right_on", &right_on_);
@@ -116,9 +136,9 @@ void VehicleObj::draw_gui()
 
 void VehicleObj::update_state()
 {
-	const glm::vec3 _angular_power = Y_DEFAULT * 1.5f;
-	constexpr float _acceleration_power = 16.f;
-	constexpr float _friction_power = 2.0f;
+	const glm::vec3 _angular_power = Y_DEFAULT * angular_power_;
+	const float _acceleration_power = acceleration_power_;
+	const float _friction_power = friction_power_;
 
 	angular_speed_ = _angular_power * static_cast<int>(angular_control_);
 	acceleration_ = _acceleration_power * static_cast<int>(accel_control_);

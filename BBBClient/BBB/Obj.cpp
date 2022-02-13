@@ -3,6 +3,20 @@
 #include "Renderer.h"
 
 
+void Obj::load_file_impl(ifstream& file)
+{
+	LOAD_FILE(file, translate_);
+	LOAD_FILE(file, quaternion_);
+	LOAD_FILE(file, scale_);
+}
+
+void Obj::save_file_impl(ofstream& file)
+{
+	SAVE_FILE(file, translate_);
+	SAVE_FILE(file, quaternion_);
+	SAVE_FILE(file, scale_);
+}
+
 void Obj::update_uniform_vars(const ShaderPtr& shader)const
 {
 	shader->use();

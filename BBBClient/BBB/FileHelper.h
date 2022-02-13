@@ -11,36 +11,37 @@
 
 inline string add_extension(string_view str)
 {
-	string extension = ".txt";
-	
+	static constexpr auto extension = ".txt";
+
 	string str_extension{ str };
 	str_extension += extension;
-	
+
 	return str_extension;
 }
 
 class IDataOnFile
 {
 public:
-	void load(string_view _filename = "")
+	void load(string_view filename = "")
 	{
-		string filename = add_extension(_filename);
-		datafilename_ = filename;
+		if (filename != "")
+		{
+			datafilename_ = add_extension(filename);
+		}
+
 		load_file(initpath(datafilename_));
 	}
 
-	void save(string_view _filename = "")
+	void save(string_view filename = "")
 	{
-		string filename = add_extension(_filename);
-		string_view datafilename;
-		datafilename = (filename == "") ? (datafilename_) : (filename);
+		auto datafilename = (filename == "") ? (datafilename_) : (filename);
 		save_file(initpath(datafilename));
 	}
 
 	GET(datafilename);
 
 private:
-	string_view datafilename_;
+	string datafilename_;
 
 private:
 	void load_file(string_view filename)
@@ -70,7 +71,7 @@ private:
 		save_file_impl(ofile);
 	}
 
-private:
+protected:
 	virtual void load_file_impl(ifstream& file) = 0;
 	virtual void save_file_impl(ofstream& file) = 0;
 };
@@ -101,7 +102,7 @@ if (savebutton) { save(); }
 
 #define GUILOAD() \
 auto loadbutton = gui::Button("[LOAD]"); \
-if (loadbutton) { load(get_datafilename()); }
+if (loadbutton) { load(); }
 
 /////////////////////////////////
 

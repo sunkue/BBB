@@ -39,8 +39,13 @@ private:
 };
 
 //////////////////////////////////////////////////////
-struct GodRayParam
+struct GodRayParam : public IDataOnFile
 {
+protected:
+	virtual void save_file_impl(ofstream& file);
+	virtual void load_file_impl(ifstream& file);
+
+public:
 	bool enable_godray = true;
 
 	float u_samples = 128;		// »ùÇÃ¸µ¼ö
@@ -53,6 +58,7 @@ struct GodRayParam
 	{
 		//gui::Begin("GodRay");
 		gui::Text("Godray");
+		GUISAVE(); GUILOAD();
 		gui::Checkbox("Enable", &enable_godray);
 		gui::DragFloat("samples", &u_samples, 0.1f, 0, 512, "%.f", 1);
 		gui::DragFloat("decay", &u_decay, 0.001f, 0.9, 1, "%.3f", 1);
@@ -290,9 +296,9 @@ public:
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 		depthmap_shader->set("u_lightpos_mat", lightSpaceMatrix);
-		
+
 		///
-		
+
 		//depthmap_shader->set("u_lightpos_mat", directional_lightspace_mat[lightmat_index]);
 	}
 

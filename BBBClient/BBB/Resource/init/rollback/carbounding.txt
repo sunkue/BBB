@@ -1,0 +1,5 @@
+L1_current.center 0 0 0
+L1_current.radius 2.789
+L2_current.center 0 1 0
+L2_current.extents 0.75 0.188 0.312
+L2_current.orientation 0 0 0 1

@@ -1,5 +1,0 @@
-L1.center 232.179 -1.1 -11.2636
-L1.radius 3.66
-L2.center 232.179 -1.1 -11.2636
-L2.extents 2.8 2.4 1.2
-L2.orientation 0 0.187877 00
