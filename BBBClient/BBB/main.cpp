@@ -56,6 +56,7 @@ void DrawGui()
 	auto sunbuffer = Renderer::get().get_sun_renderer()->skypass_tbo->id;
 	gui::Begin("sky_buffer");
 	gui::Image((void*)sunbuffer, gui_texture_size, ImVec2(0, 1), ImVec2(1, 0));
+	Sky::get().draw_gui();
 	gui::End();
 
 	sunbuffer = Renderer::get().get_sun_renderer()->godraypass_tbo->id;
@@ -123,7 +124,7 @@ void DoNextFrame()
 
 void MouseWheel(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 {
-	auto camera = Renderer::get().get_main_camera();
+	auto& camera = Renderer::get().get_main_camera();
 	if (scroll.yoffset > 0)
 	{
 		auto diff = camera->get_diff();
@@ -161,8 +162,8 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_SAMPLES, 4);
-	
-	
+
+
 
 	window = glfwCreateWindow(screen.width, screen.height, "SUNKUE", NULL, NULL);
 	if (window == nullptr)
@@ -195,7 +196,7 @@ int main()
 	glfwSetKeyCallback(window,
 		[](GLFWwindow* window, int key, int code, int action, int modifiers)
 		{ KEY_BOARD_EVENT_MANAGER::get().KeyBoard(window, key, code, action, modifiers);  });
-	
+
 #ifdef GUI
 	IMGUI_CHECKVERSION();
 	gui::CreateContext();
@@ -212,6 +213,8 @@ int main()
 
 	BindDefaultInputFuncs();
 
+
+
 	Networker::get().connect("127.0.0.1");
 	thread networker{ &Networker::do_recv, &Networker::get() };
 
@@ -222,6 +225,9 @@ int main()
 	}
 
 	networker.join();
+
+
+
 
 #ifdef GUI
 	ImGui_ImplOpenGL3_Shutdown();

@@ -2,9 +2,6 @@
 
 #include "stdafx.h"
 
-constexpr int MAX_BUFFER_SIZE = MAX_PACKET_SIZE;
-static_assert(MAX_PACKET_SIZE <= MAX_BUFFER_SIZE);
-
 enum class COMP_OP : int8
 {
 	OP_NONE,

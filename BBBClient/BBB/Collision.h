@@ -1,5 +1,6 @@
 #pragma once
 
+#include "FileHelper.h"
 
 // 구, 사각형, 레이, 프리스텀
 
@@ -60,12 +61,20 @@ struct BoundingFrustum
 	static void CreateFromMatrix(glm::mat4 projection);
 };
 
+///////////////////////////////////
 
-struct Boundings
+class Boundings : public IDataOnFile
 {
+private:
+	virtual void save_file_impl(ofstream& file) final;
+	virtual void load_file_impl(ifstream& file) final;
+
+public:
 	// L1 should contain L2.
 	BoundingSphere L1;
 	BoundingBox L2;
+
+	
 
 	ModelPtr sphere{ Model::sphere() };
 	ModelPtr box{ Model::box() };
@@ -105,6 +114,9 @@ public:
 		gui::Begin("Boundings");
 		gui::Text("This is Boundings in real game.");
 
+		GUISAVE();
+		GUILOAD();
+
 		gui::Text("L1, Shpere");
 		gui::Checkbox("L1 show", &L1_on);
 		if (gui::DragFloat3("L1 center", const_cast<float*>(glm::value_ptr(L1_current.center))))
@@ -120,7 +132,7 @@ public:
 
 		gui::Text("L2, Box");
 		gui::Checkbox("L2 show", &L2_on);
-		if (gui::DragFloat3("L2 center", const_cast<float*>(glm::value_ptr(L2_current.center))))
+		if (gui::DragFloat3("L2 center", const_cast<float*>(glm::value_ptr(L2.center))))
 		{
 			L2.center += L2_current.center - L2_prev.center;
 			L2_prev.center = L2_current.center;

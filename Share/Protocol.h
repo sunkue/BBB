@@ -15,10 +15,12 @@ const uint16_t SERVER_PORT = 8282;
 //====================================
 
 const int MAX_NAME_SIZE = 10;
-const int MAX_PLAYER = 7;
+const int MAX_PLAYER = 8;
 const int MAX_ENEMY = 30;
 const int MAX_OBJECT = MAX_PLAYER + MAX_ENEMY;
 const int MAX_PACKET_SIZE = std::numeric_limits<packet_size_t>::max() + 1;
+const int MAX_BUFFER_SIZE = MAX_PACKET_SIZE + 1;
+static_assert(MAX_PACKET_SIZE <= MAX_BUFFER_SIZE);
 
 //====================================
 

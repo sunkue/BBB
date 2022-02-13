@@ -34,6 +34,29 @@ TEMPLATE_SAVE_FILE(glm::vec3)
 	file << var.x << " " << var.y << " " << var.z << endl;
 }
 
+TEMPLATE_LOAD_FILE(glm::quat)
+{
+	string tmp;
+	file >> tmp >> var.x >> var.y >> var.z >> var.w;
+}
+
+TEMPLATE_SAVE_FILE(glm::quat)
+{
+	file << var.x << " " << var.y << " " << var.z << "" << var.z << endl;
+}
+
+TEMPLATE_LOAD_FILE(float)
+{
+	string tmp;
+	file >> tmp >> var;
+}
+
+TEMPLATE_SAVE_FILE(float)
+{
+	file << var << endl;
+}
+
+
 /////////////////////////////////////////////////////
 
 #define INIT_FILE() \

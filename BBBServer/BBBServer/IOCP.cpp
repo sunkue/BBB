@@ -200,7 +200,7 @@ void IOCP::OnAcceptComplete(ExpOver* ex_over) // 유일성 보장 함수.
 
 NetID IOCP::get_new_net_id()
 {
-	for (int net_id = 1; net_id < sessions_.size(); net_id++)
+	for (int net_id = 0; net_id < sessions_.size(); net_id++)
 	{
 		if (sessions_[net_id].check_state(ST_FREE))
 		{

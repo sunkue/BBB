@@ -16,6 +16,6 @@ public:
 
 private:
 	SOCKET socket_;
-	array<char, MAX_PACKET_SIZE + 1> recv_buf_{};
+	array<char, MAX_BUFFER_SIZE> recv_buf_{};
 };
 

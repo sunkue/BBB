@@ -7,17 +7,31 @@
 /// 정의부 :: 
 /// LOAD_FILE(file, var1); SAVE_FILE(file, var1); ...
 /// 두 함수에서 로드와 세이브 순서 같게 해주야 함.
+
+
+inline string add_extension(string_view str)
+{
+	string extension = ".txt";
+	
+	string str_extension{ str };
+	str_extension += extension;
+	
+	return str_extension;
+}
+
 class IDataOnFile
 {
 public:
-	void load(string_view filename = "")
+	void load(string_view _filename = "")
 	{
+		string filename = add_extension(_filename);
 		datafilename_ = filename;
 		load_file(initpath(datafilename_));
 	}
 
-	void save(string_view filename = "")
+	void save(string_view _filename = "")
 	{
+		string filename = add_extension(_filename);
 		string_view datafilename;
 		datafilename = (filename == "") ? (datafilename_) : (filename);
 		save_file(initpath(datafilename));
@@ -32,13 +46,28 @@ private:
 	void load_file(string_view filename)
 	{
 		ifstream file{ filename.data(), ios::in };
+		if (file.fail())
+		{
+			cerr << "[ERR]::no file::generate::" << filename << endl;
+			// ofstream ofile{ filename.data(), ios::out };
+			return;
+		}
 		load_file_impl(file);
 	}
 
 	void save_file(string_view filename)
 	{
-		ofstream file{ filename.data(), ios::out };
-		save_file_impl(file);
+		// 롤백용 파일 저장
+		ifstream ifile{ filename.data(), ios::in };
+		if (ifile)
+		{
+			ofstream rollbackfile{ initpath("rollback/").append(datafilename_).data(), ios::out };
+			rollbackfile << ifile.rdbuf();
+		}
+
+		// 저장
+		ofstream ofile{ filename.data(), ios::out };
+		save_file_impl(ofile);
 	}
 
 private:

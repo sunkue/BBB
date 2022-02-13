@@ -4,6 +4,7 @@
 #include "DynamicObj.h"
 #include "Camera.h"
 #include "Shader.h"
+#include "Sun.h"
 #include "BO.h"
 
 //////////////////////////////////////////////////////
@@ -280,7 +281,19 @@ public:
 	void set_directional_depthmap_shader(const ShaderPtr& depthmap_shader, int lightmat_index)
 	{
 		depthmap_shader->use();
-		depthmap_shader->set("u_lightpos_mat", directional_lightspace_mat[lightmat_index]);
+
+		/// 동적그림자..
+
+		float n = screen.n; float f = screen.f;
+		glm::mat4 lightProjection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, n, f);
+		glm::mat4 lightView = glm::lookAt(-Sky::get().get_sun_light()->direction * 1000, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+		depthmap_shader->set("u_lightpos_mat", lightSpaceMatrix);
+		
+		///
+		
+		//depthmap_shader->set("u_lightpos_mat", directional_lightspace_mat[lightmat_index]);
 	}
 
 	void bind_point_depthmap_fbo(const ShaderPtr& depthmap_shader, const PointLightPtr& light, int lightmat_index)

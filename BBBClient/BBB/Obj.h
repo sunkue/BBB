@@ -45,14 +45,17 @@ public:
 	glm::vec3 get_up_dir()const { return get_rotation() * UP_DEFAULT; }
 	glm::vec3 get_right_dir()const { return get_rotation() * RIGHT_DEFAULT; }
 
-	void rotate(const glm::quat& q) { quaternion_ *= q; boundings_.rotate(q); }
-	void move(const glm::vec3& dif) { translate_ += dif; boundings_.move(dif); }
-	void scaling(const glm::vec3& ratio) { scale_ *= ratio; boundings_.scaling(ratio); }
+	void rotate(const glm::quat& q) { quaternion_ *= q; }
+	void move(const glm::vec3& dif) { translate_ += dif; }
+	void scaling(const glm::vec3& ratio) { scale_ *= ratio; }
 
 public:
 	virtual void update_uniform_vars(const ShaderPtr& shader)const;
 
-	virtual void update(float time_elapsed) {}
+	virtual void update(float time_elapsed) 
+	{
+
+	}
 
 	virtual void draw(const ShaderPtr& shader)const
 	{
@@ -80,10 +83,11 @@ private:
 	glm::vec3 translate_;
 	glm::quat quaternion_;
 	glm::vec3 scale_{ V3_DEFAULT };
+
 	ModelPtr model_;
 
 public:
-	GET_REF(boundings);
+	GET_REF_UNSAFE(boundings);
 private:
 	Boundings boundings_;
 };

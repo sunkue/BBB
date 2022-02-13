@@ -123,9 +123,11 @@ void Renderer::init_resources()
 	ubo_default_buffer_resolution.bind(skypass_shader_, "RESOLUTION");
 
 	ubo_lightspace_mat.bind(gbuffer_renderer_->lightpass_shader, "LIGHTSPACE_MAT");
-	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
-	ubo_lightspace_mat.update(glm::value_ptr(depth_renderer_->directional_lightspace_mat[index]));
-	// index = depth_renderer_->add_lightspace_mat(testing_point_light_);
+
+//	int index = depth_renderer_->add_lightspace_mat(testing_directional_light_);
+//	ubo_lightspace_mat.update(depth_renderer_->directional_lightspace_mat.data());
+
+// index = depth_renderer_->add_lightspace_mat(testing_point_light_);
 
 //	ubo_sun.update(testing_directional_light_.get());
 
@@ -146,49 +148,58 @@ void Renderer::load_model()
 	default_map->scaling(glm::vec3{ 50.f });
 
 
-	size_t id = 0;
-	cars_.emplace_back(make_shared<VehicleObj>(id++, pinkcar));
-	//player_->move({ 200.f,-1.1f,0.f });
+	size_t id = -1;
+	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
+	cars_.back()->move({ 200.f,-1.1f,0.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
-	cars_.emplace_back(make_shared<VehicleObj>(id++, pinkcar));
-	cars_.back()->move({ 10.f,0.f,2.f });
+	cars_.emplace_back(make_shared<VehicleObj>(++id, pinkcar));
+	cars_.back()->move({ 10.f,-1.1f,2.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
-	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
-	cars_.back()->move({ 2.f,0.f,6.f });
+	cars_.emplace_back(make_shared<VehicleObj>(++id, greencar));
+	cars_.back()->move({ 2.f,-1.1f,6.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
-	cars_.emplace_back(make_shared<VehicleObj>(id++, pinkcar));
-	cars_.back()->move({ 5.f,0.f,10.f });
+	cars_.emplace_back(make_shared<VehicleObj>(++id, pinkcar));
+	cars_.back()->move({ 5.f,-1.1f,10.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
-	cars_.emplace_back(make_shared<VehicleObj>(id++, greencar));
-	cars_.back()->move({ 8.f,0.f,14.f });
+	cars_.emplace_back(make_shared<VehicleObj>(++id, greencar));
+	cars_.back()->move({ 8.f,-1.1f,14.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
-	cars_.emplace_back(make_shared<VehicleObj>(id++, greencar));
-	cars_.back()->move({ 0.f,0.f,0.f });
+	cars_.emplace_back(make_shared<VehicleObj>(++id, greencar));
+	cars_.back()->move({ 0.f,-1.1f,0.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
-	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
+	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
 	cars_.back()->move({ 0.f,15.f,1.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
-	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
+	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
 	cars_.back()->move({ 4.f,8.f,3.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
-	cars_.emplace_back(make_shared<VehicleObj>(id++, bluecar));
+	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
 	cars_.back()->move({ 0.f,8.f,7.f });
 	cars_.back()->scaling(glm::vec3{ 4.0f });
+	cars_.back()->get_boundings().load("cars" + to_string(id));
 
 	player_ = cars_.at(0);
 
 	main_camera_ = make_shared<Camera>();
 	main_camera_->set_ownner(player_.get());
-
-	main_camera_->load("main_camera.txt");
+	
+	main_camera_->load("main_camera");
 	//main_camera_->set_diff(glm::vec3{ -12.f, 5.f, 0.f });
 
 
@@ -269,6 +280,12 @@ void Renderer::ready_draw()
 	glm::vec2 default_buffer_resolution = { screen.width, screen.height };
 	
 	ubo_default_buffer_resolution.update(glm::value_ptr(default_buffer_resolution));
+
+	float n = screen.n; float f = screen.f;
+	glm::mat4 lightProjection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, n, f);
+	glm::mat4 lightView = glm::lookAt(-Sky::get().get_sun_light()->direction * 1000, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+	ubo_lightspace_mat.update(glm::value_ptr(lightSpaceMatrix));
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -348,7 +365,7 @@ void Renderer::draw()
 		sun_renderer_->bind_sky_fbo();
 
 
-		Sun::get().update_uniform_vars(skypass_shader_);
+		Sky::get().update_uniform_vars(skypass_shader_);
 
 		skypass_shader_->use();
 		skypass_shader_->set("obj_texture", gbuffer_renderer_->normal_tbo); // normal_tbo
@@ -624,7 +641,7 @@ void SunRenderer::init()
 void GodRayParam::update_uniform_vars(const ShaderPtr& shader)
 {
 	auto vp = Renderer::get().vp_mat();
-	glm::vec3 lightdir = Sun::get().get_sun_light()->direction;
+	glm::vec3 lightdir = Sky::get().get_sun_light()->direction;
 	glm::vec3 camerapos = Renderer::get().get_main_camera()->get_position();
 	glm::vec3 cameralook = Renderer::get().get_main_camera()->get_look_dir();
 	glm::vec3 lightpos = camerapos - lightdir * 1e6f;

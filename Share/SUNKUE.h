@@ -36,8 +36,7 @@ namespace MY_NAME_SPACE
         public:											\
             CLASS(const CLASS&) = delete;				\
             CLASS& operator=(const CLASS&) = delete;
-
-
+	
 #define SINGLE_TON(CLASS)								\
 		DISABLE_COPY(CLASS)								\
 		public:											\
