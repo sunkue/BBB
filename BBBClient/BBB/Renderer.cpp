@@ -215,8 +215,7 @@ void Renderer::load_model()
 
 	/// ///////
 
-	auto no_model = Model::create("");
-	ghost_ = make_unique<GhostObj>(no_model);
+	ghost_ = make_unique<GhostObj>(Model::no_model());
 }
 
 void Renderer::load_texture()
@@ -317,6 +316,10 @@ void Renderer::draw()
 		grasses_->update_uniform_vars(grass_g_shader_);
 		grasses_->draw(grass_g_shader_);
 		glEnable(GL_CULL_FACE);
+
+
+		// track
+		track_.get().draw(default_g_shader_);
 
 	}
 

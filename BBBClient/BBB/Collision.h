@@ -158,12 +158,14 @@ public:
 			L2.extents *= L2_current.extents / L2_prev.extents;
 			L2_prev.extents = L2_current.extents;
 		}
-		if (gui::DragFloat4("L2 orientation", glm::value_ptr(L2_current.orientation), 0.0625, 0, 20, NULL, 1))
+		if (gui::DragFloat4("L2 orientation", glm::value_ptr(L2_current.orientation), 0.0625))
 		{
+			L2_current.orientation = glm::normalize(L2_current.orientation);
 			L2.orientation *= glm::inverse(L2_prev.orientation);
 			L2.orientation *= L2_current.orientation;
 			L2_prev.orientation = L2_current.orientation;
 		}
+
 		gui::End();
 	}
 

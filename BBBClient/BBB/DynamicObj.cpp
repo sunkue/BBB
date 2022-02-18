@@ -235,6 +235,11 @@ void GhostObj::draw_gui()
 	gui::Text("This is Ghost for free moving camera");
 	gui::SliderFloat("speed", &speed_, 10.0f, 500.0f);
 	gui::End();
+
+	if (selected_obj_)
+	{
+		selected_obj_->draw_gui();
+	}
 }
 
 void GhostObj::draw(const ShaderPtr& shader) const
@@ -293,6 +298,8 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::button_event& button)
 		{
 			auto& renderer = Renderer::get();
 			auto mouse_ray = Ray::create(mm.get_prev_x(), mm.get_prev_y());
+
+			// 차량에 타기
 			for (const auto& car : renderer.get_cars())
 			{
 				float dist;
@@ -301,6 +308,18 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::button_event& button)
 					renderer.set_ghost(car);
 					renderer.swap_player_ghost();
 					break;
+				}
+			}
+			
+			
+			// 트랙 선택
+			for (const auto& track : renderer.get_track().get_tracks())
+			{
+				float dist;
+				if (track->get_boundings().intersects(mouse_ray, dist))
+				{
+					selected_obj_ = track;
+					return true;
 				}
 			}
 		}
@@ -377,6 +396,10 @@ bool GhostObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 	CASE GLFW_KEY_LEFT_SHIFT :
 	{
 		speed_ += pressed;
+	}
+	CASE GLFW_KEY_SPACE :
+	{
+		move(Renderer::get().get_ghost()->get_position() - get_position());
 	}
 	break; default: return false;
 	}

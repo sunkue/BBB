@@ -233,6 +233,7 @@
     <ClCompile Include="Sun.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Obj.cpp" />
+    <ClCompile Include="TrackNode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Share\SocketUtil.h" />
@@ -277,6 +278,7 @@
     <ClInclude Include="sunkue_glm.hpp" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Obj.h" />
+    <ClInclude Include="TrackNode.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\cubemap.frag" />

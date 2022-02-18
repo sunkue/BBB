@@ -77,6 +77,9 @@
     <Filter Include="Network">
       <UniqueIdentifier>{91c6881b-988a-461b-ad0b-ce2bc8adf7c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\Track">
+      <UniqueIdentifier>{06d1470c-c494-4083-8048-49c0aa570116}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -166,6 +169,9 @@
     </ClCompile>
     <ClCompile Include="Networker.cpp">
       <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackNode.cpp">
+      <Filter>Render\Track</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -294,6 +300,9 @@
     </ClInclude>
     <ClInclude Include="Networker.h">
       <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackNode.h">
+      <Filter>Render\Track</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

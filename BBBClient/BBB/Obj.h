@@ -74,9 +74,19 @@ public:
 	{
 		gui::Begin("Obj");
 		GUISAVE(); GUILOAD();
-		gui::DragFloat3("translate", glm::value_ptr(translate_));
-		gui::DragFloat3("quaternion", glm::value_ptr(quaternion_));
-		gui::DragFloat3("scale", glm::value_ptr(scale_));
+		gui::DragFloat3("translate", glm::value_ptr(translate_), 0.0625);
+		
+		static auto prev_quat = quaternion_;
+		static auto current_quat = quaternion_;
+		if (gui::DragFloat4("quaternion", glm::value_ptr(current_quat), 0.0625))
+		{
+			current_quat = glm::normalize(current_quat);
+			quaternion_ *= glm::inverse(prev_quat);
+			quaternion_ *= current_quat;
+			prev_quat = current_quat;
+		}
+
+		gui::DragFloat3("scale", glm::value_ptr(scale_), 0.0625);
 		gui::End();
 
 		boundings_.draw_gui();
@@ -96,7 +106,7 @@ public:
 
 private:
 	glm::vec3 translate_;
-	glm::quat quaternion_;
+	glm::quat quaternion_{};
 	glm::vec3 scale_{ V3_DEFAULT };
 
 	ModelPtr model_;

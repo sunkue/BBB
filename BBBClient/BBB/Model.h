@@ -13,6 +13,8 @@ using ModelPtr = shared_ptr<class Model>;
 
 class Model
 {
+
+
 public:
 	CREATE_SHARED(ModelPtr, Model);
 
@@ -28,6 +30,12 @@ public:
 	{
 		static ModelPtr box = create("./Resource/Model/box/box.obj");
 		return box;
+	}
+
+	static ModelPtr no_model()
+	{
+		static ModelPtr no_model = create("");
+		return no_model;
 	}
 
 private:

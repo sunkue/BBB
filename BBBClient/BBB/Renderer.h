@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "Sun.h"
 #include "BO.h"
+#include "TrackNode.h"
 
 //////////////////////////////////////////////////////
 
@@ -391,6 +392,7 @@ public:
 	GET_REF(screen_renderer);
 	GET_REF(gbuffer_renderer);
 	GET_REF(sun_renderer);
+	GET_REF(track);
 
 	void swap_player_ghost();
 
@@ -451,11 +453,12 @@ private:
 	ObjPtr player_;
 	ObjPtr ghost_;
 	//
-
 	ShaderPtr grass_g_shader_;
 	InstancingObjPtr grasses_;
 
-
+	//
+	//
+	Track& track_ = Track::get();
 };
 
 
