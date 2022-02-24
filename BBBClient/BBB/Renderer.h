@@ -31,7 +31,6 @@ class ScreenQuad
 	SINGLE_TON(ScreenQuad);
 
 public:
-
 	// set using shader and uniforms first.
 	void draw_quad();
 

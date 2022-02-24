@@ -104,7 +104,13 @@ private:
 	glm::vec3 front_; // position - position 으로 진행방향 구성
 	//vector<vehicle*> include_objs_; 
 	//vector<item*> include_objs_; 
-	vector<Obj*> joined_objs_; // prev, next 와 함께 충돌검사.
+	vector<Obj*> joined_objs_; // prev, next 와 함께 충돌검사. 
+	
+	// 겹칠경우 진행방향 쪽 노드에 포함(next node 인 노드에 포함).
+	// 0 => 진행방향 => 1. 높을 수록 진행방향 쪽.
+	// 
+	// 이어지는 노드들 선형보간 텍스쳐 다닥다닥 곡선 트랙 맹글기.
+
 };
 
 ///////////////////////////////////////////////////////////////

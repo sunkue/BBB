@@ -332,14 +332,9 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::button_event& button)
 bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::pos_event& pos)
 {
 	auto& mm = MOUSE_EVENT_MANAGER::get();
-	// 오브젝트 클릭중일때 선택된 오브젝트의 위치 변경, 
+
 	if (mm.get_R_click())
 	{
-		if (selected_obj_)
-		{
-			return true;
-		}
-		else
 		{
 			// 회전
 			float xoffset = pos.xpos - mm.get_prev_x(); xoffset /= 10;

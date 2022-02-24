@@ -80,6 +80,9 @@
     <Filter Include="Render\Track">
       <UniqueIdentifier>{06d1470c-c494-4083-8048-49c0aa570116}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Render\UI">
+      <UniqueIdentifier>{dd066c24-5b57-4f89-a458-c3ad1715c566}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -172,6 +175,9 @@
     </ClCompile>
     <ClCompile Include="TrackNode.cpp">
       <Filter>Render\Track</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>Render\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -304,6 +310,9 @@
     <ClInclude Include="TrackNode.h">
       <Filter>Render\Track</Filter>
     </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Render\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\grass_vert.glsl">
@@ -382,6 +391,12 @@
       <Filter>Render\Shader\glsl</Filter>
     </None>
     <None Include="Shader\godray.frag">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\ui.frag">
+      <Filter>Render\Shader\glsl</Filter>
+    </None>
+    <None Include="Shader\ui.vert">
       <Filter>Render\Shader\glsl</Filter>
     </None>
   </ItemGroup>

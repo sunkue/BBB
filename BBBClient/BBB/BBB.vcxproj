@@ -234,6 +234,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Obj.cpp" />
     <ClCompile Include="TrackNode.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Share\SocketUtil.h" />
@@ -279,6 +280,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Obj.h" />
     <ClInclude Include="TrackNode.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shader\cubemap.frag" />
@@ -307,6 +309,8 @@
     <None Include="Shader\test_fragment.glsl" />
     <None Include="Shader\test_geometry.glsl" />
     <None Include="Shader\test_vertex.glsl" />
+    <None Include="Shader\ui.frag" />
+    <None Include="Shader\ui.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resource\Texture\blueflower.png" />

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Renderer.h"
 #include "Sun.h"
+#include "UI.h"
 ////////////////////////////
 
 SCREEN screen;
@@ -376,6 +377,9 @@ void Renderer::draw()
 	screen_renderer_->blit_fbo(gbuffer_renderer_->lightpass_fbo);
 
 	screen_renderer_->draw_screen(sun_renderer_->skypass_tbo, sun_renderer_->godraypass_tbo);
+
+	// Render UI
+	UI::get().draw();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glUseProgram(0);
