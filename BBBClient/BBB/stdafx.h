@@ -60,6 +60,7 @@ using clk = std::chrono::high_resolution_clock;
 #include "Dependencies/imgui/imgui_impl_opengl3.h"
 #define gui ImGui
 
+#define GUI
 
 #define initpath(x) "Resource/init/"s.append(x)
 

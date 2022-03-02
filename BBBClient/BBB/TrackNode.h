@@ -20,6 +20,9 @@ public:
 	{
 		// 모든 노드 연결 후,
 		// front vector pre-cacul.
+
+		return;
+
 		const glm::vec3 pos = get_position();
 		glm::vec3 front{ 0 };
 		for (const auto& next : next_nodes_)
@@ -89,6 +92,28 @@ private:
 			}
 		}
 	}
+protected:
+	void add_prev(TrackNode* prev, bool joint_them = true)
+	{
+		if (nullptr == prev) return;
+
+		prev_nodes_.emplace_back(prev);
+		if (joint_them)
+		{
+			prev->add_next(this, false);
+		}
+	}
+
+	void add_next(TrackNode* next, bool joint_them = true)
+	{
+		if (nullptr == next) return;
+		next_nodes_.emplace_back(next);
+		if (joint_them)
+		{
+			next->add_prev(this, false);
+		}
+	}
+
 public:
 	virtual void draw_gui() override;
 
@@ -105,7 +130,7 @@ private:
 	//vector<vehicle*> include_objs_; 
 	//vector<item*> include_objs_; 
 	vector<Obj*> joined_objs_; // prev, next 와 함께 충돌검사. 
-	
+
 	// 겹칠경우 진행방향 쪽 노드에 포함(next node 인 노드에 포함).
 	// 0 => 진행방향 => 1. 높을 수록 진행방향 쪽.
 	// 
@@ -126,10 +151,25 @@ class Track // : public IDataOnFile
 	{
 		unsigned int id = 0;
 
-		tracks_.emplace_back(make_shared<TrackNode>(Model::box()));
-//		tracks_.emplace_back(make_unique<TrackNode>(Model::no_model()));
-		tracks_.back()->move({ 206.311, 0, -108.274 });
-		tracks_.back()->id = id++;
+		auto model = Model::box(); // Model::no_model();
+		glm::vec3 sp = { 206.311, 0, -108.274 };
+		auto len = glm::length(sp);
+
+		for (int i = 0, nodes = 60; i < nodes; i++)
+		{
+			glm::vec3 dir = glm::rotate(sp, glm::radians(360.f / nodes) * i, Y_DEFAULT);
+			dir = glm::normalize(dir);
+			tracks_.emplace_back(make_shared<TrackNode>(model));
+			tracks_.back()->move(len * dir);
+			tracks_.back()->id = id++;
+
+			if (i > 0)
+			{
+				tracks_.back()->add_prev(tracks_[i - 1].get());
+			}
+		}
+		tracks_.back()->add_next(tracks_[0].get());
+		tracks_.back()->add_next(tracks_[1].get());
 	}
 
 protected:

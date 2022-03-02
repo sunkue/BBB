@@ -89,7 +89,7 @@ public:
 
 	void rotate(const glm::quat& q) { L2.orientation *= q; }
 	void move(const glm::vec3& dif) { L1.center += dif; L2.center += dif; }
-	void scaling(const glm::vec3& ratio) { L2.extents *= ratio; L1.radius *= glm::compMax(ratio); }
+	void scaling(const glm::vec3& ratio) { L2.extents *= ratio; L1.radius *= (compMax(ratio) > 1.f) ? glm::compMax(ratio) : glm::compMin(ratio); }
 
 	bool intersects(const Ray& ray, float& dist) const
 	{
@@ -110,7 +110,7 @@ private:
 	bool L1_on = false;
 	bool L2_on = false;
 public:
-	void trans_debug()
+	void trans_gui()
 	{
 		L1.center += L1_current.center - L1_prev.center;
 		L1_prev.center = L1_current.center;
@@ -134,7 +134,9 @@ public:
 		GUISAVE(); GUILOAD();
 
 		gui::Text("L1, Shpere");
+
 		gui::Checkbox("L1 show", &L1_on);
+
 		if (gui::DragFloat3("L1 center", glm::value_ptr(L1_current.center), 0.0625, 0.1, 20, NULL, 1))
 		{
 			L1.center += L1_current.center - L1_prev.center;

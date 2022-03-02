@@ -35,7 +35,7 @@ protected:
 	virtual void load_file_impl(ifstream& file);
 
 public:
-	
+
 	explicit Obj(const ModelPtr& model) : model_{ model } {}
 	virtual ~Obj() {}
 
@@ -70,23 +70,60 @@ public:
 		model_->draw(shader);
 		boundings_.draw();
 	}
-	virtual void draw_gui() 
+
+	virtual void draw_gui()
 	{
 		gui::Begin("Obj");
 		GUISAVE(); GUILOAD();
-		gui::DragFloat3("translate", glm::value_ptr(translate_), 0.0625);
-		
-		static auto prev_quat = quaternion_;
-		static auto current_quat = quaternion_;
-		if (gui::DragFloat4("quaternion", glm::value_ptr(current_quat), 0.0625))
+
+		static bool move_collision = true;
+
+		gui::Checkbox("move_collision", &move_collision);
+
+		auto translate = translate_;
+		if (gui::DragFloat3("translate", glm::value_ptr(translate), 0.0625))
 		{
-			current_quat = glm::normalize(current_quat);
-			quaternion_ *= glm::inverse(prev_quat);
-			quaternion_ *= current_quat;
-			prev_quat = current_quat;
+			auto diff = translate - translate_;
+			translate_ = translate;
+
+			if (move_collision)
+			{
+				boundings_.move(diff);
+				boundings_.trans_gui();
+			}
 		}
 
-		gui::DragFloat3("scale", glm::value_ptr(scale_), 0.0625);
+		auto prev_quat = quaternion_;
+		auto current_quat = quaternion_;
+		if (gui::DragFloat4("quaternion", glm::value_ptr(current_quat), 0.0625))
+		{
+			auto iprev_quat = glm::inverse(prev_quat);
+			current_quat = glm::normalize(current_quat);
+			quaternion_ *= iprev_quat;
+			quaternion_ *= current_quat;
+			prev_quat = current_quat;
+
+			if (move_collision)
+			{
+				boundings_.rotate(iprev_quat);
+				boundings_.rotate(current_quat);
+				boundings_.trans_gui();
+			}
+		}
+
+		auto scale = scale_;
+		if (gui::DragFloat3("scale", glm::value_ptr(scale), 0.0625, 0.5, 50))
+		{
+			auto origin = scale_;
+			scale_ = scale;
+
+			if (move_collision)
+			{
+				boundings_.scaling(scale / origin);
+				boundings_.trans_gui();
+			}
+		}
+
 		gui::End();
 
 		boundings_.draw_gui();
@@ -133,7 +170,7 @@ public:
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, abo);
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
-		
+
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)offsetof(Vertex, pos));
 
@@ -158,7 +195,7 @@ public:
 
 		glBindVertexArray(vao);
 		auto index = attbLoc_[name];
-			//glGetAttribLocation(shader->get_shader_id(), name.data());
+		//glGetAttribLocation(shader->get_shader_id(), name.data());
 		glEnableVertexAttribArray(index);
 		glBindBuffer(GL_ARRAY_BUFFER, inst_abo);
 		glVertexAttribPointer(index, sizeof(*data) / 4, type, GL_FALSE, sizeof(*data), 0);

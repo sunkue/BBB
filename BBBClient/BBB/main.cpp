@@ -9,10 +9,6 @@
 #include "Networker.h"
 
 
-// #define gui as //
-
-#define GUI
-
 
 ;
 

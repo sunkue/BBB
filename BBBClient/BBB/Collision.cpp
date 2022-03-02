@@ -287,7 +287,7 @@ void Boundings::load_file_impl(ifstream& file)
 	LOAD_FILE(file, L2_current.extents);
 	LOAD_FILE(file, L2_current.orientation);
 
-	trans_debug();
+	trans_gui();
 }
 
 void Boundings::save_file_impl(ofstream& file)
