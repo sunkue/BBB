@@ -391,7 +391,7 @@ public:
 	GET_REF(screen_renderer);
 	GET_REF(gbuffer_renderer);
 	GET_REF(sun_renderer);
-	GET_REF(track);
+	GET_REF_UNSAFE(track);
 
 	void swap_player_ghost();
 

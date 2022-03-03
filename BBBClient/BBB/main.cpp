@@ -8,7 +8,7 @@
 #include "MouseEvent.h"
 #include "Networker.h"
 
-
+#define GUI
 
 ;
 
@@ -20,6 +20,7 @@ void DrawGui()
 
 	Renderer::get().get_player()->draw_gui();
 	Renderer::get().get_main_camera()->draw_gui();
+	Renderer::get().get_track().draw_gui();
 
 	gui::Begin("SUNKUE_ENGINE");
 	gui::Text("MOUSE_BUTTON_CHECK");
@@ -220,6 +221,7 @@ int main()
 		DoNextFrame();
 	}
 
+	// 여기서 networker 를 중단시켜야 함., recv 가 리턴되지 않고 남아있음,,,
 	networker.join();
 
 

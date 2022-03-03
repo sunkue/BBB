@@ -27,6 +27,7 @@ __interface IObj
 	void draw_gui();
 };
 
+
 /* 그려지는 모든 물체 */
 class Obj : public IObj, public IDataOnFile
 {
@@ -36,7 +37,7 @@ protected:
 
 public:
 
-	explicit Obj(const ModelPtr& model) : model_{ model } {}
+	explicit Obj(const ModelPtr& model) : model_{ model }{}
 	virtual ~Obj() {}
 
 	glm::mat4 model_mat()const { return glm::translate(translate_) * glm::toMat4(quaternion_) * glm::scale(scale_); }
@@ -68,6 +69,12 @@ public:
 	virtual void draw(const ShaderPtr& shader)const
 	{
 		model_->draw(shader);
+		boundings_.draw();
+	}
+
+	void draw(const ShaderPtr& shader, const ModelPtr& model) const
+	{
+		model->draw(shader);
 		boundings_.draw();
 	}
 
@@ -139,7 +146,6 @@ public:
 
 public:
 	glm::vec3 get_project_pos(glm::vec3 origin = {});
-
 
 private:
 	glm::vec3 translate_;

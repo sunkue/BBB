@@ -107,12 +107,17 @@ protected:
 	void add_next(TrackNode* next, bool joint_them = true)
 	{
 		if (nullptr == next) return;
+
 		next_nodes_.emplace_back(next);
 		if (joint_them)
 		{
 			next->add_prev(this, false);
 		}
 	}
+
+	void draw_edges(const ShaderPtr& shader) const;
+	void draw_prev_edge(const ShaderPtr& shader, TrackNode* prev) const;
+	void draw_next_edge(const ShaderPtr& shader, TrackNode* next) const;
 
 public:
 	virtual void draw_gui() override;
@@ -121,29 +126,29 @@ public:
 	GET_REF(next_nodes);
 
 private:
-	unsigned int id; // 노필요일지도.
+	unsigned int id; 
 	vector<TrackNode*> prev_nodes_;
 	vector<TrackNode*> next_nodes_;
-
+	
 private:
 	glm::vec3 front_; // position - position 으로 진행방향 구성
 	//vector<vehicle*> include_objs_; 
 	//vector<item*> include_objs_; 
-	vector<Obj*> joined_objs_; // prev, next 와 함께 충돌검사. 
+	vector<ObjPtr> joined_objs_; // prev, next 와 함께 충돌검사. 
 
 	// 겹칠경우 진행방향 쪽 노드에 포함(next node 인 노드에 포함).
 	// 0 => 진행방향 => 1. 높을 수록 진행방향 쪽.
 	// 
 	// 이어지는 노드들 선형보간 텍스쳐 다닥다닥 곡선 트랙 맹글기.
 
+	// 두 노드 사이를 끝으로 하는 사각형(연결엣지) 그리기? 
+	// 몇개가 될지 모름. 반복문형식으로,,
+	// 중심 에서 front 로 절반만 노랑,
+	// front 에서 next의 중심으로 절반만 초록..? 
+
 };
 
-///////////////////////////////////////////////////////////////
-// 
-// 트리형식으로 맹글어서 head == 0 -> 1 -> 2 -> 0  으로 연결? 
-// vector<TrackNode*> next_nodes_; //=> next 및 prev 가 여러개일 수 있게 됨. 갈림길 표현.
-// 
-///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////
 
 class Track // : public IDataOnFile
 {
@@ -175,21 +180,22 @@ class Track // : public IDataOnFile
 protected:
 	//	virtual void save_file_impl(ofstream& file) final;
 	//	virtual void load_file_impl(ifstream& file) final;
+private:
+	void draw_edges(const ShaderPtr& shader) const;
+		
+public:
+	void draw(const ShaderPtr& shader);
+	void draw_gui();
 
 public:
-	void draw(const ShaderPtr& shader)
-	{
-		for (auto& node : tracks_)
-		{
-			node->update_uniform_vars(shader);
-			node->draw(shader);
-		}
-	}
-
 	GET_REF(tracks);
-
 private:
 	vector<shared_ptr<TrackNode>> tracks_;
+	
+	bool draw_all_edges_ = false;
+	bool draw_nearby_edges_ = false;
+	bool draw_select_edges_ = false;
+	
 };
 
 ///////////////////////////////////////////////////////////////

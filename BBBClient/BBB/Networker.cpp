@@ -71,6 +71,7 @@ void Networker::do_recv()
 			SocketUtil::DisplayError(WSAGetLastError());
 		}
 
+		
 		if (0 == recved_bytes)
 		{
 			cout << "disconnected server" << endl;

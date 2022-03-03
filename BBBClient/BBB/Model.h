@@ -26,9 +26,27 @@ public:
 		return sphere;
 	}
 	
-	static ModelPtr box()
+	static ModelPtr box() //red
 	{
 		static ModelPtr box = create("./Resource/Model/box/box.obj");
+		return box;
+	}
+
+	static ModelPtr box_blue()
+	{
+		static ModelPtr box = create("./Resource/Model/box_blue/box.obj");
+		return box;
+	}
+
+	static ModelPtr box_green()
+	{
+		static ModelPtr box = create("./Resource/Model/box_green/box.obj");
+		return box;
+	}
+
+	static ModelPtr box_yellow()
+	{
+		static ModelPtr box = create("./Resource/Model/box_yellow/box.obj");
 		return box;
 	}
 

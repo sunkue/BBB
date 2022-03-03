@@ -61,6 +61,7 @@ public:
 	virtual bool process_input(const MOUSE_EVENT_MANAGER::button_event& button) override;
 	virtual bool process_input(const MOUSE_EVENT_MANAGER::pos_event& pos) override;
 
+	GET(selected_obj);
 private:
 	ObjPtr selected_obj_;
 	rotator rotator_;
