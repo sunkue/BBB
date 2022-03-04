@@ -78,10 +78,34 @@ void TrackNode::draw_next_edge(const ShaderPtr& shader, TrackNode* next) const
 	Model::box_green()->draw(shader);
 }
 
+void TrackNode::draw_front_edge(const ShaderPtr& shader) const
+{
+	shader->use();
+
+	auto nodepos = get_position();
+	auto dir = front_;
+	auto length = glm::length(get_scale());
+
+	auto center = nodepos + dir * length + glm::vec3(0, 1, 0);
+	auto rotate = glm::inverse(sunkueglm::quat_from2vectors(dir));
+	auto scale = glm::vec3{ length, edgescale * 0.4f };
+
+	glm::mat4 m
+		= glm::translate(center)
+		* glm::toMat4(rotate)
+		* glm::scale(scale);
+
+	shader->set("u_m_mat", m);
+
+	Model::box()->draw(shader);
+}
+
 /////////////////
 
 void TrackNode::draw_edges(const ShaderPtr& shader) const
 {
+	draw_front_edge(shader);
+
 	for (auto& prev : get_prev_nodes())
 	{
 		draw_prev_edge(shader, prev);

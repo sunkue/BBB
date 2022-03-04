@@ -16,13 +16,8 @@ public:
 	explicit TrackNode(const ModelPtr& model) : Obj{ model } {};
 
 public:
-	void init()
+	void update_front()
 	{
-		// 모든 노드 연결 후,
-		// front vector pre-cacul.
-
-		return;
-
 		const glm::vec3 pos = get_position();
 		glm::vec3 front{ 0 };
 		for (const auto& next : next_nodes_)
@@ -30,9 +25,10 @@ public:
 			auto diff = next->get_position() - pos;
 			front += diff;
 		};
+
 		front /= next_nodes_.size();
 
-		//
+		front_ = glm::normalize(front);
 	}
 
 public:
@@ -118,6 +114,7 @@ protected:
 	void draw_edges(const ShaderPtr& shader) const;
 	void draw_prev_edge(const ShaderPtr& shader, TrackNode* prev) const;
 	void draw_next_edge(const ShaderPtr& shader, TrackNode* next) const;
+	void draw_front_edge(const ShaderPtr& shader) const;
 
 public:
 	virtual void draw_gui() override;
@@ -141,11 +138,6 @@ private:
 	// 
 	// 이어지는 노드들 선형보간 텍스쳐 다닥다닥 곡선 트랙 맹글기.
 
-	// 두 노드 사이를 끝으로 하는 사각형(연결엣지) 그리기? 
-	// 몇개가 될지 모름. 반복문형식으로,,
-	// 중심 에서 front 로 절반만 노랑,
-	// front 에서 next의 중심으로 절반만 초록..? 
-
 };
 
 //////////////////////////////////////////////
@@ -167,7 +159,7 @@ class Track // : public IDataOnFile
 			tracks_.emplace_back(make_shared<TrackNode>(model));
 			tracks_.back()->move(len * dir);
 			tracks_.back()->id = id++;
-
+			
 			if (i > 0)
 			{
 				tracks_.back()->add_prev(tracks_[i - 1].get());
@@ -175,6 +167,11 @@ class Track // : public IDataOnFile
 		}
 		tracks_.back()->add_next(tracks_[0].get());
 		tracks_.back()->add_next(tracks_[1].get());
+		
+		for (auto& node : tracks_)
+		{
+			node->update_front();
+		}
 	}
 
 protected:

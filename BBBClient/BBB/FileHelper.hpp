@@ -7,13 +7,15 @@
 template<class T>
 inline void FILE_HELPER::load_file(ifstream& file, T& var)
 {
-	static_assert(false, "load_file(), come to ~~~ and add template for type.");
+	static_assert(sizeof(T) == 0, "load_file(), come to FileHelper.hpp and specialize template for type.");
 }
+
+
 
 template<class T>
 inline void FILE_HELPER::save_file(ofstream& file, T& var)
 {
-	static_assert(false, "save_file(), come to ~~~ and add template for type.");
+	static_assert(sizeof(T) == 0, "save_file(), come to FileHelper.hpp and specialize template for type.");
 }
 
 /////////////////////////////////////////////////////
