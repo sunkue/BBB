@@ -38,6 +38,21 @@ TEMPLATE_SAVE_FILE(bool)
 
 ////////////////////////////////////////////////
 
+TEMPLATE_LOAD_FILE(int)
+{
+	string tmp;
+	file >> tmp >> var;
+}
+
+TEMPLATE_SAVE_FILE(int)
+{
+	file << var << endl;
+}
+
+////////////////////////////////////////////////
+
+////////////////////////////////////////////////
+
 TEMPLATE_LOAD_FILE(float)
 {
 	string tmp;
@@ -73,6 +88,31 @@ TEMPLATE_LOAD_FILE(glm::quat)
 TEMPLATE_SAVE_FILE(glm::quat)
 {
 	file << var.x << " " << var.y << " " << var.z << " " << var.w << endl;
+}
+
+/////////////////////////////////////////////////////
+
+///////////////////////////////////////////////
+
+TEMPLATE_LOAD_FILE(vector<int>)
+{
+	string tmp; file >> tmp;
+	int size; file >> size;
+	var.resize(size);
+	for (auto& v : var)
+	{
+		file >> v;
+	}
+}
+
+TEMPLATE_SAVE_FILE(vector<int>)
+{
+	file << var.size() << " ";
+	for (auto& v : var)
+	{
+		file << v << " ";
+	}
+	file << endl;
 }
 
 /////////////////////////////////////////////////////

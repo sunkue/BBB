@@ -1,0 +1,4 @@
+translate_ 86.1155 0 216.499
+quaternion_ 0 0 0 1
+scale_ 1 1 1
+id 44

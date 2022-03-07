@@ -15,6 +15,10 @@ class TrackNode : public Obj
 public:
 	explicit TrackNode(const ModelPtr& model) : Obj{ model } {};
 
+protected:
+	virtual void save_file_impl(ofstream& file) final;
+	virtual void load_file_impl(ifstream& file) final;
+
 public:
 	void update_front()
 	{
@@ -123,10 +127,10 @@ public:
 	GET_REF(next_nodes);
 
 private:
-	unsigned int id; 
+	int id;
 	vector<TrackNode*> prev_nodes_;
 	vector<TrackNode*> next_nodes_;
-	
+
 private:
 	glm::vec3 front_; // position - position 栏肺 柳青规氢 备己
 	//vector<vehicle*> include_objs_; 
@@ -142,12 +146,13 @@ private:
 
 //////////////////////////////////////////////
 
-class Track // : public IDataOnFile
+class Track : public IDataOnFile
 {
 	SINGLE_TON(Track)
 	{
-		unsigned int id = 0;
-
+		load("track");
+		/*
+		int id = 0;
 		auto model = Model::box(); // Model::no_model();
 		glm::vec3 sp = { 206.311, 0, -108.274 };
 		auto len = glm::length(sp);
@@ -159,7 +164,7 @@ class Track // : public IDataOnFile
 			tracks_.emplace_back(make_shared<TrackNode>(model));
 			tracks_.back()->move(len * dir);
 			tracks_.back()->id = id++;
-			
+
 			if (i > 0)
 			{
 				tracks_.back()->add_prev(tracks_[i - 1].get());
@@ -167,19 +172,21 @@ class Track // : public IDataOnFile
 		}
 		tracks_.back()->add_next(tracks_[0].get());
 		tracks_.back()->add_next(tracks_[1].get());
-		
+
 		for (auto& node : tracks_)
 		{
 			node->update_front();
 		}
+		*/
 	}
 
 protected:
-	//	virtual void save_file_impl(ofstream& file) final;
-	//	virtual void load_file_impl(ifstream& file) final;
+	virtual void save_file_impl(ofstream& file) final;
+	virtual void load_file_impl(ifstream& file) final;
+
 private:
 	void draw_edges(const ShaderPtr& shader) const;
-		
+
 public:
 	void draw(const ShaderPtr& shader);
 	void draw_gui();
@@ -188,11 +195,11 @@ public:
 	GET_REF(tracks);
 private:
 	vector<shared_ptr<TrackNode>> tracks_;
-	
+
 	bool draw_all_edges_ = false;
 	bool draw_nearby_edges_ = false;
 	bool draw_select_edges_ = false;
-	
+
 };
 
 ///////////////////////////////////////////////////////////////

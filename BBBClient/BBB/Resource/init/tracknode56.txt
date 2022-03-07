@@ -1,0 +1,4 @@
+translate_ 232.513 0 -14.999
+quaternion_ 0 0 0 1
+scale_ 1 1 1
+id 56

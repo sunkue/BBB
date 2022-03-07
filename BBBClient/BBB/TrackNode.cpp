@@ -102,6 +102,20 @@ void TrackNode::draw_front_edge(const ShaderPtr& shader) const
 
 /////////////////
 
+void TrackNode::save_file_impl(ofstream& file)
+{
+	Obj::save_file_impl(file);
+	SAVE_FILE(file, id);
+}
+
+void TrackNode::load_file_impl(ifstream& file)
+{
+	Obj::load_file_impl(file);
+	LOAD_FILE(file, id);
+}
+
+/////////////////
+
 void TrackNode::draw_edges(const ShaderPtr& shader) const
 {
 	draw_front_edge(shader);
@@ -119,6 +133,83 @@ void TrackNode::draw_edges(const ShaderPtr& shader) const
 
 ////////////////////////////////////////////////
 
+void Track::save_file_impl(ofstream& file)
+{
+	//track
+	{
+		int track_nums = tracks_.size();
+		SAVE_FILE(file, track_nums);
+
+
+		for (int id = 0; id < track_nums; id++)
+		{
+			tracks_.at(id)->save();
+		}
+
+		//edge
+		for (const auto& node : tracks_)
+		{
+			auto& prevs = node->get_prev_nodes();
+			vector<int> prev_ids;
+			for (const auto& prev : prevs)
+			{
+				prev_ids.emplace_back(prev->id);
+			}
+			SAVE_FILE(file, prev_ids);
+
+
+			auto& nexts = node->get_next_nodes();
+			vector<int> next_ids;
+			for (const auto& next : nexts)
+			{
+				next_ids.emplace_back(next->id);
+			}
+			SAVE_FILE(file, next_ids);
+		}
+	}
+}
+
+void Track::load_file_impl(ifstream& file)
+{
+	//track
+	{
+		int track_nums; LOAD_FILE(file, track_nums);
+		tracks_.clear();
+		tracks_.reserve(track_nums);
+
+		auto model = Model::box(); // Model::no_model();
+		for (int id = 0; id < track_nums; id++)
+		{
+			const string HEADER_NODE_FILE = "tracknode";
+			string name_node_file = HEADER_NODE_FILE;
+			name_node_file.append(std::to_string(id));
+
+			tracks_.emplace_back(make_shared<TrackNode>(model));
+			tracks_.back()->load(name_node_file);
+		}
+
+		//edge
+		for (const auto& node : tracks_)
+		{
+			vector<int> prev_ids; LOAD_FILE(file, prev_ids);
+			for (const auto ids : prev_ids)
+			{
+				node->add_prev(tracks_[ids].get(), false);
+			}
+
+			vector<int> next_ids; LOAD_FILE(file, next_ids);
+			for (const auto ids : next_ids)
+			{
+				node->add_next(tracks_[ids].get(), false);
+			}
+		}
+	}
+
+	for (auto& node : tracks_)
+	{
+		node->update_front();
+	}
+}
 
 void Track::draw(const ShaderPtr& shader)
 {
@@ -221,6 +312,9 @@ void Track::draw_edges(const ShaderPtr& shader) const
 void Track::draw_gui()
 {
 	gui::Begin("Track");
+
+	GUISAVE();
+	GUILOAD();
 
 	gui::BeginChild("Show Edge", ImVec2{ 0,0 }, true);
 	gui::Text("Show Edge");

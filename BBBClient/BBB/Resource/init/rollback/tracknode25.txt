@@ -1,0 +1,4 @@
+translate_ -232.808 0 -9.38748
+quaternion_ 0 0 0 1
+scale_ 1 1 1
+id 25
