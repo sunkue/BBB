@@ -11,10 +11,12 @@
 
 /////////////////////////////////////////
 
+
+
 template<class T>
 inline void Shader::set(const string& uniform_var, const T& value)const
 {
-	static_assert(sizeof(T) == 0, "Shader::set T&, come to Shader.hpp and specialize template for type.");
+	static_assert(always_false<T>, "Shader::set T&, come to Shader.hpp and specialize template for type.");
 }
 
 /////////////////////////////////////////

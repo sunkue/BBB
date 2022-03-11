@@ -20,20 +20,7 @@ protected:
 	virtual void load_file_impl(ifstream& file) final;
 
 public:
-	void update_front()
-	{
-		const glm::vec3 pos = get_position();
-		glm::vec3 front{ 0 };
-		for (const auto& next : next_nodes_)
-		{
-			auto diff = next->get_position() - pos;
-			front += diff;
-		};
-
-		front /= next_nodes_.size();
-
-		front_ = glm::normalize(front);
-	}
+	void update_front();
 
 public:
 	void update()
@@ -47,73 +34,71 @@ public:
 		}
 	}
 
-	bool check_include(const Obj& obj)
+	bool check_include(Obj& obj)
 	{
-		obj.get_position();
-		// intesect => point with node(box?).
-		// process_detach();
+		bool isCollide = get_boundings().intersects(obj.get_boundings());
+		return isCollide;
 	}
 
+	bool is_joined(Obj& obj)
+	{
+		auto res = std::find(ALLOF(joined_objs_), &obj);
+		return (res != joined_objs_.end());
+	}
 private:
-	void process_detach(const Obj& obj)
+	void process_detach(Obj& obj)
 	{
-		// check_include(obj) with next, prev and join to on of those node.
-	}
-
-public:
-	void process_collide() // 연결된 노드들 포함.
-	{
-		process_collide(this);
+		for (auto& next : next_nodes_)
+		{
+			if (next->check_include(obj))
+			{
+				return detach_behave(obj);
+			}
+		}
 
 		for (auto& prev : prev_nodes_)
 		{
-			process_collide(prev);
-		}
-
-		for (auto& next : next_nodes_)
-		{
-			process_collide(next);
-		}
-	}
-
-private:
-	void process_collide(TrackNode* node)
-	{
-		for (const auto& obj : joined_objs_)
-		{
-			for (const auto& other : node->joined_objs_)
+			if (prev->check_include(obj))
 			{
-				if (obj == other) // this 가 아니면 어차피 안하는 것...? 제거?
-				{
-					continue;
-				}
-
-				obj->collision_detect(*other); // instersect로 검사 후 액션.
+				return detach_behave(obj);
 			}
 		}
+
+		return detach_behave(obj, true);
 	}
+
+	void join_behave(Obj& obj, bool from_no_where = false)
+	{
+		if (from_no_where)
+		{
+			cerr << "from noway" << endl;
+		}
+	}
+
+	void detach_behave(Obj& obj, bool to_no_where = false)
+	{
+		if (to_no_where)
+		{
+			// 복귀.
+			cerr << "to noway" << endl;
+		}
+		else
+		{
+			cerr << "to nearnode" << endl;
+		}
+
+		joined_objs_.erase(std::remove(joined_objs_.begin(), joined_objs_.end(), &obj), joined_objs_.end());
+	}
+
+public:
+	void process_collide(); // 연결된 노드들 포함.
+
+private:
+	void process_collide(TrackNode* node);
+
 protected:
-	void add_prev(TrackNode* prev, bool joint_them = true)
-	{
-		if (nullptr == prev) return;
-
-		prev_nodes_.emplace_back(prev);
-		if (joint_them)
-		{
-			prev->add_next(this, false);
-		}
-	}
-
-	void add_next(TrackNode* next, bool joint_them = true)
-	{
-		if (nullptr == next) return;
-
-		next_nodes_.emplace_back(next);
-		if (joint_them)
-		{
-			next->add_prev(this, false);
-		}
-	}
+	void add_prev(TrackNode* prev, bool joint_them = true);
+	void add_next(TrackNode* next, bool joint_them = true);
 
 	void draw_edges(const ShaderPtr& shader) const;
 	void draw_prev_edge(const ShaderPtr& shader, TrackNode* prev) const;
@@ -135,7 +120,7 @@ private:
 	glm::vec3 front_; // position - position 으로 진행방향 구성
 	//vector<vehicle*> include_objs_; 
 	//vector<item*> include_objs_; 
-	vector<ObjPtr> joined_objs_; // prev, next 와 함께 충돌검사. 
+	vector<Obj*> joined_objs_; // prev, next 와 함께 충돌검사. 
 
 	// 겹칠경우 진행방향 쪽 노드에 포함(next node 인 노드에 포함).
 	// 0 => 진행방향 => 1. 높을 수록 진행방향 쪽.
@@ -148,37 +133,7 @@ private:
 
 class Track : public IDataOnFile
 {
-	SINGLE_TON(Track)
-	{
-		load("track");
-		/*
-		int id = 0;
-		auto model = Model::box(); // Model::no_model();
-		glm::vec3 sp = { 206.311, 0, -108.274 };
-		auto len = glm::length(sp);
-
-		for (int i = 0, nodes = 60; i < nodes; i++)
-		{
-			glm::vec3 dir = glm::rotate(sp, glm::radians(360.f / nodes) * i, Y_DEFAULT);
-			dir = glm::normalize(dir);
-			tracks_.emplace_back(make_shared<TrackNode>(model));
-			tracks_.back()->move(len * dir);
-			tracks_.back()->id = id++;
-
-			if (i > 0)
-			{
-				tracks_.back()->add_prev(tracks_[i - 1].get());
-			}
-		}
-		tracks_.back()->add_next(tracks_[0].get());
-		tracks_.back()->add_next(tracks_[1].get());
-
-		for (auto& node : tracks_)
-		{
-			node->update_front();
-		}
-		*/
-	}
+	SINGLE_TON(Track);
 
 protected:
 	virtual void save_file_impl(ofstream& file) final;
@@ -192,13 +147,68 @@ public:
 	void draw_gui();
 
 public:
+	void update()
+	{
+		for (auto& node : tracks_)
+		{
+			node->update();
+		}
+	}
+public:
+	int check_include(Obj& obj) // return -1 to fail
+	{
+		for (auto& track : tracks_)
+		{
+			if (track->check_include(obj))
+			{
+				return track->id;
+			}
+		}
+
+		return -1;
+	}
+
+	void include_obj(Obj& obj)
+	{
+		auto res = check_include(obj);
+
+		if (-1 == res)
+		{
+			res = find_closest_track(obj);
+		}
+
+		tracks_[res]->joined_objs_.push_back(&obj);
+		cerr << "near track ==[ " << res << " ]" << endl;
+	}
+
+	int find_closest_track(Obj& obj)
+	{
+		pair<int, float> ret = make_pair(-1, -1.f);
+
+		auto pos = obj.get_position();
+
+		for (auto& track : tracks_)
+		{
+			auto len = glm::length(track->get_position() - pos);
+
+			if (ret.second < 0 || len < ret.second)
+			{
+				ret = make_pair(track->id, len);
+			}
+		}
+
+		return ret.first;
+	}
+public:
 	GET_REF(tracks);
 private:
 	vector<shared_ptr<TrackNode>> tracks_;
 
-	bool draw_all_edges_ = false;
-	bool draw_nearby_edges_ = false;
-	bool draw_select_edges_ = false;
+	bool draw_ = true;
+	bool draw_all_edges_ = true;
+	bool draw_nearby_edges_ = true;
+	bool draw_select_edges_ = true;
+	bool wiremode_ = false;
 
 };
 

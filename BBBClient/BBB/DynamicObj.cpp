@@ -53,6 +53,13 @@ bool VehicleObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 		draft_on_ = pressed;
 		// brake_on_ = pressed;
 	}
+	CASE GLFW_KEY_APOSTROPHE : // '
+	{
+		if (pressed)
+		{
+			Track::get().include_obj(*reinterpret_cast<Obj*>(this));
+		}
+	}
 	break; default: return false;
 	}
 
@@ -85,7 +92,7 @@ void VehicleObj::update_speed(float time_elapsed)
 	}
 
 	auto accel = head_dir * acceleration_ * time_elapsed;
-	
+
 	///* accumulate */
 	auto new_linear_speed = linear_speed_ + accel + fric;
 
@@ -203,7 +210,7 @@ void GhostObj::update(float time_elapsed)
 	auto& camera = Game::get().renderer.get_main_camera();
 	auto right = camera->get_right();
 	auto up = camera->get_up();
-	auto front =  camera->get_look_dir();
+	auto front = camera->get_look_dir();
 
 	float speed = speed_ * time_elapsed;
 	if (up_on_) { move(up * speed); };
@@ -310,8 +317,8 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::button_event& button)
 					break;
 				}
 			}
-			
-			
+
+
 			// 트랙 선택
 			for (const auto& track : renderer.get_track().get_tracks())
 			{

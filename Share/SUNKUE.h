@@ -166,6 +166,9 @@ namespace MY_NAME_SPACE {
 	constexpr bool _is_consteval(...) { return false; }
 	// 함수 반환값 컴파일 타임인지 확인
 #define is_consteval(Ret_val) _is_consteval([]() {return Ret_val; })
+
+
+	template<typename> constexpr bool always_false = false; // static_assert(always_false<T>)
 }
 
 //	Thread

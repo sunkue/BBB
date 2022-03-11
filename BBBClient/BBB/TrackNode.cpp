@@ -2,6 +2,66 @@
 #include "TrackNode.h"
 #include "Renderer.h"
 
+//////////////////////
+
+void TrackNode::save_file_impl(ofstream& file)
+{
+	Obj::save_file_impl(file);
+	SAVE_FILE(file, id);
+}
+
+void TrackNode::load_file_impl(ifstream& file)
+{
+	Obj::load_file_impl(file);
+	LOAD_FILE(file, id);
+}
+
+void TrackNode::update_front()
+{
+	const glm::vec3 pos = get_position();
+	glm::vec3 front{ 0 };
+	for (const auto& next : next_nodes_)
+	{
+		auto diff = next->get_position() - pos;
+		front += diff;
+	};
+
+	front /= next_nodes_.size();
+
+	front_ = glm::normalize(front);
+}
+
+void TrackNode::process_collide()
+{
+	process_collide(this);
+
+	for (auto& prev : prev_nodes_)
+	{
+		process_collide(prev);
+	}
+
+	for (auto& next : next_nodes_)
+	{
+		process_collide(next);
+	}
+}
+
+void TrackNode::process_collide(TrackNode* node)
+{
+	for (const auto& obj : joined_objs_)
+	{
+		for (const auto& other : node->joined_objs_)
+		{
+			if (obj == other)
+			{
+				continue;
+			}
+
+			obj->collision_detect(*other); // instersect로 검사 후 액션.
+		}
+	}
+}
+
 void TrackNode::draw_gui()
 {
 	gui::Begin(("TrackNode::" + to_string(id)).c_str());
@@ -24,9 +84,6 @@ void TrackNode::draw_gui()
 
 	Obj::draw_gui();
 }
-
-
-//////////////////////
 
 static const glm::vec2 edgescale = glm::vec2(0.2f);
 
@@ -100,21 +157,27 @@ void TrackNode::draw_front_edge(const ShaderPtr& shader) const
 	Model::box()->draw(shader);
 }
 
-/////////////////
-
-void TrackNode::save_file_impl(ofstream& file)
+void TrackNode::add_prev(TrackNode* prev, bool joint_them)
 {
-	Obj::save_file_impl(file);
-	SAVE_FILE(file, id);
+	if (nullptr == prev) return;
+
+	prev_nodes_.emplace_back(prev);
+	if (joint_them)
+	{
+		prev->add_next(this, false);
+	}
 }
 
-void TrackNode::load_file_impl(ifstream& file)
+void TrackNode::add_next(TrackNode* next, bool joint_them)
 {
-	Obj::load_file_impl(file);
-	LOAD_FILE(file, id);
-}
+	if (nullptr == next) return;
 
-/////////////////
+	next_nodes_.emplace_back(next);
+	if (joint_them)
+	{
+		next->add_prev(this, false);
+	}
+}
 
 void TrackNode::draw_edges(const ShaderPtr& shader) const
 {
@@ -132,10 +195,14 @@ void TrackNode::draw_edges(const ShaderPtr& shader) const
 }
 
 ////////////////////////////////////////////////
+Track::Track()
+{
+	load("track");
+}
 
 void Track::save_file_impl(ofstream& file)
 {
-	//track
+	//track-
 	{
 		int track_nums = tracks_.size();
 		SAVE_FILE(file, track_nums);
@@ -213,8 +280,12 @@ void Track::load_file_impl(ifstream& file)
 
 void Track::draw(const ShaderPtr& shader)
 {
+	if (false == draw_) return;
+
 	for (auto& node : tracks_)
 	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL - wiremode_);
+
 		node->update_uniform_vars(shader);
 
 		if (const auto ghost_player = dynamic_cast<GhostObj*>(Renderer::get().get_player().get()))
@@ -315,6 +386,9 @@ void Track::draw_gui()
 
 	GUISAVE();
 	GUILOAD();
+
+	gui::Checkbox("show", &draw_);
+	gui::Checkbox("wiremode", &wiremode_);
 
 	gui::BeginChild("Show Edge", ImVec2{ 0,0 }, true);
 	gui::Text("Show Edge");

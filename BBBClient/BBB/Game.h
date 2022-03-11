@@ -10,6 +10,9 @@ class Game
 public:
 	void update()
 	{
+		//
+		renderer.get_track().update();
+		/// 
 		float milli_tick = static_cast<float>(GAME_SYSTEM::get().tick_time().count());
 		float tick = milli_tick / 1000.f;
 		renderer.get_player()->update(tick);
