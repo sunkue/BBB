@@ -257,6 +257,10 @@ void Renderer::ready_draw()
 
 void Renderer::draw()
 {
+	//=> scene 별로 함수 맹글어서 교체하는 방식..
+	// 매칭씬, 
+	// 게임씬,
+
 	ready_draw();
 
 	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;

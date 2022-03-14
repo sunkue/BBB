@@ -1,4 +1,4 @@
 sun_light_->direction -0.136006 -0.194294 0.971469
 skycolor_top_ 0.525 0.735 0.84
-skycolor_bottom_ 0.9 0.9 0.95
+skycolor_bottom_ 4.9 0.9 -4.05
 sun_color_ 1 0.6 0.1

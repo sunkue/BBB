@@ -31,6 +31,53 @@ void TrackNode::update_front()
 	front_ = glm::normalize(front);
 }
 
+void TrackNode::update_rotate()
+{
+	auto prev_q = get_rotation();
+	auto u = X_DEFAULT;
+	auto v = get_next_center() - get_prev_center();
+	auto q = quat_from2vectors(u, v);
+	
+	rotate(glm::inverse(prev_q));
+	rotate(q);
+}
+
+void TrackNode::update_scale()
+{
+
+}
+
+void TrackNode::update()
+{
+	for (const auto obj : joined_objs_)
+	{
+		// detach
+		if (false == check_include(*obj))
+		{
+			process_detach(*obj);
+		}
+
+		// dir
+		if (auto vehicle = dynamic_cast<VehicleObj* const>(obj))
+		{
+			auto head = vehicle->get_head_dir();
+			auto drive_good_dir = glm::dot(head, front_) >= 0 ? true : false;
+			if (drive_good_dir)
+			{
+				cout << "good dir" << endl;
+			}
+			else
+			{
+				cout << "bad dir" << endl;
+				// 일정시간 지나면 자동복귀..? 1초? 3초?
+			}
+		}
+	}
+
+
+
+}
+
 void TrackNode::process_collide()
 {
 	process_collide(this);
@@ -65,7 +112,14 @@ void TrackNode::process_collide(TrackNode* node)
 void TrackNode::draw_gui()
 {
 	gui::Begin(("TrackNode::" + to_string(id)).c_str());
-
+	if (gui::Button("u_front"))
+	{
+		update_front();
+	}
+	if (gui::Button("u_rotate"))
+	{
+		update_rotate();
+	}
 	gui::Text("Prev_nodes");
 	for (const auto& prev : prev_nodes_)
 	{

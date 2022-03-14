@@ -21,18 +21,11 @@ protected:
 
 public:
 	void update_front();
+	void update_rotate(); 
+	void update_scale();
 
 public:
-	void update()
-	{
-		for (const auto& obj : joined_objs_)
-		{
-			if (false == check_include(*obj))
-			{
-				process_detach(*obj);
-			}
-		}
-	}
+	void update();
 
 	bool check_include(Obj& obj)
 	{
@@ -66,7 +59,6 @@ private:
 
 		return detach_behave(obj, true);
 	}
-
 	void join_behave(Obj& obj, bool from_no_where = false)
 	{
 		if (from_no_where)
@@ -74,7 +66,6 @@ private:
 			cerr << "from noway" << endl;
 		}
 	}
-
 	void detach_behave(Obj& obj, bool to_no_where = false)
 	{
 		if (to_no_where)
@@ -88,6 +79,28 @@ private:
 		}
 
 		joined_objs_.erase(std::remove(joined_objs_.begin(), joined_objs_.end(), &obj), joined_objs_.end());
+	}
+
+private:
+	glm::vec3 get_next_center()
+	{
+		glm::vec3 ret{0};
+		for (auto& next : next_nodes_)
+		{
+			ret += next->get_position();
+		}
+		ret /= next_nodes_.size();
+		return ret;
+	}
+	glm::vec3 get_prev_center()
+	{
+		glm::vec3 ret{ 0 };
+		for (auto& prev : prev_nodes_)
+		{
+			ret += prev->get_position();
+		}
+		ret /= prev_nodes_.size();
+		return ret;
 	}
 
 public:
@@ -155,7 +168,7 @@ public:
 		}
 	}
 public:
-	int check_include(Obj& obj) // return -1 to fail
+	int check_include(Obj& obj) // return -1 on fail
 	{
 		for (auto& track : tracks_)
 		{
@@ -181,7 +194,7 @@ public:
 		cerr << "near track ==[ " << res << " ]" << endl;
 	}
 
-	int find_closest_track(Obj& obj)
+	int find_closest_track(Obj& obj) //return -1 on fail.
 	{
 		pair<int, float> ret = make_pair(-1, -1.f);
 
@@ -203,6 +216,10 @@ public:
 	GET_REF(tracks);
 private:
 	vector<shared_ptr<TrackNode>> tracks_;
+
+	shared_ptr<TrackNode> start_point_;
+	shared_ptr<TrackNode> mid_point_;
+	shared_ptr<TrackNode> end_point_;
 
 	bool draw_ = true;
 	bool draw_all_edges_ = true;
