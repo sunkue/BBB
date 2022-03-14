@@ -44,7 +44,30 @@ void TrackNode::update_rotate()
 
 void TrackNode::update_scale()
 {
+	auto pos = get_position();
+	auto next_pos = get_next_center();
+	auto prev_pos = get_prev_center();
+	auto mid_pos = (next_pos + prev_pos) / 2;
 
+	auto next_diff = next_pos - pos;
+	auto prev_diff = pos - prev_pos;
+	auto v = next_pos - prev_pos;
+
+
+	float next_cos = cos_from2vectors(next_diff, v);
+	float next_theta = glm::acos(next_cos);
+	float next_sin = glm::sin(glm::radians(90 - glm::degrees(next_theta)));
+	float next_length = glm::length(next_diff) * next_sin;
+
+	float prev_cos = cos_from2vectors(prev_diff, v);
+	float prev_theta = glm::acos(prev_cos);
+	float prev_sin = glm::sin(glm::radians(90 - glm::degrees(prev_theta)));
+	float prev_length = glm::length(prev_diff) * prev_sin;
+
+	auto s = get_scale(); 
+	scaling({ 1 / s.x, 1 / s.y, 1 / s.z });
+	s.x = (next_length + prev_length) / 4;
+	scaling(s);
 }
 
 void TrackNode::update()
@@ -112,14 +135,7 @@ void TrackNode::process_collide(TrackNode* node)
 void TrackNode::draw_gui()
 {
 	gui::Begin(("TrackNode::" + to_string(id)).c_str());
-	if (gui::Button("u_front"))
-	{
-		update_front();
-	}
-	if (gui::Button("u_rotate"))
-	{
-		update_rotate();
-	}
+	
 	gui::Text("Prev_nodes");
 	for (const auto& prev : prev_nodes_)
 	{
@@ -195,11 +211,11 @@ void TrackNode::draw_front_edge(const ShaderPtr& shader) const
 
 	auto nodepos = get_position();
 	auto dir = front_;
-	auto length = glm::length(get_scale());
+	auto length = glm::length(get_scale()) * 0.3f;
 
 	auto center = nodepos + dir * length + glm::vec3(0, 1, 0);
 	auto rotate = glm::inverse(sunkueglm::quat_from2vectors(dir));
-	auto scale = glm::vec3{ length, edgescale * 0.4f };
+	auto scale = glm::vec3{ length, edgescale * 0.2f };
 
 	glm::mat4 m
 		= glm::translate(center)
@@ -326,10 +342,7 @@ void Track::load_file_impl(ifstream& file)
 		}
 	}
 
-	for (auto& node : tracks_)
-	{
-		node->update_front();
-	}
+
 }
 
 void Track::draw(const ShaderPtr& shader)
@@ -443,6 +456,16 @@ void Track::draw_gui()
 
 	gui::Checkbox("show", &draw_);
 	gui::Checkbox("wiremode", &wiremode_);
+
+	if(gui::Button("update nodes"))
+	{
+		for (auto& node : tracks_)
+		{
+			node->update_front();
+			node->update_rotate();
+			node->update_scale();
+		}
+	}
 
 	gui::BeginChild("Show Edge", ImVec2{ 0,0 }, true);
 	gui::Text("Show Edge");

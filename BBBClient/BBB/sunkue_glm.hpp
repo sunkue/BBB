@@ -23,6 +23,14 @@ namespace sunkueglm
 		return glm::normalize(glm::quat(real_part, w.x, w.y, w.z));
 	}
 
+	inline GLfloat cos_from2vectors(glm::vec3 u, glm::vec3 v = glm::vec3{ 1, 0, 0 })
+	{
+		auto nu = glm::normalize(u);
+		auto nv = glm::normalize(v);
+		auto normalized_dot = glm::dot(nu, nv);
+		return normalized_dot;
+	}
+
 } using namespace sunkueglm;
 
 struct rotator
