@@ -383,6 +383,7 @@ void Renderer::draw()
 	screen_renderer_->draw_screen(sun_renderer_->skypass_tbo, sun_renderer_->godraypass_tbo);
 
 	// Render UI
+	UI::get().update();
 	UI::get().draw();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

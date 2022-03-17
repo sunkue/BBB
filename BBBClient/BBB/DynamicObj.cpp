@@ -118,6 +118,10 @@ void VehicleObj::draw_gui()
 	gui::Begin("Vehicle");
 	gui::Text("This is Vehicle in real game.");
 	gui::DragInt("ID", (int*)&id_);
+	gui::DragInt("rank", &rank_);
+	gui::DragInt("cp", (int*)&check_point_);
+	gui::DragInt("lab", &lab_);
+	gui::DragInt("node", &included_node_);
 	gui::DragFloat3("linear_speed", glm::value_ptr(linear_speed_));
 	auto speed = glm::length(linear_speed_);
 	gui::DragFloat("setting", &speed);

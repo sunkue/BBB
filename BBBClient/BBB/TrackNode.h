@@ -21,7 +21,7 @@ protected:
 
 public:
 	void update_front();
-	void update_rotate(); 
+	void update_rotate();
 	void update_scale();
 
 public:
@@ -45,7 +45,9 @@ private:
 		{
 			if (next->check_include(obj))
 			{
-				return detach_behave(obj);
+				detach_behave(obj);
+				next->join_behave(obj);
+				return;
 			}
 		}
 
@@ -53,38 +55,21 @@ private:
 		{
 			if (prev->check_include(obj))
 			{
-				return detach_behave(obj);
+				detach_behave(obj);
+				prev->join_behave(obj);
+				return;
 			}
 		}
 
 		return detach_behave(obj, true);
 	}
-	void join_behave(Obj& obj, bool from_no_where = false)
-	{
-		if (from_no_where)
-		{
-			cerr << "from noway" << endl;
-		}
-	}
-	void detach_behave(Obj& obj, bool to_no_where = false)
-	{
-		if (to_no_where)
-		{
-			// 복귀.
-			cerr << "to noway" << endl;
-		}
-		else
-		{
-			cerr << "to nearnode" << endl;
-		}
-
-		joined_objs_.erase(std::remove(joined_objs_.begin(), joined_objs_.end(), &obj), joined_objs_.end());
-	}
+	void join_behave(Obj& obj, bool from_no_where = false);
+	void detach_behave(Obj& obj, bool to_no_where = false);
 
 private:
 	glm::vec3 get_next_center()
 	{
-		glm::vec3 ret{0};
+		glm::vec3 ret{ 0 };
 		for (auto& next : next_nodes_)
 		{
 			ret += next->get_position();
@@ -139,9 +124,15 @@ private:
 	// 0 => 진행방향 => 1. 높을 수록 진행방향 쪽.
 	// 
 	// 이어지는 노드들 선형보간 텍스쳐 다닥다닥 곡선 트랙 맹글기.
+	using obj_func = std::function<void(Obj&)>;
 
+public:
+	void set_editional_update_func(obj_func func = [](Obj&) {});
+private:
+	// 스타트, 엔드, 중간노드들.
+	obj_func editional_update_func_{ [](Obj&) {} };
 };
-
+using TrackNodePtr = shared_ptr<TrackNode>;
 //////////////////////////////////////////////
 
 class Track : public IDataOnFile
@@ -154,6 +145,7 @@ protected:
 
 private:
 	void draw_edges(const ShaderPtr& shader) const;
+
 
 public:
 	void draw(const ShaderPtr& shader);
@@ -189,8 +181,7 @@ public:
 		{
 			res = find_closest_track(obj);
 		}
-
-		tracks_[res]->joined_objs_.push_back(&obj);
+		tracks_[res]->join_behave(obj);
 		cerr << "near track ==[ " << res << " ]" << endl;
 	}
 
@@ -212,14 +203,30 @@ public:
 
 		return ret.first;
 	}
+
 public:
 	GET_REF(tracks);
 private:
-	vector<shared_ptr<TrackNode>> tracks_;
+	vector<TrackNodePtr> tracks_;
 
-	shared_ptr<TrackNode> start_point_;
-	shared_ptr<TrackNode> mid_point_;
-	shared_ptr<TrackNode> end_point_;
+private:
+	void set_start_node(TrackNodePtr& newNode);
+	void set_end_node(TrackNodePtr& newNode);
+	void set_mid1_node(TrackNodePtr& newNode);
+	void set_mid2_node(TrackNodePtr& newNode);
+
+private:
+	TrackNodePtr start_point_;
+	TrackNodePtr mid_point1_;
+	TrackNodePtr mid_point2_;
+	TrackNodePtr end_point_;
+
+private:
+	// check_point => 비교, 업데이트에서 포함 오브제중 차량에 적용,,
+	// 차량에 체크포인트 변수,, lab 변수,, 
+	// lab수 + end point 까지 남은 수 + front 로 판단,, 
+	// end point 는 start node 다음,, 두 노드 경계가 출발선.
+	// s->e->m1->m2->s->e // s->m1 // m1->m2 // m2->e(+1) // m2->m1(reverse) 
 
 	bool draw_ = true;
 	bool draw_all_edges_ = true;

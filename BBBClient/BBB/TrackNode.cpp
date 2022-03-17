@@ -37,7 +37,7 @@ void TrackNode::update_rotate()
 	auto u = X_DEFAULT;
 	auto v = get_next_center() - get_prev_center();
 	auto q = quat_from2vectors(u, v);
-	
+
 	rotate(glm::inverse(prev_q));
 	rotate(q);
 }
@@ -64,7 +64,7 @@ void TrackNode::update_scale()
 	float prev_sin = glm::sin(glm::radians(90 - glm::degrees(prev_theta)));
 	float prev_length = glm::length(prev_diff) * prev_sin;
 
-	auto s = get_scale(); 
+	auto s = get_scale();
 	scaling({ 1 / s.x, 1 / s.y, 1 / s.z });
 	s.x = (next_length + prev_length) / 4;
 	scaling(s);
@@ -79,6 +79,8 @@ void TrackNode::update()
 		{
 			process_detach(*obj);
 		}
+
+		editional_update_func_(*obj);
 
 		// dir
 		if (auto vehicle = dynamic_cast<VehicleObj* const>(obj))
@@ -96,9 +98,35 @@ void TrackNode::update()
 			}
 		}
 	}
+}
 
+void TrackNode::join_behave(Obj& obj, bool from_no_where)
+{
+	if (from_no_where)
+	{
+		cerr << "from noway" << endl;
+	}
+	if (VehicleObj* car = dynamic_cast<VehicleObj*>(&obj))
+	{
+		car->set_included_node(id);
+	}
 
+	joined_objs_.push_back(&obj);
+}
 
+void TrackNode::detach_behave(Obj& obj, bool to_no_where)
+{
+	if (to_no_where)
+	{
+		// 복귀.
+		cerr << "to noway" << endl;
+	}
+	else
+	{
+		cerr << "to nearnode" << endl;
+	}
+
+	joined_objs_.erase(std::remove(joined_objs_.begin(), joined_objs_.end(), &obj), joined_objs_.end());
 }
 
 void TrackNode::process_collide()
@@ -135,7 +163,7 @@ void TrackNode::process_collide(TrackNode* node)
 void TrackNode::draw_gui()
 {
 	gui::Begin(("TrackNode::" + to_string(id)).c_str());
-	
+
 	gui::Text("Prev_nodes");
 	for (const auto& prev : prev_nodes_)
 	{
@@ -154,6 +182,13 @@ void TrackNode::draw_gui()
 
 	Obj::draw_gui();
 }
+
+void TrackNode::set_editional_update_func(obj_func func)
+{
+	cout << "1" << endl;
+	editional_update_func_ = func; // throw error here;
+	cout << "2" << endl;
+};
 
 static const glm::vec2 edgescale = glm::vec2(0.2f);
 
@@ -268,6 +303,10 @@ void TrackNode::draw_edges(const ShaderPtr& shader) const
 Track::Track()
 {
 	load("track");
+	set_start_node(tracks_.front());
+	set_mid1_node(tracks_[1]);  // 변경
+	set_mid2_node(tracks_[2]);  // 변경
+	set_end_node(tracks_.back());
 }
 
 void Track::save_file_impl(ofstream& file)
@@ -457,7 +496,7 @@ void Track::draw_gui()
 	gui::Checkbox("show", &draw_);
 	gui::Checkbox("wiremode", &wiremode_);
 
-	if(gui::Button("update nodes"))
+	if (gui::Button("update nodes"))
 	{
 		for (auto& node : tracks_)
 		{
@@ -492,4 +531,71 @@ void Track::draw_gui()
 	// 경로보기.. (노드 한개, 앞뒤노드 전부, 전체.)
 	// enable collide
 	// enable regen
+}
+
+void Track::set_start_node(TrackNodePtr& newNode)
+{
+	if (start_point_)
+	{
+		start_point_->set_editional_update_func();
+	}
+	newNode->set_editional_update_func(
+		[](Obj& obj)
+		{
+		});
+}
+
+void Track::set_end_node(TrackNodePtr& newNode)
+{
+	if (end_point_)
+	{
+		end_point_->set_editional_update_func();
+	}
+	newNode->set_editional_update_func(
+		[](Obj& obj)
+		{
+			if (auto car = dynamic_cast<VehicleObj*>(&obj))
+			{
+				auto prev_cp = car->get_check_point();
+				auto pre_target = VehicleObj::CHECK_POINT::check2;
+
+				if (pre_target == prev_cp)
+				{
+					car->clear_lab();
+				}
+				car->set_check_point(VehicleObj::CHECK_POINT::begin);
+			}
+		});
+}
+
+void Track::set_mid1_node(TrackNodePtr& newNode)
+{
+	if (mid_point1_)
+	{
+		mid_point1_->set_editional_update_func();
+	}
+	newNode->set_editional_update_func(
+		[](Obj& obj)
+		{
+			if (auto car = dynamic_cast<VehicleObj*>(&obj))
+			{
+			car->set_check_point(VehicleObj::CHECK_POINT::check1);
+			}
+		});
+}
+
+void Track::set_mid2_node(TrackNodePtr& newNode)
+{
+	if (mid_point2_)
+	{
+		mid_point2_->set_editional_update_func();
+	}
+	newNode->set_editional_update_func(
+		[](Obj& obj)
+		{
+			if (auto car = dynamic_cast<VehicleObj*>(&obj))
+			{
+				car->set_check_point(VehicleObj::CHECK_POINT::check2);
+			}
+		});
 }

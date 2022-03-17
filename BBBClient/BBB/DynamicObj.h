@@ -112,6 +112,7 @@ private:
 public:
 	virtual bool process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key) override;
 
+	GET(rank);
 private:
 	float angular_power_ = 1.5f;
 	float acceleration_power_ = 16.f;
@@ -134,6 +135,32 @@ private:
 	float draft_time_ = 1;
 	bool use_item_ = false;
 
+	int rank_ = 1;
+	int lab_ = 0;
+
+	// debug
+public:
+	SET(included_node);
+private:
+	int included_node_ = 0;
+
+public:
+	enum class CHECK_POINT
+	{
+		none = 0,
+		begin = 1,
+		check1,
+		check2,
+	};
+
+	GET(check_point);
+	SET(check_point);
+
+	void clear_lab() { lab_ += 1; };
+private:
+	CHECK_POINT check_point_ = CHECK_POINT::begin;
+
+private:
 	size_t id_;
 };
 

@@ -141,11 +141,14 @@ namespace MY_NAME_SPACE {
 	using namespace std;
 
 	namespace optimize {
+		/*
 		// branchless
 		template<integral _Ty> inline constexpr _Ty abs(const _Ty x) noexcept {
-			const _Ty y{ x >> (TypeInfo<_Ty>::bits - 1) }; /* >> = copy MSB // positive=>0 negative =>-1 */
+			const _Ty y{ x >> (TypeInfo<_Ty>::bits - 1) }; // >> = copy MSB // positive=>0 negative =>-1 
 			return (x ^ y) - y;
 		}
+		std::abs 에 밀림, int 1'0000'0000 번 기준, 6ms 이득, short 기준 참패
+		*/
 
 		// branchless 
 		inline constexpr char toupper_alphabets(char c) noexcept {

@@ -1,4 +1,4 @@
 translate_ 232.513 0 -14.999
-quaternion_ 0 0 0 1
-scale_ 1 1 1
+quaternion_ 0 0.729514 0 0.683966
+scale_ 12.1774 1 1
 id 56
