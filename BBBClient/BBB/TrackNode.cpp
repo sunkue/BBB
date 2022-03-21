@@ -7,13 +7,13 @@
 void TrackNode::save_file_impl(ofstream& file)
 {
 	Obj::save_file_impl(file);
-	SAVE_FILE(file, id);
+	SAVE_FILE(file, id_);
 }
 
 void TrackNode::load_file_impl(ifstream& file)
 {
 	Obj::load_file_impl(file);
-	LOAD_FILE(file, id);
+	LOAD_FILE(file, id_);
 }
 
 void TrackNode::update_front()
@@ -108,7 +108,7 @@ void TrackNode::join_behave(Obj& obj, bool from_no_where)
 	}
 	if (VehicleObj* car = dynamic_cast<VehicleObj*>(&obj))
 	{
-		car->set_included_node(id);
+		car->set_included_node(id_);
 	}
 
 	joined_objs_.push_back(&obj);
@@ -162,19 +162,19 @@ void TrackNode::process_collide(TrackNode* node)
 
 void TrackNode::draw_gui()
 {
-	gui::Begin(("TrackNode::" + to_string(id)).c_str());
+	gui::Begin(("TrackNode::" + to_string(id_)).c_str());
 
 	gui::Text("Prev_nodes");
 	for (const auto& prev : prev_nodes_)
 	{
-		gui::InputInt("prev_ID", (int*)&prev->id);
+		gui::InputInt("prev_ID", (int*)&prev->id_);
 		// => rejoint
 	}
 
 	gui::Text("Next_nodes");
 	for (const auto& next : next_nodes_)
 	{
-		gui::InputInt("next_ID", (int*)&next->id);
+		gui::InputInt("next_ID", (int*)&next->id_);
 		// => rejoint
 	}
 
@@ -329,7 +329,7 @@ void Track::save_file_impl(ofstream& file)
 			vector<int> prev_ids;
 			for (const auto& prev : prevs)
 			{
-				prev_ids.emplace_back(prev->id);
+				prev_ids.emplace_back(prev->id_);
 			}
 			SAVE_FILE(file, prev_ids);
 
@@ -338,7 +338,7 @@ void Track::save_file_impl(ofstream& file)
 			vector<int> next_ids;
 			for (const auto& next : nexts)
 			{
-				next_ids.emplace_back(next->id);
+				next_ids.emplace_back(next->id_);
 			}
 			SAVE_FILE(file, next_ids);
 		}

@@ -111,7 +111,7 @@ void UI::RankingUI::update()
 	auto elapsedt = GAME_SYSTEM::get().tick_timef();
 
 	const auto& cars = Renderer::get().get_cars(); // 등수 뽑아내서 rank 에 저장하기.
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < cars.size(); i++)
 	{
 		auto origin = dynamic_sps_[i]; 
 		auto target = static_sps_[reinterpret_cast<VehicleObj*>(cars[i].get())->get_rank() - 1]; // rank[i] 번쨰 위치로

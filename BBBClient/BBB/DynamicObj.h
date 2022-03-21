@@ -77,6 +77,7 @@ private:
 };
 
 /* controllable obj */
+using VehiclePtr = shared_ptr<class VehicleObj>;
 class VehicleObj : public DynamicObj
 {
 private:
@@ -113,6 +114,7 @@ public:
 	virtual bool process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key) override;
 
 	GET(rank);
+	SET(rank);
 private:
 	float angular_power_ = 1.5f;
 	float acceleration_power_ = 16.f;
@@ -143,6 +145,9 @@ public:
 	SET(included_node);
 private:
 	int included_node_ = 0;
+
+public:
+	bool rank_worse_than(VehicleObj& other);
 
 public:
 	enum class CHECK_POINT

@@ -12,6 +12,7 @@ public:
 	{
 		//
 		renderer.get_track().update();
+		update_ranks();
 		/// 
 		float milli_tick = static_cast<float>(GAME_SYSTEM::get().tick_time().count());
 		float tick = milli_tick / 1000.f;
@@ -19,6 +20,9 @@ public:
 		renderer.get_main_camera()->update(tick);
 		GAME_SYSTEM::get().tick();
 	}
+
+	void update_ranks();
+
 
 public:
 	Renderer& renderer = Renderer::get();

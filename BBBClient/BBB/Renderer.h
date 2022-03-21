@@ -386,7 +386,7 @@ public:
 	GET_REF(player);
 	GET_REF(ghost);
 	SET(ghost);
-	GET_REF(cars);
+	GET_REF_UNSAFE(cars);
 	GET_REF(depth_renderer);
 	GET_REF(screen_renderer);
 	GET_REF(gbuffer_renderer);
@@ -444,7 +444,7 @@ private:
 	//
 
 	ShaderPtr default_g_shader_;
-	vector<ObjPtr> cars_;
+	vector<VehiclePtr> cars_;
 	//
 
 

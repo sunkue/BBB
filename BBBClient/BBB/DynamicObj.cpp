@@ -206,6 +206,35 @@ void VehicleObj::update_camera(Camera* camera, float time_elpased) const
 	}
 }
 
+bool VehicleObj::rank_worse_than(VehicleObj& other)
+{
+	//lab
+	if (lab_ < other.lab_)
+	{
+		return true;
+	}
+
+	// same lab
+	// node
+	assert(lab_ == other.lab_);
+	auto& nodes = Track::get().get_tracks();
+	auto& this_node = nodes.at(included_node_);
+	auto& other_node = nodes.at(other.included_node_);
+	if (this_node->get_id() < other_node->get_id())
+	{
+		return true;
+	}
+
+	// same lab
+	// same node
+	// pos
+	assert(this_node == other_node);
+	auto next_pos = this_node->get_next_center();
+	auto this_diff = next_pos - get_position();
+	auto other_diff = next_pos - other.get_position();
+	return glm::length(other_diff) < glm::length(this_diff);
+}
+
 
 /////////////////////////////////////////////////////////
 
@@ -411,3 +440,4 @@ bool GhostObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 	}
 	return true;
 }
+

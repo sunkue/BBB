@@ -66,7 +66,7 @@ private:
 	void join_behave(Obj& obj, bool from_no_where = false);
 	void detach_behave(Obj& obj, bool to_no_where = false);
 
-private:
+public:
 	glm::vec3 get_next_center()
 	{
 		glm::vec3 ret{ 0 };
@@ -108,9 +108,9 @@ public:
 
 	GET_REF(prev_nodes);
 	GET_REF(next_nodes);
-
+	GET(id);
 private:
-	int id;
+	int id_; //=> 작을 수록 출발점에 가까운...
 	vector<TrackNode*> prev_nodes_;
 	vector<TrackNode*> next_nodes_;
 
@@ -166,7 +166,7 @@ public:
 		{
 			if (track->check_include(obj))
 			{
-				return track->id;
+				return track->id_;
 			}
 		}
 
@@ -197,7 +197,7 @@ public:
 
 			if (ret.second < 0 || len < ret.second)
 			{
-				ret = make_pair(track->id, len);
+				ret = make_pair(track->id_, len);
 			}
 		}
 
