@@ -13,8 +13,6 @@ using ModelPtr = shared_ptr<class Model>;
 
 class Model
 {
-
-
 public:
 	CREATE_SHARED(ModelPtr, Model);
 
@@ -32,23 +30,21 @@ public:
 		return box;
 	}
 
-	static ModelPtr box_blue()
-	{
-		static ModelPtr box = create("./Resource/Model/box_blue/box.obj");
-		return box;
-	}
+#define BOX(color)\
+	static ModelPtr box_##color()\
+	{\
+		static ModelPtr box = create("./Resource/Model/box_"s+#color+"/box.obj");\
+		return box;\
+	}\
 
-	static ModelPtr box_green()
-	{
-		static ModelPtr box = create("./Resource/Model/box_green/box.obj");
-		return box;
-	}
+	BOX(blue);
+	BOX(green);
+	BOX(yellow);
+	BOX(purple);
+	BOX(bludyred);
+	BOX(redpurple);
+	BOX(orange);
 
-	static ModelPtr box_yellow()
-	{
-		static ModelPtr box = create("./Resource/Model/box_yellow/box.obj");
-		return box;
-	}
 
 	static ModelPtr no_model()
 	{

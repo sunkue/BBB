@@ -137,10 +137,10 @@ private:
 	float draft_time_ = 1;
 	bool use_item_ = false;
 
-	int rank_ = 1;
-	int lab_ = 0;
+	int rank_ = 0;
+	int lab_ = -1;
 
-	// debug
+
 public:
 	SET(included_node);
 private:
@@ -163,7 +163,7 @@ public:
 
 	void clear_lab() { lab_ += 1; };
 private:
-	CHECK_POINT check_point_ = CHECK_POINT::begin;
+	CHECK_POINT check_point_ = CHECK_POINT::check2;
 
 private:
 	size_t id_;

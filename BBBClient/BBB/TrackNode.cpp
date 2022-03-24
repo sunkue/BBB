@@ -135,12 +135,12 @@ void TrackNode::process_collide()
 
 	for (auto& prev : prev_nodes_)
 	{
-		process_collide(prev);
+		process_collide(prev.get());
 	}
 
 	for (auto& next : next_nodes_)
 	{
-		process_collide(next);
+		process_collide(next.get());
 	}
 }
 
@@ -185,9 +185,7 @@ void TrackNode::draw_gui()
 
 void TrackNode::set_editional_update_func(obj_func func)
 {
-	cout << "1" << endl;
 	editional_update_func_ = func; // throw error here;
-	cout << "2" << endl;
 };
 
 static const glm::vec2 edgescale = glm::vec2(0.2f);
@@ -290,12 +288,12 @@ void TrackNode::draw_edges(const ShaderPtr& shader) const
 
 	for (auto& prev : get_prev_nodes())
 	{
-		draw_prev_edge(shader, prev);
+		draw_prev_edge(shader, prev.get());
 	}
 
 	for (auto& next : get_next_nodes())
 	{
-		draw_next_edge(shader, next);
+		draw_next_edge(shader, next.get());
 	}
 }
 
@@ -303,11 +301,31 @@ void TrackNode::draw_edges(const ShaderPtr& shader) const
 Track::Track()
 {
 	load("track");
-	set_start_node(tracks_.front());
-	set_mid1_node(tracks_[1]);  // 변경
-	set_mid2_node(tracks_[2]);  // 변경
-	set_end_node(tracks_.back());
+	set_start_node(tracks_.back());
+	set_mid1_node(tracks_[10]);  // 변경
+	set_mid2_node(tracks_[11]);  // 변경
+	set_end_node(tracks_.front());
 }
+
+void Track::cacul_from_starts()
+{
+	// s= n, e = 0 // s.next,e.prev size = 1 //
+	queue<TrackNodePtr> numbering_track_list;
+	end_point_->from_start_ = 0;
+	numbering_track_list.push(end_point_);
+	do {
+		for (auto& n : numbering_track_list.front()->next_nodes_)
+		{
+			n->from_start_ = std::max(n->from_start_, numbering_track_list.front()->from_start_ + 1);
+			numbering_track_list.push(n);
+		}
+		numbering_track_list.pop();
+	} while (end_point_ != numbering_track_list.front());
+	end_point_->from_start_ = 0;
+
+	cout << "caclued from_start" << endl;
+}
+
 
 void Track::save_file_impl(ofstream& file)
 {
@@ -412,7 +430,7 @@ void Track::draw(const ShaderPtr& shader)
 				{
 					// check is node in slectedNode's prevlist.
 					const auto& fail = slected_node->get_prev_nodes().cend();
-					const auto& is_prev = std::find(cALLOF(slected_node->get_prev_nodes()), node.get());
+					const auto& is_prev = std::find(ALLOF(slected_node->get_prev_nodes()), node);
 
 					if (fail != is_prev)
 					{
@@ -424,7 +442,7 @@ void Track::draw(const ShaderPtr& shader)
 				{
 					// check is node in slectedNode's nextlist.
 					const auto& fail = slected_node->get_next_nodes().cend();
-					const auto& is_next = std::find(cALLOF(slected_node->get_next_nodes()), node.get());
+					const auto& is_next = std::find(cALLOF(slected_node->get_next_nodes()), node);
 
 					if (fail != is_next)
 					{
@@ -433,6 +451,27 @@ void Track::draw(const ShaderPtr& shader)
 					}
 				}
 			}
+		}
+
+		if (node == start_point_)
+		{
+			node->draw(shader, Model::box_purple()); 
+			continue;
+		}
+		else if (node == mid_point1_)
+		{
+			node->draw(shader, Model::box_bludyred());
+			continue;
+		}
+		else if (node == mid_point2_)
+		{
+			node->draw(shader, Model::box_redpurple()); 
+			continue;
+		}
+		else if (node == end_point_)
+		{
+			node->draw(shader, Model::box_orange()); 
+			continue;
 		}
 
 		node->draw(shader);
@@ -495,7 +534,10 @@ void Track::draw_gui()
 
 	gui::Checkbox("show", &draw_);
 	gui::Checkbox("wiremode", &wiremode_);
-
+	if (gui::Button("nn"))
+	{
+		cacul_from_starts();
+	}
 	if (gui::Button("update nodes"))
 	{
 		for (auto& node : tracks_)
@@ -543,6 +585,7 @@ void Track::set_start_node(TrackNodePtr& newNode)
 		[](Obj& obj)
 		{
 		});
+	start_point_ = newNode;
 }
 
 void Track::set_end_node(TrackNodePtr& newNode)
@@ -566,6 +609,7 @@ void Track::set_end_node(TrackNodePtr& newNode)
 				car->set_check_point(VehicleObj::CHECK_POINT::begin);
 			}
 		});
+	end_point_ = newNode;
 }
 
 void Track::set_mid1_node(TrackNodePtr& newNode)
@@ -579,9 +623,10 @@ void Track::set_mid1_node(TrackNodePtr& newNode)
 		{
 			if (auto car = dynamic_cast<VehicleObj*>(&obj))
 			{
-			car->set_check_point(VehicleObj::CHECK_POINT::check1);
+				car->set_check_point(VehicleObj::CHECK_POINT::check1);
 			}
 		});
+	mid_point1_ = newNode;
 }
 
 void Track::set_mid2_node(TrackNodePtr& newNode)
@@ -598,4 +643,6 @@ void Track::set_mid2_node(TrackNodePtr& newNode)
 				car->set_check_point(VehicleObj::CHECK_POINT::check2);
 			}
 		});
+	mid_point2_ = newNode;
 }
+

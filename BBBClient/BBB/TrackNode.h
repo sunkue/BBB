@@ -3,12 +3,7 @@
 #include "Obj.h"
 
 
-///////////////////////////////////////////////////////////////
-// 
-// template node<T> 를 맹글까?
-// 
-///////////////////////////////////////////////////////////////
-
+using TrackNodePtr = shared_ptr<class TrackNode>;
 class TrackNode : public Obj
 {
 	friend class Track;
@@ -109,10 +104,12 @@ public:
 	GET_REF(prev_nodes);
 	GET_REF(next_nodes);
 	GET(id);
+	GET(from_start);
 private:
-	int id_; //=> 작을 수록 출발점에 가까운...
-	vector<TrackNode*> prev_nodes_;
-	vector<TrackNode*> next_nodes_;
+	int id_; 
+	int from_start_{}; //=> 작을 수록 출발점에 가까운...
+	vector<TrackNodePtr> prev_nodes_;
+	vector<TrackNodePtr> next_nodes_;
 
 private:
 	glm::vec3 front_; // position - position 으로 진행방향 구성
@@ -132,7 +129,6 @@ private:
 	// 스타트, 엔드, 중간노드들.
 	obj_func editional_update_func_{ [](Obj&) {} };
 };
-using TrackNodePtr = shared_ptr<TrackNode>;
 //////////////////////////////////////////////
 
 class Track : public IDataOnFile
@@ -214,6 +210,8 @@ private:
 	void set_end_node(TrackNodePtr& newNode);
 	void set_mid1_node(TrackNodePtr& newNode);
 	void set_mid2_node(TrackNodePtr& newNode);
+	
+	void cacul_from_starts();
 
 private:
 	TrackNodePtr start_point_;

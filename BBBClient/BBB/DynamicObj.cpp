@@ -220,7 +220,7 @@ bool VehicleObj::rank_worse_than(VehicleObj& other)
 	auto& nodes = Track::get().get_tracks();
 	auto& this_node = nodes.at(included_node_);
 	auto& other_node = nodes.at(other.included_node_);
-	if (this_node->get_id() < other_node->get_id())
+	if (this_node->get_from_start() < other_node->get_from_start())
 	{
 		return true;
 	}

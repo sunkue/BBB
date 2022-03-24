@@ -1,4 +1,5 @@
 #pragma once
+
 class UI
 {
 	SINGLE_TON(UI) = default;
