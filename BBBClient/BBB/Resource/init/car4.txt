@@ -1,5 +1,5 @@
-translate_ 8 -1.1 14
-quaternion_ 0 0 0 1
+translate_ 210.063 -1.1 -94.5097
+quaternion_ 0 0.751117 0 0.660173
 scale_ 4 4 4
 angular_power_ 1.5
 acceleration_power_ 16

@@ -159,7 +159,7 @@ void Renderer::load_model()
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
-
+	
 	player_ = cars_.at(0);
 
 	main_camera_ = make_shared<Camera>();
