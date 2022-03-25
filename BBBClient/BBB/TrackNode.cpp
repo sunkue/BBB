@@ -63,7 +63,6 @@ void TrackNode::update_scale()
 	float prev_theta = glm::acos(prev_cos);
 	float prev_sin = glm::sin(glm::radians(90 - glm::degrees(prev_theta)));
 	float prev_length = glm::length(prev_diff) * prev_sin;
-
 	auto s = get_scale();
 	scaling({ 1 / s.x, 1 / s.y, 1 / s.z });
 	s.x = (next_length + prev_length) / 4;
@@ -344,10 +343,7 @@ void TrackNode::draw_edges(const ShaderPtr& shader) const
 Track::Track()
 {
 	load("track");
-	set_start_node(tracks_.back());
-	set_mid1_node(tracks_[10]);  // 변경
-	set_mid2_node(tracks_[11]);  // 변경
-	set_end_node(tracks_.front());
+
 }
 
 void Track::cacul_from_starts()
@@ -369,80 +365,90 @@ void Track::cacul_from_starts()
 	cout << "caclued from_start" << endl;
 }
 
-
 void Track::save_file_impl(ofstream& file)
 {
-	//track-
+	int track_nums = tracks_.size();
+	SAVE_FILE(file, track_nums);
+
+	for (int id = 0; id < track_nums; id++)
 	{
-		int track_nums = tracks_.size();
-		SAVE_FILE(file, track_nums);
-
-
-		for (int id = 0; id < track_nums; id++)
-		{
-			tracks_.at(id)->save();
-		}
-
-		//edge
-		for (const auto& node : tracks_)
-		{
-			auto& prevs = node->get_prev_nodes();
-			vector<int> prev_ids;
-			for (const auto& prev : prevs)
-			{
-				prev_ids.emplace_back(prev->id_);
-			}
-			SAVE_FILE(file, prev_ids);
-
-
-			auto& nexts = node->get_next_nodes();
-			vector<int> next_ids;
-			for (const auto& next : nexts)
-			{
-				next_ids.emplace_back(next->id_);
-			}
-			SAVE_FILE(file, next_ids);
-		}
+		tracks_.at(id)->save();
 	}
+
+	//edge
+	for (const auto& node : tracks_)
+	{
+		auto& prevs = node->get_prev_nodes();
+		vector<int> prev_ids;
+		for (const auto& prev : prevs)
+		{
+			prev_ids.emplace_back(prev->id_);
+		}
+		SAVE_FILE(file, prev_ids);
+
+
+		auto& nexts = node->get_next_nodes();
+		vector<int> next_ids;
+		for (const auto& next : nexts)
+		{
+			next_ids.emplace_back(next->id_);
+		}
+		SAVE_FILE(file, next_ids);
+	}
+
+	int cp_s = start_point_->id_;
+	int cp_e = end_point_->id_;
+	int cp_m1 = mid_point1_->id_;
+	int cp_m2 = mid_point2_->id_;
+	SAVE_FILE(file, cp_s);
+	SAVE_FILE(file, cp_e);
+	SAVE_FILE(file, cp_m1);
+	SAVE_FILE(file, cp_m2);
 }
 
 void Track::load_file_impl(ifstream& file)
 {
-	//track
+	int track_nums; LOAD_FILE(file, track_nums);
+	tracks_.clear();
+	tracks_.reserve(track_nums);
+
+	auto model = Model::box(); // Model::no_model();
+	for (int id = 0; id < track_nums; id++)
 	{
-		int track_nums; LOAD_FILE(file, track_nums);
-		tracks_.clear();
-		tracks_.reserve(track_nums);
+		const string HEADER_NODE_FILE = "tracknode";
+		string name_node_file = HEADER_NODE_FILE;
+		name_node_file.append(std::to_string(id));
 
-		auto model = Model::box(); // Model::no_model();
-		for (int id = 0; id < track_nums; id++)
+		tracks_.emplace_back(make_shared<TrackNode>(model));
+		tracks_.back()->load(name_node_file);
+	}
+
+	//edge
+	for (const auto& node : tracks_)
+	{
+		vector<int> prev_ids; LOAD_FILE(file, prev_ids);
+		for (const auto ids : prev_ids)
 		{
-			const string HEADER_NODE_FILE = "tracknode";
-			string name_node_file = HEADER_NODE_FILE;
-			name_node_file.append(std::to_string(id));
-
-			tracks_.emplace_back(make_shared<TrackNode>(model));
-			tracks_.back()->load(name_node_file);
+			node->add_prev(tracks_[ids].get(), false);
 		}
 
-		//edge
-		for (const auto& node : tracks_)
+		vector<int> next_ids; LOAD_FILE(file, next_ids);
+		for (const auto ids : next_ids)
 		{
-			vector<int> prev_ids; LOAD_FILE(file, prev_ids);
-			for (const auto ids : prev_ids)
-			{
-				node->add_prev(tracks_[ids].get(), false);
-			}
-
-			vector<int> next_ids; LOAD_FILE(file, next_ids);
-			for (const auto ids : next_ids)
-			{
-				node->add_next(tracks_[ids].get(), false);
-			}
+			node->add_next(tracks_[ids].get(), false);
 		}
 	}
 
+	int cp_s, cp_e, cp_m1, cp_m2;
+	LOAD_FILE(file, cp_s);
+	LOAD_FILE(file, cp_e);
+	LOAD_FILE(file, cp_m1);
+	LOAD_FILE(file, cp_m2);
 
+	set_start_node(tracks_[cp_s]);
+	set_end_node(tracks_[cp_e]);
+	set_mid1_node(tracks_[cp_m1]);  // 변경
+	set_mid2_node(tracks_[cp_m2]);  // 변경
 }
 
 void Track::draw(const ShaderPtr& shader)
@@ -609,6 +615,22 @@ void Track::draw_gui()
 		draw_all_edges_ = false;
 	}
 	gui::EndChild();
+
+	if (gui::Button("[!!]NEW NODE"))
+	{
+		// 삭제는 track 파일, node 파일 삭제 필요.
+		// 추가시 node 파일 하나 삭제 필요.
+		auto new_id = tracks_.size();
+		tracks_.emplace_back(make_shared<TrackNode>(Model::box()));
+		tracks_.back()->id_ = new_id;
+		const string HEADER_NODE_FILE = "tracknode";
+		string name_node_file = HEADER_NODE_FILE;
+		name_node_file.append(std::to_string(new_id));
+		string savefile = name_node_file + ".txt";
+		tracks_.back()->save(savefile);
+		tracks_.back()->load(name_node_file);
+		tracks_.back()->move(Renderer::get().get_main_camera()->get_position());
+	}
 
 	gui::End();
 
