@@ -135,12 +135,12 @@ void TrackNode::process_collide()
 
 	for (auto& prev : prev_nodes_)
 	{
-		process_collide(prev.get());
+		process_collide(prev);
 	}
 
 	for (auto& next : next_nodes_)
 	{
-		process_collide(next.get());
+		process_collide(next);
 	}
 }
 
@@ -164,18 +164,55 @@ void TrackNode::draw_gui()
 {
 	gui::Begin(("TrackNode::" + to_string(id_)).c_str());
 
-	gui::Text("Prev_nodes");
-	for (const auto& prev : prev_nodes_)
 	{
-		gui::InputInt("prev_ID", (int*)&prev->id_);
-		// => rejoint
+		static int newid = -1;
+		gui::InputInt("new node id", &newid);
+		if (newid != -1)
+		{
+			if (gui::Button("add prev"))
+			{
+				add_prev(Track::get().get_tracks().at(newid).get());
+			}
+			if (gui::Button("add next"))
+			{
+				add_next(Track::get().get_tracks().at(newid).get());
+			}
+		}
+		gui::Text("Prev_nodes");
 	}
 
-	gui::Text("Next_nodes");
-	for (const auto& next : next_nodes_)
 	{
-		gui::InputInt("next_ID", (int*)&next->id_);
-		// => rejoint
+		gui::BeginChild("delete node");
+		static bool unjoint_mode = false;
+		gui::Checkbox("unjoint mode", &unjoint_mode);
+
+		for (const auto& prev : prev_nodes_)
+		{
+			int pid = prev->id_;
+			gui::InputInt("prev_ID", &pid);
+			if (unjoint_mode)
+			{
+				if (gui::Button("unjoint"))
+				{
+					TrackNode::unjoint(prev, this);
+				}
+			}
+		}
+
+		gui::Text("Next_nodes");
+		for (const auto& next : next_nodes_)
+		{
+			int nid = next->id_;
+			gui::InputInt("next_ID", &nid);
+			if (unjoint_mode)
+			{
+				if (gui::Button("unjoint"))
+				{
+					TrackNode::unjoint(this, next);
+				}
+			}
+		}
+		gui::EndChild();
 	}
 
 	gui::End();
@@ -262,7 +299,7 @@ void TrackNode::draw_front_edge(const ShaderPtr& shader) const
 
 void TrackNode::add_prev(TrackNode* prev, bool joint_them)
 {
-	if (nullptr == prev) return;
+	if (nullptr == prev || this == prev) return;
 
 	prev_nodes_.emplace_back(prev);
 	if (joint_them)
@@ -273,7 +310,7 @@ void TrackNode::add_prev(TrackNode* prev, bool joint_them)
 
 void TrackNode::add_next(TrackNode* next, bool joint_them)
 {
-	if (nullptr == next) return;
+	if (nullptr == next || this == next) return;
 
 	next_nodes_.emplace_back(next);
 	if (joint_them)
@@ -282,18 +319,24 @@ void TrackNode::add_next(TrackNode* next, bool joint_them)
 	}
 }
 
+void TrackNode::unjoint(TrackNode* prev, TrackNode* next)
+{
+	prev->next_nodes_.erase(std::remove(ALLOF(prev->next_nodes_), next));
+	next->prev_nodes_.erase(std::remove(ALLOF(next->prev_nodes_), prev));
+}
+
 void TrackNode::draw_edges(const ShaderPtr& shader) const
 {
 	draw_front_edge(shader);
 
 	for (auto& prev : get_prev_nodes())
 	{
-		draw_prev_edge(shader, prev.get());
+		draw_prev_edge(shader, prev);
 	}
 
 	for (auto& next : get_next_nodes())
 	{
-		draw_next_edge(shader, next.get());
+		draw_next_edge(shader, next);
 	}
 }
 
@@ -310,9 +353,9 @@ Track::Track()
 void Track::cacul_from_starts()
 {
 	// s= n, e = 0 // s.next,e.prev size = 1 //
-	queue<TrackNodePtr> numbering_track_list;
+	queue<TrackNode*> numbering_track_list;
 	end_point_->from_start_ = 0;
-	numbering_track_list.push(end_point_);
+	numbering_track_list.push(end_point_.get());
 	do {
 		for (auto& n : numbering_track_list.front()->next_nodes_)
 		{
@@ -320,7 +363,7 @@ void Track::cacul_from_starts()
 			numbering_track_list.push(n);
 		}
 		numbering_track_list.pop();
-	} while (end_point_ != numbering_track_list.front());
+	} while (end_point_.get() != numbering_track_list.front());
 	end_point_->from_start_ = 0;
 
 	cout << "caclued from_start" << endl;
@@ -430,7 +473,7 @@ void Track::draw(const ShaderPtr& shader)
 				{
 					// check is node in slectedNode's prevlist.
 					const auto& fail = slected_node->get_prev_nodes().cend();
-					const auto& is_prev = std::find(ALLOF(slected_node->get_prev_nodes()), node);
+					const auto& is_prev = std::find(ALLOF(slected_node->get_prev_nodes()), node.get());
 
 					if (fail != is_prev)
 					{
@@ -442,7 +485,7 @@ void Track::draw(const ShaderPtr& shader)
 				{
 					// check is node in slectedNode's nextlist.
 					const auto& fail = slected_node->get_next_nodes().cend();
-					const auto& is_next = std::find(cALLOF(slected_node->get_next_nodes()), node);
+					const auto& is_next = std::find(cALLOF(slected_node->get_next_nodes()), node.get());
 
 					if (fail != is_next)
 					{
@@ -455,7 +498,7 @@ void Track::draw(const ShaderPtr& shader)
 
 		if (node == start_point_)
 		{
-			node->draw(shader, Model::box_purple()); 
+			node->draw(shader, Model::box_purple());
 			continue;
 		}
 		else if (node == mid_point1_)
@@ -465,12 +508,12 @@ void Track::draw(const ShaderPtr& shader)
 		}
 		else if (node == mid_point2_)
 		{
-			node->draw(shader, Model::box_redpurple()); 
+			node->draw(shader, Model::box_redpurple());
 			continue;
 		}
 		else if (node == end_point_)
 		{
-			node->draw(shader, Model::box_orange()); 
+			node->draw(shader, Model::box_orange());
 			continue;
 		}
 
@@ -534,7 +577,7 @@ void Track::draw_gui()
 
 	gui::Checkbox("show", &draw_);
 	gui::Checkbox("wiremode", &wiremode_);
-	if (gui::Button("nn"))
+	if (gui::Button("cacul from start(rank)"))
 	{
 		cacul_from_starts();
 	}

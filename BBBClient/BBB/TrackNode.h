@@ -92,6 +92,7 @@ private:
 protected:
 	void add_prev(TrackNode* prev, bool joint_them = true);
 	void add_next(TrackNode* next, bool joint_them = true);
+	static void unjoint(TrackNode* prev, TrackNode* next);
 
 	void draw_edges(const ShaderPtr& shader) const;
 	void draw_prev_edge(const ShaderPtr& shader, TrackNode* prev) const;
@@ -107,12 +108,12 @@ public:
 	GET(from_start);
 private:
 	int id_; 
-	int from_start_{}; //=> 작을 수록 출발점에 가까운...
-	vector<TrackNodePtr> prev_nodes_;
-	vector<TrackNodePtr> next_nodes_;
+	int from_start_{}; //=> 작을 수록 스타트라인에 가까운...
+	vector<TrackNode*> prev_nodes_;
+	vector<TrackNode*> next_nodes_;
 
 private:
-	glm::vec3 front_; // position - position 으로 진행방향 구성
+	glm::vec3 front_; 
 	//vector<vehicle*> include_objs_; 
 	//vector<item*> include_objs_; 
 	vector<Obj*> joined_objs_; // prev, next 와 함께 충돌검사. 
@@ -220,12 +221,6 @@ private:
 	TrackNodePtr end_point_;
 
 private:
-	// check_point => 비교, 업데이트에서 포함 오브제중 차량에 적용,,
-	// 차량에 체크포인트 변수,, lab 변수,, 
-	// lab수 + end point 까지 남은 수 + front 로 판단,, 
-	// end point 는 start node 다음,, 두 노드 경계가 출발선.
-	// s->e->m1->m2->s->e // s->m1 // m1->m2 // m2->e(+1) // m2->m1(reverse) 
-
 	bool draw_ = true;
 	bool draw_all_edges_ = true;
 	bool draw_nearby_edges_ = true;

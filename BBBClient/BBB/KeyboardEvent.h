@@ -24,17 +24,6 @@ private:
 	std::queue<key_event> key_events_;
 	std::map<key, key_func> key_functions_;
 
-
-
-
-	int f() {
-		std::array<int, 8> z;
-
-		z.begin();
-		for (auto& x : z)
-		{
-		}
-	};
 private:
 	main_key_func main_func_ = [](auto) { return false; };
 
