@@ -237,6 +237,10 @@ bool VehicleObj::rank_worse_than(VehicleObj& other)
 
 
 /////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
 
 void GhostObj::update(float time_elapsed)
 {
@@ -252,6 +256,24 @@ void GhostObj::update(float time_elapsed)
 	if (back_on_) { move(-front * speed); };
 	if (right_on_) { move(right * speed); };
 	if (left_on_) { move(-right * speed); };
+
+	if (selected_obj_)
+	{
+		auto set_arrow_to_target = [this](auto& x, const glm::vec3 v)
+		{
+			auto& t = selected_obj_;
+			auto pos = t->get_position() - x->get_position();
+			auto scale = glm::vec3(glm::compMax(t->get_scale())) * 0.625;
+			x->move(pos);
+			x->scaling(glm::vec3{ 1 } / x->get_scale());
+			auto value = scale * v;
+			x->scaling(value + glm::vec3{ 0.2 });
+			x->move(value);
+		};
+		set_arrow_to_target(xAxis, X_DEFAULT);
+		set_arrow_to_target(yAxis, Y_DEFAULT);
+		set_arrow_to_target(zAxis, Z_DEFAULT);
+	}
 }
 
 void GhostObj::update_camera(Camera* camera, float time_elpased) const
@@ -274,6 +296,17 @@ void GhostObj::draw_gui()
 	gui::Begin("Ghost");
 	gui::Text("This is Ghost for free moving camera");
 	gui::SliderFloat("speed", &speed_, 10.0f, 500.0f);
+	if (gui::Button(+cntl_mode._to_string()))
+	{
+		if (cntl_mode._size() == cntl_mode._value )
+		{
+			cntl_mode = CONTROLL_MODE::TRANSLATE;
+		}
+		else
+		{
+			cntl_mode._value++;
+		}
+	}
 	gui::End();
 
 	if (selected_obj_)
@@ -282,10 +315,65 @@ void GhostObj::draw_gui()
 	}
 }
 
+void GhostObj::update_uniform_vars(const ShaderPtr& shader) const
+{
+	// none
+}
+
 void GhostObj::draw(const ShaderPtr& shader) const
 {
-
+	// draw selected obj arrows.
+	switch (select_mode)
+	{
+	case GhostObj::SELECTED_MODE::NONE:
+	{
+		xAxis->update_uniform_vars(shader);
+		xAxis->draw(shader);
+		yAxis->update_uniform_vars(shader);
+		yAxis->draw(shader);
+		zAxis->update_uniform_vars(shader);
+		zAxis->draw(shader);
+	}
+	CASE GhostObj::SELECTED_MODE::X :
+	{
+		xAxis->update_uniform_vars(shader);
+		xAxis->draw(shader, Model::box_yellow());
+		yAxis->update_uniform_vars(shader);
+		yAxis->draw(shader);
+		zAxis->update_uniform_vars(shader);
+		zAxis->draw(shader);
+	}
+	CASE GhostObj::SELECTED_MODE::Y :
+	{
+		xAxis->update_uniform_vars(shader);
+		xAxis->draw(shader);
+		yAxis->update_uniform_vars(shader);
+		yAxis->draw(shader, Model::box_yellow());
+		zAxis->update_uniform_vars(shader);
+		zAxis->draw(shader);
+	}
+	CASE GhostObj::SELECTED_MODE::Z :
+	{
+		xAxis->update_uniform_vars(shader);
+		xAxis->draw(shader);
+		yAxis->update_uniform_vars(shader);
+		yAxis->draw(shader);
+		zAxis->update_uniform_vars(shader);
+		zAxis->draw(shader, Model::box_yellow());
+	}
+	CASE GhostObj::SELECTED_MODE::XYZ :
+	{
+		xAxis->update_uniform_vars(shader);
+		xAxis->draw(shader, Model::box_yellow());
+		yAxis->update_uniform_vars(shader);
+		yAxis->draw(shader, Model::box_yellow());
+		zAxis->update_uniform_vars(shader);
+		zAxis->draw(shader, Model::box_yellow());
+	}
+	}
 }
+
+
 
 bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 {
@@ -334,28 +422,43 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::button_event& button)
 
 	if (GLFW_MOUSE_BUTTON_LEFT == button.button)
 	{
+		select_mode = SELECTED_MODE::NONE;
+
 		if (GLFW_PRESS == button.action)
 		{
 			auto& renderer = Renderer::get();
 			auto mouse_ray = Ray::create(mm.get_prev_x(), mm.get_prev_y());
+			float dist;
 
-			// 차량에 타기
-			for (const auto& car : renderer.get_cars())
+			if (xAxis->get_boundings().intersects(mouse_ray, dist))
 			{
-				float dist;
-				if (car->get_boundings().intersects(mouse_ray, dist))
-				{
-					renderer.set_ghost(car);
-					renderer.swap_player_ghost();
-					break;
-				}
+				select_mode = SELECTED_MODE::X;
+				return true;
+			}
+			if (yAxis->get_boundings().intersects(mouse_ray, dist))
+			{
+				select_mode = SELECTED_MODE::Y;
+				return true;
+			}
+			if (zAxis->get_boundings().intersects(mouse_ray, dist))
+			{
+				select_mode = SELECTED_MODE::Z;
+				return true;
 			}
 
+			// 차량 선택
+			for (const auto& car : renderer.get_cars())
+			{
+				if (car->get_boundings().intersects(mouse_ray, dist))
+				{
+					selected_obj_ = car;
+					return true;
+				}
+			}
 
 			// 트랙 선택
 			for (const auto& track : renderer.get_track().get_tracks())
 			{
-				float dist;
 				if (track->get_boundings().intersects(mouse_ray, dist))
 				{
 					selected_obj_ = track;
@@ -365,13 +468,70 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::button_event& button)
 		}
 	}
 
-	// 오브젝트 선택. 클릭시 선택 (ray_collision)
+	if (mm.get_L_click() && mm.get_R_click())
+	{
+
+		auto& renderer = Renderer::get();
+		auto mouse_ray = Ray::create(mm.get_prev_x(), mm.get_prev_y());
+
+		// 차량에 타기
+		for (const auto& car : renderer.get_cars())
+		{
+			float dist;
+			if (car->get_boundings().intersects(mouse_ray, dist))
+			{
+				renderer.set_ghost(car);
+				renderer.swap_player_ghost();
+				break;
+			}
+		}
+	}
+
 	return false;
 }
 
 bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::pos_event& pos)
 {
 	auto& mm = MOUSE_EVENT_MANAGER::get();
+
+	if (mm.get_L_click())
+	{
+		// Axis 선택
+		if (selected_obj_)
+		{
+			float xoffset = pos.xpos - mm.get_prev_x(); xoffset /= 1;
+			float yoffset = pos.ypos - mm.get_prev_y(); yoffset /= 1;
+			auto mouse_ray_prev = Ray::create(mm.get_prev_x(), mm.get_prev_y());
+			auto mouse_ray = Ray::create(pos.xpos, pos.ypos);
+			auto diff = mouse_ray.dir - mouse_ray_prev.dir;
+
+			constexpr float power = 20;
+			diff *= power;
+
+			switch (select_mode)
+			{
+			case GhostObj::SELECTED_MODE::NONE:
+			{}
+			CASE GhostObj::SELECTED_MODE::X :
+			{
+				selected_obj_->move(diff.x * X_DEFAULT);
+			}
+			CASE GhostObj::SELECTED_MODE::Y :
+			{
+				selected_obj_->move(diff.y * Y_DEFAULT);
+			}
+			CASE GhostObj::SELECTED_MODE::Z :
+			{
+				selected_obj_->move(diff.z * Z_DEFAULT);
+			}
+			CASE GhostObj::SELECTED_MODE::XYZ :
+			{
+
+			}
+			}
+		}
+	}
+
 
 	if (mm.get_R_click())
 	{
@@ -430,7 +590,7 @@ bool GhostObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 	}
 	CASE GLFW_KEY_LEFT_SHIFT :
 	{
-		speed_ += pressed;
+		speed_ += 5 * pressed;
 	}
 	CASE GLFW_KEY_SPACE :
 	{

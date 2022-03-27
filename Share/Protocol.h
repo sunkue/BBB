@@ -24,12 +24,6 @@ static_assert(MAX_PACKET_SIZE <= MAX_BUFFER_SIZE);
 
 //====================================
 
-constexpr int MAX_HP = 7;
-constexpr float DEFAULT_X = 840.f;
-constexpr float DEFAULT_Y = 639.5f;
-
-//====================================
-
 #pragma warning(push)
 #pragma warning(disable: 26812)
 

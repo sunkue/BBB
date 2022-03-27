@@ -285,6 +285,7 @@ void Renderer::draw()
 		}
 		/**/
 
+
 		// grass
 		depth_renderer_->set_directional_depthmap_shader(directional_grass_depthmap_shader_, 0);
 
@@ -315,6 +316,9 @@ void Renderer::draw()
 			car->update_uniform_vars(default_g_shader_);
 			car->draw(default_g_shader_);
 		}
+		
+		player_->update_uniform_vars(default_g_shader_);
+		player_->draw(default_g_shader_);
 
 		// grass
 		glDisable(GL_CULL_FACE);
@@ -325,7 +329,6 @@ void Renderer::draw()
 
 		// track
 		track_.get().draw(default_g_shader_);
-
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

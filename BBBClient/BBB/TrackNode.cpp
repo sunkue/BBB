@@ -293,7 +293,7 @@ void TrackNode::draw_front_edge(const ShaderPtr& shader) const
 
 	shader->set("u_m_mat", m);
 
-	Model::box()->draw(shader);
+	Model::box_red()->draw(shader);
 }
 
 void TrackNode::add_prev(TrackNode* prev, bool joint_them)
@@ -412,7 +412,7 @@ void Track::load_file_impl(ifstream& file)
 	tracks_.clear();
 	tracks_.reserve(track_nums);
 
-	auto model = Model::box(); // Model::no_model();
+	auto model = Model::box_red(); // Model::no_model();
 	for (int id = 0; id < track_nums; id++)
 	{
 		const string HEADER_NODE_FILE = "tracknode";
@@ -621,7 +621,7 @@ void Track::draw_gui()
 		// 삭제는 track 파일, node 파일 삭제 필요.
 		// 추가시 node 파일 하나 삭제 필요.
 		auto new_id = tracks_.size();
-		tracks_.emplace_back(make_shared<TrackNode>(Model::box()));
+		tracks_.emplace_back(make_shared<TrackNode>(Model::box_red()));
 		tracks_.back()->id_ = new_id;
 		const string HEADER_NODE_FILE = "tracknode";
 		string name_node_file = HEADER_NODE_FILE;

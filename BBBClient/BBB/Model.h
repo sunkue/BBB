@@ -24,19 +24,14 @@ public:
 		return sphere;
 	}
 	
-	static ModelPtr box() //red
-	{
-		static ModelPtr box = create("./Resource/Model/box/box.obj");
-		return box;
-	}
-
 #define BOX(color)\
 	static ModelPtr box_##color()\
 	{\
-		static ModelPtr box = create("./Resource/Model/box_"s+#color+"/box.obj");\
-		return box;\
+		static ModelPtr box_red = create("./Resource/Model/box_"s+#color+"/box.obj");\
+		return box_red;\
 	}\
 
+	BOX(red);
 	BOX(blue);
 	BOX(green);
 	BOX(yellow);

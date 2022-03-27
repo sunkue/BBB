@@ -27,6 +27,18 @@ void Obj::update_uniform_vars(const ShaderPtr& shader)const
 	glUseProgram(0);
 }
 
+void Obj::draw(const ShaderPtr& shader) const
+{
+	model_->draw(shader);
+	boundings_.draw();
+}
+
+void Obj::draw(const ShaderPtr& shader, const ModelPtr& model) const
+{
+	model->draw(shader);
+	boundings_.draw();
+}
+
 // [-1, 1]
 glm::vec3 Obj::get_project_pos(glm::vec3 origin)
 {

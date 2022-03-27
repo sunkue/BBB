@@ -66,17 +66,9 @@ public:
 
 	virtual void update(float time_elapsed) {}
 
-	virtual void draw(const ShaderPtr& shader)const
-	{
-		model_->draw(shader);
-		boundings_.draw();
-	}
+	virtual void draw(const ShaderPtr& shader)const;
 
-	void draw(const ShaderPtr& shader, const ModelPtr& model) const
-	{
-		model->draw(shader);
-		boundings_.draw();
-	}
+	void draw(const ShaderPtr& shader, const ModelPtr& model) const;
 
 	virtual void draw_gui()
 	{

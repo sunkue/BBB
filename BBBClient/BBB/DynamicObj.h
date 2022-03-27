@@ -44,7 +44,13 @@ protected:
 	glm::vec3 angular_speed_{};
 };
 
-
+BETTER_ENUM
+(
+	CONTROLL_MODE, int
+	, TRANSLATE = 1
+	, ROTATE
+	, SCALE
+);
 
 using GhostPtr = unique_ptr<class GhostObj>;
 class GhostObj : public DynamicObj
@@ -55,12 +61,31 @@ public:
 	virtual void update(float time_elapsed) override;
 	virtual void update_camera(Camera* camera, float time_elpased) const override;
 	virtual void draw(const ShaderPtr& shader)const override;
+	virtual void update_uniform_vars(const ShaderPtr& shader)const override;
 	virtual void draw_gui() override;
 	virtual bool process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key) override;
 	virtual bool process_input(const MOUSE_EVENT_MANAGER::scroll_event& scroll) override;
 	virtual bool process_input(const MOUSE_EVENT_MANAGER::button_event& button) override;
 	virtual bool process_input(const MOUSE_EVENT_MANAGER::pos_event& pos) override;
 
+private:
+	ObjPtr xAxis = make_shared<Obj>(Model::box_red());
+	ObjPtr yAxis = make_shared<Obj>(Model::box_blue());
+	ObjPtr zAxis = make_shared<Obj>(Model::box_green());
+
+	enum class SELECTED_MODE
+	{
+		NONE,
+		X,
+		Y,
+		Z,
+		XYZ
+	} select_mode;
+
+public:
+	CONTROLL_MODE cntl_mode = CONTROLL_MODE::TRANSLATE;
+
+public:
 	GET(selected_obj);
 private:
 	ObjPtr selected_obj_;

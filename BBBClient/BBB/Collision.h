@@ -83,7 +83,7 @@ public:
 
 
 	ModelPtr sphere{ Model::sphere() };
-	ModelPtr box{ Model::box() };
+	ModelPtr box{ Model::box_red() };
 
 	ShaderPtr bounding_shader{ Shader::basic() };
 
