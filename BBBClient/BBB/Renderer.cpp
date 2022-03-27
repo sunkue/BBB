@@ -160,6 +160,11 @@ void Renderer::load_model()
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
 	cars_.emplace_back(make_shared<VehicleObj>(++id, bluecar));
 	
+	for (auto& car : cars_)
+	{
+		track_.init_include_obj(*car.get(), true);
+	}
+
 	player_ = cars_.at(0);
 
 	main_camera_ = make_shared<Camera>();
@@ -263,7 +268,7 @@ void Renderer::draw()
 
 	ready_draw();
 
-	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
+	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time().count()) / 1000.f;
 
 	// 1. first render to depth map 
 

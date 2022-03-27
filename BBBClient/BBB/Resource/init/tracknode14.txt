@@ -1,4 +1,6 @@
 translate_ -86.1155 0 -216.499
 quaternion_ 0 -0.982138 0 0.18816
-scale_ 12.1774 1 1
+scale_ 24.3548 1 15
 id_ 14
+from_start_ 14
+front_ -0.908567 0 0.417739

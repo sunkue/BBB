@@ -106,14 +106,15 @@ public:
 	GET_REF(next_nodes);
 	GET(id);
 	GET(from_start);
+	GET(front);
 private:
-	int id_; 
+	int id_;
 	int from_start_{}; //=> 작을 수록 스타트라인에 가까운...
 	vector<TrackNode*> prev_nodes_;
 	vector<TrackNode*> next_nodes_;
 
 private:
-	glm::vec3 front_; 
+	glm::vec3 front_;
 	//vector<vehicle*> include_objs_; 
 	//vector<item*> include_objs_; 
 	vector<Obj*> joined_objs_; // prev, next 와 함께 충돌검사. 
@@ -134,8 +135,10 @@ private:
 
 class Track : public IDataOnFile
 {
-	SINGLE_TON(Track);
+	using outlanded_obj = pair<milliseconds, Obj*>;
+	using outlanded_update_func = std::function<void(outlanded_obj&)>;
 
+	SINGLE_TON(Track);
 protected:
 	virtual void save_file_impl(ofstream& file) final;
 	virtual void load_file_impl(ifstream& file) final;
@@ -149,15 +152,18 @@ public:
 	void draw_gui();
 
 public:
-	void update()
+	outlanded_update_func outlanded_update_func_{};
+
+	void update_outlanded_obj(outlanded_obj& outlanded_obj)
 	{
-		for (auto& node : tracks_)
-		{
-			node->update();
-		}
+		outlanded_update_func_(outlanded_obj);
 	}
+
+	void update();
+
 public:
-	int check_include(Obj& obj) // return -1 on fail
+	// return -1 on fail
+	int check_include(Obj& obj)
 	{
 		for (auto& track : tracks_)
 		{
@@ -170,7 +176,20 @@ public:
 		return -1;
 	}
 
-	void include_obj(Obj& obj)
+	void init_include_obj(Obj& obj, bool from_no_where)
+	{
+		auto res = check_include(obj);
+
+		if (-1 == res)
+		{
+			return;
+			/// res = find_closest_track(obj);
+		}
+		tracks_[res]->join_behave(obj, from_no_where);
+		cerr << "included track ==[ " << res << " ]" << endl;
+	}
+
+	void include_obj(Obj& obj, bool from_no_where, glm::vec3 diff = glm::vec3{ 0 })
 	{
 		auto res = check_include(obj);
 
@@ -178,11 +197,15 @@ public:
 		{
 			res = find_closest_track(obj);
 		}
-		tracks_[res]->join_behave(obj);
-		cerr << "near track ==[ " << res << " ]" << endl;
+
+		auto move = tracks_[res]->get_position() - obj.get_position() + diff; move.y = 0;
+		obj.move(move);
+		tracks_[res]->join_behave(obj, from_no_where);
+		cerr << "included track ==[ " << res << " ]" << endl;
 	}
 
-	int find_closest_track(Obj& obj) //return -1 on fail.
+	//return -1 on fail.
+	int find_closest_track(Obj& obj)
 	{
 		pair<int, float> ret = make_pair(-1, -1.f);
 
@@ -203,15 +226,17 @@ public:
 
 public:
 	GET_REF(tracks);
+	GET_REF_UNSAFE(objs_in_outland);
 private:
 	vector<TrackNodePtr> tracks_;
+	vector<outlanded_obj> objs_in_outland_;
 
 private:
 	void set_start_node(TrackNodePtr& newNode);
 	void set_end_node(TrackNodePtr& newNode);
 	void set_mid1_node(TrackNodePtr& newNode);
 	void set_mid2_node(TrackNodePtr& newNode);
-	
+
 	void cacul_from_starts();
 
 private:

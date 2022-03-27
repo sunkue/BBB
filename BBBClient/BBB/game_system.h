@@ -27,9 +27,9 @@ public:
 		return _elapsed_time.count()/1000.f;
 	}
 
-	size_t game_time()
+	milliseconds game_time()
 	{
-		return _game_time.count();
+		return _game_time;
 	}
 
 private:

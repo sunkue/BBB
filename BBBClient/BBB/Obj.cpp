@@ -55,7 +55,7 @@ glm::vec3 Obj::get_project_pos(glm::vec3 origin)
 void InstancingObj::update_uniform_vars(const ShaderPtr& shader) const
 {
 	shader->use();
-	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time()) / 1000.f;
+	auto gametime = static_cast<float>(GAME_SYSTEM::get().game_time().count()) / 1000.f;
 	shader->set("u_time", gametime);
 	shader->set("u_tex_sampler", get_textures());
 	glUseProgram(0);

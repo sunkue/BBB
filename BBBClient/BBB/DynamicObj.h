@@ -44,6 +44,9 @@ protected:
 	glm::vec3 angular_speed_{};
 };
 
+#pragma warning(push)
+#pragma warning(disable: 26812)
+#pragma warning(disable: 26495)
 BETTER_ENUM
 (
 	CONTROLL_MODE, int
@@ -51,6 +54,7 @@ BETTER_ENUM
 	, ROTATE
 	, SCALE
 );
+#pragma warning(pop)
 
 using GhostPtr = unique_ptr<class GhostObj>;
 class GhostObj : public DynamicObj
@@ -92,7 +96,7 @@ private:
 	rotator rotator_;
 
 private:
-	float speed_ = 5.0f;
+	float speed_ = 25.0f;
 	bool up_on_ = false;
 	bool down_on_ = false;
 	bool front_on_ = false;
@@ -137,7 +141,9 @@ private:
 
 public:
 	virtual bool process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key) override;
-
+public:
+	void regenerate();
+public:
 	GET(rank);
 	SET(rank);
 private:

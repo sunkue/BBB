@@ -8,12 +8,16 @@ void TrackNode::save_file_impl(ofstream& file)
 {
 	Obj::save_file_impl(file);
 	SAVE_FILE(file, id_);
+	SAVE_FILE(file, from_start_);
+	SAVE_FILE(file, front_);
 }
 
 void TrackNode::load_file_impl(ifstream& file)
 {
 	Obj::load_file_impl(file);
 	LOAD_FILE(file, id_);
+	LOAD_FILE(file, from_start_);
+	LOAD_FILE(file, front_);
 }
 
 void TrackNode::update_front()
@@ -53,7 +57,6 @@ void TrackNode::update_scale()
 	auto prev_diff = pos - prev_pos;
 	auto v = next_pos - prev_pos;
 
-
 	float next_cos = cos_from2vectors(next_diff, v);
 	float next_theta = glm::acos(next_cos);
 	float next_sin = glm::sin(glm::radians(90 - glm::degrees(next_theta)));
@@ -65,7 +68,9 @@ void TrackNode::update_scale()
 	float prev_length = glm::length(prev_diff) * prev_sin;
 	auto s = get_scale();
 	scaling({ 1 / s.x, 1 / s.y, 1 / s.z });
-	s.x = (next_length + prev_length) / 4;
+	s.x = (next_length + prev_length) / 2;
+	s.y = 1;
+	s.z = 15;
 	scaling(s);
 }
 
@@ -88,11 +93,11 @@ void TrackNode::update()
 			auto drive_good_dir = glm::dot(head, front_) >= 0 ? true : false;
 			if (drive_good_dir)
 			{
-				cout << "good dir" << endl;
+				//cout << "good dir" << endl;
 			}
 			else
 			{
-				cout << "bad dir" << endl;
+				//cout << "bad dir" << endl;
 				// 일정시간 지나면 자동복귀..? 1초? 3초?
 			}
 		}
@@ -103,7 +108,7 @@ void TrackNode::join_behave(Obj& obj, bool from_no_where)
 {
 	if (from_no_where)
 	{
-		cerr << "from noway" << endl;
+		//cerr << "from noway" << endl;
 	}
 	if (VehicleObj* car = dynamic_cast<VehicleObj*>(&obj))
 	{
@@ -117,12 +122,11 @@ void TrackNode::detach_behave(Obj& obj, bool to_no_where)
 {
 	if (to_no_where)
 	{
-		// 복귀.
-		cerr << "to noway" << endl;
+		Track::get().get_objs_in_outland().emplace_back(GAME_SYSTEM::get().game_time(), &obj);
 	}
 	else
 	{
-		cerr << "to nearnode" << endl;
+		// cerr << "to nearnode" << endl;
 	}
 
 	joined_objs_.erase(std::remove(joined_objs_.begin(), joined_objs_.end(), &obj), joined_objs_.end());
@@ -344,6 +348,27 @@ Track::Track()
 {
 	load("track");
 
+	outlanded_update_func_ =
+		[this](outlanded_obj& outlanded_obj)
+	{
+		const auto& game_tp = GAME_SYSTEM::get().game_time();
+		auto& outed_tp = outlanded_obj.first;
+		auto& obj = *outlanded_obj.second;
+		auto outed_elapsed = game_tp - outed_tp;
+		cerr << objs_in_outland_.size() << endl;
+		if (2000ms < outed_elapsed)
+		{
+			cerr << "outed func" << endl;
+			include_obj(obj, true);
+
+			if (auto car = dynamic_cast<VehicleObj*>(&obj))
+			{
+				car->regenerate();
+			}
+
+			objs_in_outland_.erase(std::remove(ALLOF(objs_in_outland_), outlanded_obj));
+		}
+	};
 }
 
 void Track::cacul_from_starts()
@@ -638,6 +663,36 @@ void Track::draw_gui()
 	// 경로보기.. (노드 한개, 앞뒤노드 전부, 전체.)
 	// enable collide
 	// enable regen
+}
+
+void Track::update()
+{
+	for (auto& node : tracks_)
+	{
+		node->update();
+	}
+
+	for (auto& outlanded_obj : objs_in_outland_)
+	{
+		if (dynamic_cast<GhostObj*>(Renderer::get().get_player().get()))
+		{
+			continue;
+		}
+		auto& outed_tp = outlanded_obj.first;
+		auto& obj = *outlanded_obj.second;
+
+		auto res = check_include(obj);
+
+		// 아웃랜드 오브제 업데이트 함수 돌리기
+		if (-1 == res)
+		{
+			update_outlanded_obj(outlanded_obj);
+			continue;
+		}
+
+		// 다른 노드에 삽입,
+		tracks_[res]->join_behave(obj, true);
+	}
 }
 
 void Track::set_start_node(TrackNodePtr& newNode)

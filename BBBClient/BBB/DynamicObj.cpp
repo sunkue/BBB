@@ -57,7 +57,7 @@ bool VehicleObj::process_input(const KEY_BOARD_EVENT_MANAGER::key_event& key)
 	{
 		if (pressed)
 		{
-			Track::get().include_obj(*reinterpret_cast<Obj*>(this));
+			Track::get().include_obj(*reinterpret_cast<Obj*>(this), true);
 		}
 	}
 	break; default: return false;
@@ -206,6 +206,15 @@ void VehicleObj::update_camera(Camera* camera, float time_elpased) const
 	}
 }
 
+void VehicleObj::regenerate()
+{
+	const float speed{ 20 };
+	auto& node = Track::get().get_tracks()[included_node_];
+	linear_speed_ = speed * node->get_front();
+	auto q = sunkueglm::quat_from2vectors(get_head_dir(), node->get_front());
+	rotate(q);
+}
+
 bool VehicleObj::rank_worse_than(VehicleObj& other)
 {
 	//lab
@@ -295,10 +304,9 @@ void GhostObj::draw_gui()
 {
 	gui::Begin("Ghost");
 	gui::Text("This is Ghost for free moving camera");
-	gui::SliderFloat("speed", &speed_, 10.0f, 500.0f);
 	if (gui::Button(+cntl_mode._to_string()))
 	{
-		if (cntl_mode._size() == cntl_mode._value )
+		if (cntl_mode._size() == cntl_mode._value)
 		{
 			cntl_mode = CONTROLL_MODE::TRANSLATE;
 		}
@@ -307,6 +315,7 @@ void GhostObj::draw_gui()
 			cntl_mode._value++;
 		}
 	}
+	gui::SliderFloat("speed", &speed_, 10.0f, 500.0f);
 	gui::End();
 
 	if (selected_obj_)
@@ -372,8 +381,6 @@ void GhostObj::draw(const ShaderPtr& shader) const
 	}
 	}
 }
-
-
 
 bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::scroll_event& scroll)
 {
@@ -505,31 +512,92 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::pos_event& pos)
 			auto mouse_ray = Ray::create(pos.xpos, pos.ypos);
 			auto diff = mouse_ray.dir - mouse_ray_prev.dir;
 
-			constexpr float power = 20;
-			diff *= power;
+		
 
-			switch (select_mode)
+			switch (cntl_mode)
 			{
-			case GhostObj::SELECTED_MODE::NONE:
-			{}
-			CASE GhostObj::SELECTED_MODE::X :
+			case CONTROLL_MODE::TRANSLATE:
 			{
-				selected_obj_->move(diff.x * X_DEFAULT);
+				constexpr float power = 20; diff *= power;
+				switch (select_mode)
+				{
+				case GhostObj::SELECTED_MODE::NONE:
+				{}
+				CASE GhostObj::SELECTED_MODE::X :
+				{
+					selected_obj_->move(diff.x* X_DEFAULT);
+				}
+				CASE GhostObj::SELECTED_MODE::Y :
+				{
+					selected_obj_->move(diff.y* Y_DEFAULT);
+				}
+				CASE GhostObj::SELECTED_MODE::Z :
+				{
+					selected_obj_->move(diff.z* Z_DEFAULT);
+				}
+				CASE GhostObj::SELECTED_MODE::XYZ :
+				{
+					selected_obj_->move(diff);
+				}
+				}
 			}
-			CASE GhostObj::SELECTED_MODE::Y :
+			CASE CONTROLL_MODE::ROTATE :
 			{
-				selected_obj_->move(diff.y * Y_DEFAULT);
-			}
-			CASE GhostObj::SELECTED_MODE::Z :
-			{
-				selected_obj_->move(diff.z * Z_DEFAULT);
-			}
-			CASE GhostObj::SELECTED_MODE::XYZ :
-			{
+				constexpr float power = 5; diff *= power;
+				float r_click = mm.get_R_click() - 0.5;
+				r_click /= abs(r_click);
+				
+				switch (select_mode)
+				{
+				case GhostObj::SELECTED_MODE::NONE:
+				{}
+				CASE GhostObj::SELECTED_MODE::X :
+				{
+					selected_obj_->rotate(glm::rotate(r_click * abs(diff.x), X_DEFAULT));
+				}
+				CASE GhostObj::SELECTED_MODE::Y :
+				{
+					selected_obj_->rotate(glm::rotate(r_click * abs(diff.y), Y_DEFAULT));
+				}
+				CASE GhostObj::SELECTED_MODE::Z :
+				{
+					selected_obj_->rotate(glm::rotate(r_click * abs(diff.z), Z_DEFAULT));
+				}
+				CASE GhostObj::SELECTED_MODE::XYZ :
+				{
 
+				}
+				}
+			}
+			CASE CONTROLL_MODE::SCALE :
+			{
+				switch (select_mode)
+				{
+				case GhostObj::SELECTED_MODE::NONE:
+				{}
+				CASE GhostObj::SELECTED_MODE::X :
+				{
+					selected_obj_->move(diff.x * X_DEFAULT);
+				}
+				CASE GhostObj::SELECTED_MODE::Y :
+				{
+					selected_obj_->move(diff.y * Y_DEFAULT);
+				}
+				CASE GhostObj::SELECTED_MODE::Z :
+				{
+					selected_obj_->move(diff.z * Z_DEFAULT);
+				}
+				CASE GhostObj::SELECTED_MODE::XYZ :
+				{
+
+				}
+				}
 			}
 			}
+
+
 		}
+		return true;
 	}
 
 
