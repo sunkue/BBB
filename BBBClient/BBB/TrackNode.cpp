@@ -370,7 +370,7 @@ Track::Track()
 				car->regenerate();
 				// 리젠시 체크포인트 업데이트 필요함,,
 			}
-
+			 
 			objs_in_outland_.erase(std::remove(ALLOF(objs_in_outland_), outlanded_obj));
 		}
 	};
