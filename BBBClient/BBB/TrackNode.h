@@ -251,6 +251,7 @@ private:
 	bool draw_nearby_edges_ = true;
 	bool draw_select_edges_ = true;
 	bool wiremode_ = false;
+	bool auto_regen_ = true;
 
 };
 

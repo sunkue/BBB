@@ -208,7 +208,7 @@ void VehicleObj::update_camera(Camera* camera, float time_elpased) const
 
 void VehicleObj::regenerate()
 {
-	const float speed{ 20 };
+	const float speed{ 0 };
 	auto& node = Track::get().get_tracks()[included_node_];
 	linear_speed_ = speed * node->get_front();
 	auto q = sunkueglm::quat_from2vectors(get_head_dir(), node->get_front());
@@ -554,14 +554,17 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::pos_event& pos)
 				CASE GhostObj::SELECTED_MODE::X :
 				{
 					selected_obj_->rotate(glm::rotate(r_click * abs(diff.x), X_DEFAULT));
+					//selected_obj_->rotate(glm::rotate(r_click * abs(diff.x), selected_obj_->get_head_dir()));
 				}
 				CASE GhostObj::SELECTED_MODE::Y :
 				{
 					selected_obj_->rotate(glm::rotate(r_click * abs(diff.y), Y_DEFAULT));
+					//selected_obj_->rotate(glm::rotate(r_click * abs(diff.y), selected_obj_->get_up_dir()));
 				}
 				CASE GhostObj::SELECTED_MODE::Z :
 				{
 					selected_obj_->rotate(glm::rotate(r_click * abs(diff.z), Z_DEFAULT));
+					//selected_obj_->rotate(glm::rotate(r_click * abs(diff.z), selected_obj_->get_right_dir()));
 				}
 				CASE GhostObj::SELECTED_MODE::XYZ :
 				{
@@ -577,15 +580,15 @@ bool GhostObj::process_input(const MOUSE_EVENT_MANAGER::pos_event& pos)
 				{}
 				CASE GhostObj::SELECTED_MODE::X :
 				{
-					selected_obj_->move(diff.x * X_DEFAULT);
+					selected_obj_->scaling(diff.x * X_DEFAULT + glm::vec3(1));
 				}
 				CASE GhostObj::SELECTED_MODE::Y :
 				{
-					selected_obj_->move(diff.y * Y_DEFAULT);
+					selected_obj_->scaling(diff.y * Y_DEFAULT + glm::vec3(1));
 				}
 				CASE GhostObj::SELECTED_MODE::Z :
 				{
-					selected_obj_->move(diff.z * Z_DEFAULT);
+					selected_obj_->scaling(diff.z * Z_DEFAULT + glm::vec3(1));
 				}
 				CASE GhostObj::SELECTED_MODE::XYZ :
 				{

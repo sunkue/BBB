@@ -1,0 +1,6 @@
+translate_ 0 0 0
+quaternion_ 0 0 0 1
+scale_ 1 1 1
+id_ 60
+from_start_ 0
+front_ 0 0 0

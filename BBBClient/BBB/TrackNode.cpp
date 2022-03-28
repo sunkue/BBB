@@ -122,7 +122,11 @@ void TrackNode::detach_behave(Obj& obj, bool to_no_where)
 {
 	if (to_no_where)
 	{
-		Track::get().get_objs_in_outland().emplace_back(GAME_SYSTEM::get().game_time(), &obj);
+		auto& outed_objlist = Track::get().get_objs_in_outland();
+		if (outed_objlist.end() == std::find_if(ALLOF(outed_objlist), [&](auto& x) { return x.second == &obj; }))
+		{
+			Track::get().get_objs_in_outland().emplace_back(GAME_SYSTEM::get().game_time(), &obj);
+		}
 	}
 	else
 	{
@@ -355,8 +359,8 @@ Track::Track()
 		auto& outed_tp = outlanded_obj.first;
 		auto& obj = *outlanded_obj.second;
 		auto outed_elapsed = game_tp - outed_tp;
-		cerr << objs_in_outland_.size() << endl;
-		if (2000ms < outed_elapsed)
+		//cerr << objs_in_outland_.size() << endl;
+		if (3000ms < outed_elapsed)
 		{
 			cerr << "outed func" << endl;
 			include_obj(obj, true);
@@ -364,6 +368,7 @@ Track::Track()
 			if (auto car = dynamic_cast<VehicleObj*>(&obj))
 			{
 				car->regenerate();
+				// 리젠시 체크포인트 업데이트 필요함,,
 			}
 
 			objs_in_outland_.erase(std::remove(ALLOF(objs_in_outland_), outlanded_obj));
@@ -478,77 +483,78 @@ void Track::load_file_impl(ifstream& file)
 
 void Track::draw(const ShaderPtr& shader)
 {
-	if (false == draw_) return;
-
-	for (auto& node : tracks_)
+	if (draw_)
 	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL - wiremode_);
-
-		node->update_uniform_vars(shader);
-
-		if (const auto ghost_player = dynamic_cast<GhostObj*>(Renderer::get().get_player().get()))
+		for (auto& node : tracks_)
 		{
-			const auto& selected_obj = ghost_player->get_selected_obj();
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL - wiremode_);
 
-			if (const auto slected_node = dynamic_cast<TrackNode*>(selected_obj.get()))
+			node->update_uniform_vars(shader);
+
+			if (const auto ghost_player = dynamic_cast<GhostObj*>(Renderer::get().get_player().get()))
 			{
+				const auto& selected_obj = ghost_player->get_selected_obj();
+
+				if (const auto slected_node = dynamic_cast<TrackNode*>(selected_obj.get()))
 				{
-					// check is node slectedNode.
-					if (slected_node == node.get())
 					{
-						node->draw(shader, Model::box_blue()); // 파랑박스
-						continue;
+						// check is node slectedNode.
+						if (slected_node == node.get())
+						{
+							node->draw(shader, Model::box_blue()); // 파랑박스
+							continue;
+						}
 					}
-				}
 
-				{
-					// check is node in slectedNode's prevlist.
-					const auto& fail = slected_node->get_prev_nodes().cend();
-					const auto& is_prev = std::find(ALLOF(slected_node->get_prev_nodes()), node.get());
-
-					if (fail != is_prev)
 					{
-						node->draw(shader, Model::box_yellow()); // 노랑박스
-						continue;
+						// check is node in slectedNode's prevlist.
+						const auto& fail = slected_node->get_prev_nodes().cend();
+						const auto& is_prev = std::find(ALLOF(slected_node->get_prev_nodes()), node.get());
+
+						if (fail != is_prev)
+						{
+							node->draw(shader, Model::box_yellow()); // 노랑박스
+							continue;
+						}
 					}
-				}
 
-				{
-					// check is node in slectedNode's nextlist.
-					const auto& fail = slected_node->get_next_nodes().cend();
-					const auto& is_next = std::find(cALLOF(slected_node->get_next_nodes()), node.get());
-
-					if (fail != is_next)
 					{
-						node->draw(shader, Model::box_green()); // 초록박스
-						continue;
+						// check is node in slectedNode's nextlist.
+						const auto& fail = slected_node->get_next_nodes().cend();
+						const auto& is_next = std::find(cALLOF(slected_node->get_next_nodes()), node.get());
+
+						if (fail != is_next)
+						{
+							node->draw(shader, Model::box_green()); // 초록박스
+							continue;
+						}
 					}
 				}
 			}
-		}
 
-		if (node == start_point_)
-		{
-			node->draw(shader, Model::box_purple());
-			continue;
-		}
-		else if (node == mid_point1_)
-		{
-			node->draw(shader, Model::box_bludyred());
-			continue;
-		}
-		else if (node == mid_point2_)
-		{
-			node->draw(shader, Model::box_redpurple());
-			continue;
-		}
-		else if (node == end_point_)
-		{
-			node->draw(shader, Model::box_orange());
-			continue;
-		}
+			if (node == start_point_)
+			{
+				node->draw(shader, Model::box_purple());
+				continue;
+			}
+			else if (node == mid_point1_)
+			{
+				node->draw(shader, Model::box_bludyred());
+				continue;
+			}
+			else if (node == mid_point2_)
+			{
+				node->draw(shader, Model::box_redpurple());
+				continue;
+			}
+			else if (node == end_point_)
+			{
+				node->draw(shader, Model::box_orange());
+				continue;
+			}
 
-		node->draw(shader);
+			node->draw(shader);
+		}
 	}
 
 	draw_edges(shader);
@@ -608,6 +614,7 @@ void Track::draw_gui()
 
 	gui::Checkbox("show", &draw_);
 	gui::Checkbox("wiremode", &wiremode_);
+	gui::Checkbox("auto_regen", &auto_regen_);
 	if (gui::Button("cacul from start(rank)"))
 	{
 		cacul_from_starts();
@@ -658,11 +665,6 @@ void Track::draw_gui()
 	}
 
 	gui::End();
-
-	// track 추가 버튼...
-	// 경로보기.. (노드 한개, 앞뒤노드 전부, 전체.)
-	// enable collide
-	// enable regen
 }
 
 void Track::update()
@@ -686,7 +688,10 @@ void Track::update()
 		// 아웃랜드 오브제 업데이트 함수 돌리기
 		if (-1 == res)
 		{
-			update_outlanded_obj(outlanded_obj);
+			if (auto_regen_)
+			{
+				update_outlanded_obj(outlanded_obj);
+			}
 			continue;
 		}
 
